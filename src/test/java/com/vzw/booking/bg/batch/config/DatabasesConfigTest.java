@@ -74,7 +74,7 @@ public class DatabasesConfigTest {
                 .withCql(cql)
                 .withMapper(financialMarketMapper);
         builder.build();
-        assertNotNull(builder);        
+        assertNotNull(builder);
         
         List<FinancialMarket> markets = builder.getResults();
         assertEquals(0, markets.size());

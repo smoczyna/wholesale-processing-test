@@ -15,10 +15,12 @@ import org.springframework.core.env.Environment;
  *
  * @author smorcja
  */
-public class BookDateCsvFileReader extends CsvFileGenericReader<BookDateCsvFileDTO> {
+public class BookDateTxtFileReader extends CsvFileGenericReader<BookDateCsvFileDTO> {
     
-    public BookDateCsvFileReader(Environment environment, String filename) {        
-        super(BookDateCsvFileDTO.class, environment, filename, new String[]{"rptPerStartDate", "rptPerEndDate", "transPerStartDate", "transPerEndDate", "monthEndCycle"}, null);
+    //private String filename;
+    
+    public BookDateTxtFileReader(Environment environment, String filename) {
+        super(BookDateCsvFileDTO.class, environment, filename, new String[]{"rptPerStartDate", "rptPerEndDate", "transPerStartDate", "transPerEndDate", "monthEndCycle"}, null);        
     }
     
     @Override
@@ -28,4 +30,11 @@ public class BookDateCsvFileReader extends CsvFileGenericReader<BookDateCsvFileD
         bookDateTokenizer.setNames(fieldNames);
         return bookDateTokenizer;
     }
+
+    // it is too late to get this param here as class is instancialted before the step !!!
+    
+//    @BeforeStep
+//    public void retrieveJobParams(StepExecution stepExecution) {
+//        this.filename =  stepExecution.getJobParameters().getString("bookdate_txt_file_name");
+//    }
 }

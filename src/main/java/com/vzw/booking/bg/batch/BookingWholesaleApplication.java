@@ -16,7 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableBatchProcessing
 @EnableScheduling
-public class BookingProcessorApplication {
+public class BookingWholesaleApplication {
 
 	/**
 	 * This the main method for the application. 
@@ -25,7 +25,7 @@ public class BookingProcessorApplication {
 	 * @param args - arguments passed to the spring boot application.
 	 */
 	public static void main(String[] args) {
-		SpringApplication.run(BookingProcessorApplication.class, args);
+		SpringApplication.run(BookingWholesaleApplication.class, args);
 	}
 
 }

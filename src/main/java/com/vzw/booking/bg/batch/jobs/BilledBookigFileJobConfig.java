@@ -15,7 +15,7 @@ import com.vzw.booking.bg.batch.processors.BookDateProcessor;
 import com.vzw.booking.bg.batch.processors.SubLedgerProcessor;
 import com.vzw.booking.bg.batch.processors.WholesaleReportProcessor;
 import com.vzw.booking.bg.batch.readers.BilledBookingFileReader;
-import com.vzw.booking.bg.batch.readers.BookDateCsvFileReader;
+import com.vzw.booking.bg.batch.readers.BookDateTxtFileReader;
 import com.vzw.booking.bg.batch.validation.CsvFileVerificationSkipper;
 import com.vzw.booking.bg.batch.writers.AggregatedSubLedgerWriter;
 import com.vzw.booking.bg.batch.writers.SubledgerCsvFileWriter;
@@ -34,7 +34,6 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -66,12 +65,9 @@ public class BilledBookigFileJobConfig {
         return new SubLedgerProcessor();
     }
 
-    @Value("#{jobParameters['billed_csv_file_name']}") 
-    private String billedCsvFileName;
-    
     @Bean
-    ItemReader<BilledCsvFileDTO> billedFileItemReader(Environment environment) {        
-        return new BilledBookingFileReader(environment, billedCsvFileName);
+    ItemReader<BilledCsvFileDTO> billedFileItemReader(Environment environment) {
+        return new BilledBookingFileReader(environment, "bmdunld.csv");
     }
 
     @Bean
@@ -79,12 +75,9 @@ public class BilledBookigFileJobConfig {
         return new CsvFileVerificationSkipper();
     }
 
-    @Value("#{jobParameters['bookdate_txt_file_name']}") 
-    private String bookdateTxtFileName;
-    
     @Bean
-    ItemReader<BookDateCsvFileDTO> bookDateItemReader(Environment environment) {        
-        return new BookDateCsvFileReader(environment, bookdateTxtFileName);
+    ItemReader<BookDateCsvFileDTO> bookDateItemReader(Environment environment) {
+        return new BookDateTxtFileReader(environment, "bookdate.txt");
     }
 
     @Bean
