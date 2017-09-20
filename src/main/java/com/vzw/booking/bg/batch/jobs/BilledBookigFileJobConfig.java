@@ -34,6 +34,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -65,9 +66,12 @@ public class BilledBookigFileJobConfig {
         return new SubLedgerProcessor();
     }
 
+    @Value("#{jobParameters['billed_csv_file_name']}") 
+    private String billedCsvFileName;
+    
     @Bean
     ItemReader<BilledCsvFileDTO> billedFileItemReader(Environment environment) {        
-        return new BilledBookingFileReader(environment);
+        return new BilledBookingFileReader(environment, billedCsvFileName);
     }
 
     @Bean
@@ -75,10 +79,12 @@ public class BilledBookigFileJobConfig {
         return new CsvFileVerificationSkipper();
     }
 
+    @Value("#{jobParameters['bookdate_txt_file_name']}") 
+    private String bookdateTxtFileName;
+    
     @Bean
-    ItemReader<BookDateCsvFileDTO> bookDateItemReader(Environment environment) {
-        String[] fieldNames = new String[]{"rptPerStartDate", "rptPerEndDate", "transPerStartDate", "transPerEndDate", "monthEndCycle"};
-        return new BookDateCsvFileReader(environment, "bookdate.txt", fieldNames);
+    ItemReader<BookDateCsvFileDTO> bookDateItemReader(Environment environment) {        
+        return new BookDateCsvFileReader(environment, bookdateTxtFileName);
     }
 
     @Bean
