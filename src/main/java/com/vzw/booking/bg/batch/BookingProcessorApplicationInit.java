@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Primary;
  *
  */
 @Component
-public class WholesaleBookingProcessorApplicationInit {
+public class BookingProcessorApplicationInit {
 
 //    @Autowired
 //    private LoggerConfig loggerConfig;

@@ -5,7 +5,7 @@
  */
 package com.vzw.booking.bg.batch.jobs;
 
-import com.vzw.booking.bg.batch.WholesaleBookingProcessorApplication;
+import com.vzw.booking.bg.batch.BookingProcessorApplication;
 import org.springframework.batch.core.JobExecution;
 
 import org.junit.Assert;
