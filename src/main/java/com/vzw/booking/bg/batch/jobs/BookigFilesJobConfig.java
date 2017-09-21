@@ -5,17 +5,18 @@
  */
 package com.vzw.booking.bg.batch.jobs;
 
+import com.vzw.booking.bg.batch.constants.Constants;
 import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import com.vzw.booking.bg.batch.domain.BilledCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.BookDateCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
-import com.vzw.booking.bg.batch.listeners.BilledBookingFileJobListener;
+import com.vzw.booking.bg.batch.listeners.BookingFilesJobListener;
 import com.vzw.booking.bg.batch.listeners.BilledBookingFileStepExecutionListener;
 import com.vzw.booking.bg.batch.processors.BookDateProcessor;
 import com.vzw.booking.bg.batch.processors.SubLedgerProcessor;
 import com.vzw.booking.bg.batch.processors.WholesaleReportProcessor;
 import com.vzw.booking.bg.batch.readers.BilledBookingFileReader;
-import com.vzw.booking.bg.batch.readers.BookDateTxtFileReader;
+import com.vzw.booking.bg.batch.readers.BookDateCsvFileReader;
 import com.vzw.booking.bg.batch.validation.CsvFileVerificationSkipper;
 import com.vzw.booking.bg.batch.writers.AggregatedSubLedgerWriter;
 import com.vzw.booking.bg.batch.writers.SubledgerCsvFileWriter;
@@ -43,16 +44,16 @@ import org.springframework.core.env.Environment;
  * @author smorcja
  */
 @Configuration
-public class BilledBookigFileJobConfig {
+public class BookigFilesJobConfig {
     
     @Bean
-    JobExecutionListener billedFileJobListener() {
-        return new BilledBookingFileJobListener();
+    JobExecutionListener bookingFileJobListener() {
+        return new BookingFilesJobListener();
     }
 
     @Bean
     Tasklet sourceFilesExistanceChecker() {
-        return new SourceFilesExistanceChecker();
+        return new SourceFilesExistanceChecker(Constants.BILLED_BOOKING_FILENAME);
     }
 
     @Bean
@@ -67,7 +68,7 @@ public class BilledBookigFileJobConfig {
 
     @Bean
     ItemReader<BilledCsvFileDTO> billedFileItemReader(Environment environment) {
-        return new BilledBookingFileReader(environment, "bmdunld.csv");
+        return new BilledBookingFileReader(environment, Constants.BILLED_BOOKING_FILENAME);
     }
 
     @Bean
@@ -77,7 +78,7 @@ public class BilledBookigFileJobConfig {
 
     @Bean
     ItemReader<BookDateCsvFileDTO> bookDateItemReader(Environment environment) {
-        return new BookDateTxtFileReader(environment, "bookdate.txt");
+        return new BookDateCsvFileReader(environment, Constants.BOOK_DATE_FILENAME);
     }
 
     @Bean
@@ -153,15 +154,15 @@ public class BilledBookigFileJobConfig {
     }
 
     @Bean
-    Job billedBookingAggregateJob(JobExecutionListener billedFileJobListener,
-                                  JobBuilderFactory jobBuilderFactory,
-                                  @Qualifier("checkIfSourceFilesExist") Step checkIfSourceFilesExist,
-                                  @Qualifier("updateBookingDatesStep") Step updateBookingDatesStep,
-                                  @Qualifier("billedBookingFileStep") Step billedBookingFileStep,
-                                  @Qualifier("saveSubLedgerToFile") Step saveSubLedgerToFile) {
-        return jobBuilderFactory.get("billedBookingAggregateJob")
+    Job bookingAggregateJob(JobExecutionListener bookingFileJobListener,
+                            JobBuilderFactory jobBuilderFactory,
+                            @Qualifier("checkIfSourceFilesExist") Step checkIfSourceFilesExist,
+                            @Qualifier("updateBookingDatesStep") Step updateBookingDatesStep,
+                            @Qualifier("billedBookingFileStep") Step billedBookingFileStep,
+                            @Qualifier("saveSubLedgerToFile") Step saveSubLedgerToFile) {
+        return jobBuilderFactory.get("bookingAggregateJob")
                 .incrementer(new RunIdIncrementer())
-                .listener(billedFileJobListener)
+                .listener(bookingFileJobListener)
                 .start(checkIfSourceFilesExist)
                 .on("COMPLETED").to(updateBookingDatesStep)
                 .on("COMPLETED").to(billedBookingFileStep)

@@ -26,10 +26,16 @@ public class SourceFilesExistanceChecker implements Tasklet {
     @Value("${csv.to.database.job.source.file.path}")
     private String SOURCE_FILES_PATH;
     
+    private final String filename;
+    
+    public SourceFilesExistanceChecker(String filename) {
+        this.filename = filename;
+    }
+    
     @Override
     public RepeatStatus execute(StepContribution sc, ChunkContext cc) throws Exception {
         LOGGER.info("Checkig if file exists...");
-        String filename = (String) cc.getStepContext().getJobParameters().get("billed_csv_file_name");
+        //String filename = (String) cc.getStepContext().getJobParameters().get("billed_csv_file_name");
         File f = new File(SOURCE_FILES_PATH.concat(filename));
         if (!f.exists() || f.isDirectory()) {
             LOGGER.error("One or more required files not found, job aborted");

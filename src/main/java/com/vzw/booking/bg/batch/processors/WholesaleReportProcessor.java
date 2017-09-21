@@ -5,6 +5,7 @@
  */
 package com.vzw.booking.bg.batch.processors;
 
+import com.vzw.booking.bg.batch.domain.AdminFeeCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import com.vzw.booking.bg.batch.domain.BilledCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vzw.booking.bg.batch.domain.BaseBookingInputInterface;
+import com.vzw.booking.bg.batch.domain.UnbilledCsvFileDTO;
 
 /**
  *
@@ -31,9 +33,13 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
     @Autowired
     SubLedgerProcessor tempSubLedgerOuput;
 
-    String searchServingSbid = null;
-    String searchHomeSbid = null;
-    boolean homeEqualsServingSbid = false;
+    String searchServingSbid;
+    String searchHomeSbid;
+    boolean homeEqualsServingSbid;
+    String financialMarket;
+    String messageSource;
+    final Set<Integer> PROD_IDS_TOLL = new HashSet(Arrays.asList(new Integer[]{95, 12872, 12873, 36201}));
+    final Set<Integer> PROD_IDS = new HashSet(Arrays.asList(new Integer[]{95, 12872, 12873, 13537, 13538, 36201}));
 
     /**
      * this method is a working version of booking logic, it is exact representation of the spec and need to be tuned when finished
@@ -43,136 +49,21 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
      */
     @Override
     public AggregateWholesaleReportDTO process(I inRec) throws Exception {
-        double tmpChargeAmt = 0;
-        final Set<Integer> PROD_IDS_TOLL = new HashSet(Arrays.asList(new Integer[]{95, 12872, 12873, 36201}));
-        final Set<Integer> PROD_IDS = new HashSet(Arrays.asList(new Integer[]{95, 12872, 12873, 13537, 13538, 36201}));
-        int tmpProdId = 0;
-        //String messageSource = "B";
-        boolean bypassBooking = false;
-        boolean defaultBooking = false;
-        int tmpInterExchangeCarrierCode = 0;
-        String financialMarket = "";
+        this.searchServingSbid = null;
+        this.searchHomeSbid = null;
+        this.financialMarket = "";
+        this.homeEqualsServingSbid = false;
 
-        // check if alternate booking is applicable but what is the consequence of it ???
-        AggregateWholesaleReportDTO outRec = new AggregateWholesaleReportDTO();
-        outRec.setBilledInd("Y");
-        
-        // check if wholesale part can be processed for this record at all
-        if (inRec.getAirProdId() > 0 && (inRec.getWholesalePeakAirCharge() > 0 || inRec.getWholesaleOffpeakAirCharge() > 0)) {
-            outRec.setPeakDollarAmt(inRec.getWholesalePeakAirCharge());
-            outRec.setOffpeakDollarAmt(inRec.getWholesaleOffpeakAirCharge());
-            outRec.setDollarAmtOther(0d);
-            outRec.setVoiceMinutes(inRec.getAirBillSeconds() * 60);
-            tmpChargeAmt = inRec.getWholesalePeakAirCharge() + inRec.getWholesaleOffpeakAirCharge();
-            if (inRec.getAirProdId().equals(190))
-                tmpProdId = 1;
-            else
-                tmpProdId = inRec.getAirProdId();            
-        }
-        
-        // this part is applicable for billed (checked) file as it uses fields specific for that file
-        if (inRec instanceof BilledCsvFileDTO) {
-            BilledCsvFileDTO billedRec = (BilledCsvFileDTO) inRec;
-            if (billedRec.getDeviceType().trim().isEmpty())                
-                financialMarket = inRec.getFinancialMarket();
-            
-            if ((billedRec.getTollProductId() > 0 && billedRec.getTollCharge() > 0)
-                || billedRec.getInterExchangeCarrierCode().equals(5050)
-                || billedRec.getIncompleteInd().equals("D")
-                || !billedRec.getHomeSbid().equals(billedRec.getServingSbid())
-                || (billedRec.getAirProdId().equals(190) && billedRec.getWholesaleTollChargeLDPeak() > 0 && billedRec.getWholesaleTollChargeLDOther() > 0)) {
-            
-                if (billedRec.getAirProdId().equals(190)) {
-                    tmpProdId = 95;
-                } else {
-                    tmpProdId = billedRec.getAirProdId();
-                }
-                
-                if (billedRec.getIncompleteInd().equals("D")) {
-                    tmpChargeAmt = billedRec.getTollCharge();
-                    outRec.setDollarAmtOther(tmpChargeAmt);
-                    
-                    // another cassandra call to DataEvent table
-                    // data aggregation - have no clue what is that !!!
-                } else {
-                    tmpChargeAmt = billedRec.getWholesaleTollChargeLDPeak() + billedRec.getWholesaleTollChargeLDOther();
-                    outRec.setTollDollarsAmt(tmpChargeAmt);
-                    outRec.setTollMinutes(tmpProdId);
-                    outRec.setTollMinutes(billedRec.getTollBillSeconds() * 60); // this is supposed to be re=ounded but how ???
-                }
-            }
-            outRec.setPeakDollarAmt(0d);
-            if (PROD_IDS_TOLL.contains(tmpProdId))
-                tmpInterExchangeCarrierCode = ((BilledCsvFileDTO) inRec).getInterExchangeCarrierCode();
-        }
-        
-        /* do events & book record */
-        
-        // second cassandra call goes here, it will check if product is wholesale product        
-        String wholesaleBillingCode = null; // this object comes from db as response 
-        //if (wholesaleBillingCode != null) it is
-        //else it is not
-        // what is that for ??? It's never used anywhere after 
+        if (inRec instanceof BilledCsvFileDTO) 
+            return processBilledRecord((BilledCsvFileDTO) inRec);
+        else if (inRec instanceof UnbilledCsvFileDTO)
+            return processUnbilledRecord((UnbilledCsvFileDTO) inRec);
 
-        // move tmpChargeAmt to tmpWholesaleCost and tmpWholsaleSettlement ???
-        // third cassandra call goes here, should retrieve unique row of FinancialEventCategory
-        
-        //FinancialEventCategory financialEventCategory = null; // this object comes from db (just one) 
-        
-        // fake financial category record provided to make the runn successful
-        FinancialEventCategory financialEventCategory = new FinancialEventCategory();
-        financialEventCategory.setBamsaffiliateindicator("N");
-        financialEventCategory.setCompanycode("CDN");
-        financialEventCategory.setForeignservedindicator("Y");
-        financialEventCategory.setHomesidequalsservingsidindicator("Y");
-        financialEventCategory.setFinancialeventnormalsign("DR");
-        financialEventCategory.setDebitcreditindicator("DR");
-        financialEventCategory.setBillingaccrualindicator("Y");
-        financialEventCategory.setFinancialeventnumber(4756);
-        financialEventCategory.setFinancialcategory(678);
-        financialEventCategory.setFinancialmarketid("FM1");
-        // end of fake object - to be removed
-        
-        boolean altBookingInd = this.isAlternateBookingApplicable(inRec);
-        
-        if (!financialEventCategory.getBamsaffiliateindicator().equals("N")
-            || !financialEventCategory.getCompanycode().trim().isEmpty()
-            || (searchHomeSbid.equals(searchServingSbid) && !financialEventCategory.getForeignservedindicator().trim().isEmpty())) {            
-            bypassBooking = true;
-        }
-
-        if (inRec.getMessageSource().equals("M") && financialEventCategory.getHomesidequalsservingsidindicator().trim().isEmpty())
-            bypassBooking = false;
-        else if (inRec.getMessageSource().equals("B")) {
-            if (financialEventCategory.getBillingaccrualindicator().equals("Y"))
-                bypassBooking = false;
-            
-            if (searchHomeSbid.equals(searchServingSbid)) {
-                if (financialEventCategory.getHomesidequalsservingsidindicator().equals("Y"))
-                    bypassBooking = false;
-            }               
-            else {
-                if (altBookingInd && financialEventCategory.getAlternatebookingindicator().equals("Y"))
-                    bypassBooking = false;
-                else if (!altBookingInd && financialEventCategory.getAlternatebookingindicator().equals("N"))
-                    bypassBooking = false;
-            }
-        }
-        
-        /* default booking check - basically it means population of sub leadger record */   
-        /* this rule here works only for billed booking */
-        if (tmpProdId == 0 || (inRec instanceof BilledCsvFileDTO && (PROD_IDS.contains(tmpProdId) && ((BilledCsvFileDTO) inRec).getInterExchangeCarrierCode() == 0))) {
-            defaultBooking = true;
-        } else {
-            tmpInterExchangeCarrierCode = 0; // it is already intiialized with 0, no other values used
-        }
-        // do the booking if no bypass detected
-        if (bypassBooking)
-            LOGGER.warn("Booking bypass detected, record skipped for sub ledger file ...");
+        // this is not applicable, Admin Fees Record doesn't fit to the interface and as such cannot be processed at all
+        else if (inRec instanceof AdminFeeCsvFileDTO)
+            return processAdminFeesRecord((AdminFeeCsvFileDTO) inRec); 
         else
-            this.crateSubLedgerRecord(tmpChargeAmt, financialEventCategory, financialMarket);
-        
-        return outRec;
+            return null;
     }
 
     private void crateSubLedgerRecord(double tmpChargeAmt, FinancialEventCategory financialEventCategory, String financialMarket) {
@@ -231,9 +122,7 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
         } else {
             subLedgerOutput.setSubledgerTotalDebitAmount(subLedgerOutput.getSubledgerTotalDebitAmount());
             subLedgerOutput.setSubledgerTotalCreditAmount(0d);
-        }
-        
-        // there is some unclear repetitions of rebalancing and cumulation of values but upon what ???
+        }        
     }
 
     private boolean isBookingBalanced(SummarySubLedgerDTO subLedgerOutput) {
@@ -249,7 +138,7 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
     }
     
     private void rebalanceBooking(SummarySubLedgerDTO subLedgerOutpu) {
-        
+        // ths logic is a little bit unclear and has been left over for further discution
     }
 
     private boolean isAlternateBookingApplicable(I inRec) {
@@ -304,5 +193,163 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
             }
         }
         return altBookingInd;
+    }
+    
+    private AggregateWholesaleReportDTO processBilledRecord(BilledCsvFileDTO billedRec) {
+        AggregateWholesaleReportDTO outRec = new AggregateWholesaleReportDTO();
+        double tmpChargeAmt = 0;
+        int tmpProdId = 0;
+        int tmpInterExchangeCarrierCode = 0;
+        boolean bypassBooking = false;
+        boolean defaultBooking = false;
+        
+        if (billedRec.getAirProdId() > 0 && (billedRec.getWholesalePeakAirCharge() > 0 || billedRec.getWholesaleOffpeakAirCharge() > 0)) {
+            outRec.setPeakDollarAmt(billedRec.getWholesalePeakAirCharge());
+            outRec.setOffpeakDollarAmt(billedRec.getWholesaleOffpeakAirCharge());
+            outRec.setDollarAmtOther(0d);
+            outRec.setVoiceMinutes(billedRec.getAirBillSeconds() * 60);
+            tmpChargeAmt = billedRec.getWholesalePeakAirCharge() + billedRec.getWholesaleOffpeakAirCharge();
+            if (billedRec.getAirProdId().equals(190))
+                tmpProdId = 1;
+            else
+                tmpProdId = billedRec.getAirProdId();            
+        }
+        
+        outRec.setBilledInd("Y");
+        messageSource = "B";
+        if (billedRec.getDeviceType().trim().isEmpty())                
+            financialMarket = billedRec.getFinancialMarket();
+
+        if ((billedRec.getTollProductId() > 0 && billedRec.getTollCharge() > 0)
+            || billedRec.getInterExchangeCarrierCode().equals(5050)
+            || billedRec.getIncompleteInd().equals("D")
+            || !billedRec.getHomeSbid().equals(billedRec.getServingSbid())
+            || (billedRec.getAirProdId().equals(190) && billedRec.getWholesaleTollChargeLDPeak() > 0 && billedRec.getWholesaleTollChargeLDOther() > 0)) {
+
+            if (billedRec.getAirProdId().equals(190)) {
+                tmpProdId = 95;
+            } else {
+                tmpProdId = billedRec.getAirProdId();
+            }
+
+            if (billedRec.getIncompleteInd().equals("D")) {
+                tmpChargeAmt = billedRec.getTollCharge();
+                outRec.setDollarAmtOther(tmpChargeAmt);
+
+                // another cassandra call to DataEvent table
+                // data aggregation - have no clue what is that !!!
+            } else {
+                tmpChargeAmt = billedRec.getWholesaleTollChargeLDPeak() + billedRec.getWholesaleTollChargeLDOther();
+                outRec.setTollDollarsAmt(tmpChargeAmt);
+                outRec.setTollMinutes(tmpProdId);
+                outRec.setTollMinutes(billedRec.getTollBillSeconds() * 60); // this is supposed to be re=ounded but how ???
+            }
+        }
+        outRec.setPeakDollarAmt(0d);
+        if (PROD_IDS_TOLL.contains(tmpProdId))
+            tmpInterExchangeCarrierCode = billedRec.getInterExchangeCarrierCode();
+        
+        /* do events & book record */
+        
+        // second cassandra call goes here, it will check if product is wholesale product        
+        String wholesaleBillingCode = null; // this object comes from db as response 
+        //if (wholesaleBillingCode != null) it is
+        //else it is not
+        // what is that for ??? It's never used anywhere after 
+
+        // move tmpChargeAmt to tmpWholesaleCost and tmpWholsaleSettlement ???
+        // third cassandra call goes here, should retrieve unique row of FinancialEventCategory
+        
+        //FinancialEventCategory financialEventCategory = null; // this object comes from db (just one) 
+        
+        // fake financial category record provided to make the runn successful
+        FinancialEventCategory financialEventCategory = new FinancialEventCategory();
+        financialEventCategory.setBamsaffiliateindicator("N");
+        financialEventCategory.setCompanycode("CDN");
+        financialEventCategory.setForeignservedindicator("Y");
+        financialEventCategory.setHomesidequalsservingsidindicator("Y");
+        financialEventCategory.setFinancialeventnormalsign("DR");
+        financialEventCategory.setDebitcreditindicator("DR");
+        financialEventCategory.setBillingaccrualindicator("Y");
+        financialEventCategory.setFinancialeventnumber(4756);
+        financialEventCategory.setFinancialcategory(678);
+        financialEventCategory.setFinancialmarketid("FM1");
+        // end of fake object - to be removed
+        
+        boolean altBookingInd = this.isAlternateBookingApplicable((I) billedRec);
+        
+        if (!financialEventCategory.getBamsaffiliateindicator().equals("N")
+            || !financialEventCategory.getCompanycode().trim().isEmpty()
+            || (searchHomeSbid.equals(searchServingSbid) && !financialEventCategory.getForeignservedindicator().trim().isEmpty())) {            
+            bypassBooking = true;
+        }
+
+        if (financialEventCategory.getBillingaccrualindicator().equals("Y"))
+            bypassBooking = false;
+
+        if (searchHomeSbid.equals(searchServingSbid)) {
+            if (financialEventCategory.getHomesidequalsservingsidindicator().equals("Y"))
+                bypassBooking = false;
+        }               
+        else {
+            if (altBookingInd && financialEventCategory.getAlternatebookingindicator().equals("Y"))
+                bypassBooking = false;
+            else if (!altBookingInd && financialEventCategory.getAlternatebookingindicator().equals("N"))
+                bypassBooking = false;
+        }
+        
+        /* default booking check - basically it means population of sub leadger record */   
+        /* this rule here works only for billed booking */
+        if (tmpProdId == 0 || (PROD_IDS.contains(tmpProdId) && billedRec.getInterExchangeCarrierCode() == 0)) {
+            defaultBooking = true;
+        } else {
+            tmpInterExchangeCarrierCode = 0; // it is already intiialized with 0, no other values used
+        }
+        if (bypassBooking)
+            LOGGER.warn("Booking bypass detected, record skipped for sub ledger file ...");
+        else
+            this.crateSubLedgerRecord(tmpChargeAmt, financialEventCategory, financialMarket);
+                
+        return outRec;
+    }
+    
+    private AggregateWholesaleReportDTO processUnbilledRecord(UnbilledCsvFileDTO unbilledRec) {
+        if (unbilledRec.getAirProdId() > 0 && (unbilledRec.getWholesalePeakAirCharge() > 0 || unbilledRec.getWholesaleOffpeakAirCharge() > 0)) {
+            AggregateWholesaleReportDTO outRec = new AggregateWholesaleReportDTO();
+
+            outRec.setBilledInd("N");
+            messageSource = "U";        
+            this.searchHomeSbid = unbilledRec.getHomeSbid();
+            if (unbilledRec.getServingSbid().trim().isEmpty())
+                this.searchServingSbid = unbilledRec.getHomeSbid();
+            else
+                this.searchServingSbid = unbilledRec.getServingSbid();
+
+            if (this.searchHomeSbid.equals(this.searchServingSbid))
+                this.homeEqualsServingSbid = true;
+
+            financialMarket = unbilledRec.getFinancialMarket();
+            return outRec;
+        }
+        else 
+            return null;        
+    }
+    
+    private AggregateWholesaleReportDTO processAdminFeesRecord(AdminFeeCsvFileDTO adminFeesRec) {
+        AggregateWholesaleReportDTO outRec = new AggregateWholesaleReportDTO(); 
+        boolean bypassBooking = false;
+        
+        FinancialEventCategory financialEventCategory = new FinancialEventCategory();
+        financialEventCategory.setHomesidequalsservingsidindicator(" "); // this ensures the record will be bypassed
+                
+        if (financialEventCategory.getHomesidequalsservingsidindicator().trim().isEmpty())
+            bypassBooking = false;
+        
+        if (bypassBooking)
+            LOGGER.warn("Booking bypass detected, record skipped for sub ledger file ...");
+//        else
+//            this.crateSubLedgerRecord(tmpChargeAmt, financialEventCategory, financialMarket); // not enough info to populate this
+        
+        return outRec;
     }
 }

@@ -5,6 +5,7 @@
  */
 package com.vzw.booking.bg.batch.listeners;
 
+import com.vzw.booking.bg.batch.constants.Constants;
 import com.vzw.booking.bg.batch.util.ProcessingUtils;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,9 +26,9 @@ import org.springframework.beans.factory.annotation.Value;
  *
  * @author smorcja
  */
-public class BilledBookingFileJobListener implements JobExecutionListener {
+public class BookingFilesJobListener implements JobExecutionListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BilledBookingFileJobListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BookingFilesJobListener.class);
 
     @Value("${csv.to.database.job.source.file.path}")
     private String BIILED_CSV_SOURCE_FILE_PATH;
@@ -40,8 +41,10 @@ public class BilledBookingFileJobListener implements JobExecutionListener {
     @Override
     public void afterJob(JobExecution je) {
         if (je.getStatus() == BatchStatus.COMPLETED) {
-            String filename = je.getJobParameters().getString("billed_csv_file_name");
-            this.moveFileToArchive(filename);
+            //String filename = je.getJobParameters().getString("billed_csv_file_name");
+            this.moveFileToArchive(Constants.BOOK_DATE_FILENAME);
+            this.moveFileToArchive(Constants.BILLED_BOOKING_FILENAME);
+            //this.moveFileToArchive(Constants.UNBILLED_BOOKING_FILENAME);
         } else {
             LOGGER.info("All encountered exceptions:");
             List<Throwable> exceptionList = je.getAllFailureExceptions();

@@ -5,6 +5,7 @@ package com.vzw.booking.bg.batch.validation;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+import com.vzw.booking.bg.batch.constants.Constants;
 import java.io.FileNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ public class CsvFileVerificationSkipper implements SkipPolicy {
     @Override
     public boolean shouldSkip(Throwable exception, int skipCount) throws SkipLimitExceededException {
         boolean result = false;
-        if (skipCount > 5)
+        if (skipCount > Constants.MAX_SKIPPED_RECORDS)
             LOGGER.error("Maximum allowed exceptions reached, terminating...");
         else {
             if (exception instanceof FileNotFoundException) {
