@@ -76,7 +76,7 @@ public class BookingFilesJobListener implements JobExecutionListener {
             inStream.close();
             outStream.close();
             srcFile.delete();
-            LOGGER.info("File archived successfully!");
+            LOGGER.info(String.format("%s file archived successfully", filename));
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
         }

@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Migration job launcher, it takes 4 parameters: 3 for file names and 1 for current date and time
- * job starts automatically right after application start and gets executed every minute since then until terminated
+ * Migration job launcher, it takes 1 parameter: current date and time displayed when the job starts
+ * it starts automatically right after application start and gets executed every minute since then until terminated
  * 
  * @author smorcja
  */

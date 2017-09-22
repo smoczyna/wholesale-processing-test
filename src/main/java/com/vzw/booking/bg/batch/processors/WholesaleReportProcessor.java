@@ -68,6 +68,7 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
 
     private void crateSubLedgerRecord(double tmpChargeAmt, FinancialEventCategory financialEventCategory, String financialMarket) {
         SummarySubLedgerDTO subLedgerOutput = this.tempSubLedgerOuput.add();
+        
         if (financialEventCategory.getFinancialeventnormalsign().equals("DR")) {
             if (financialEventCategory.getDebitcreditindicator().equals("DR")) {
                 if (financialEventCategory.getBillingaccrualindicator().equals("Y")) {
@@ -108,13 +109,6 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
         subLedgerOutput.setFinancialmarketId(financialMarket);
         subLedgerOutput.setBillCycleMonthYear(this.tempSubLedgerOuput.getDates().getRptPerEndDate()); // need to be in YYYYMM format 
         subLedgerOutput.setBillAccrualIndicator(financialEventCategory.getBillingaccrualindicator());
-        // balance check
-        if (isBookingBalanced(subLedgerOutput)) {
-            LOGGER.info("Sub ledger record is balanced");
-        } else {
-            LOGGER.info("Sub ledger record is unbalanced - rebalancing...");
-            rebalanceBooking(subLedgerOutput);
-        }
         
         if (subLedgerOutput.getSubledgerTotalDebitAmount() > 0) {
             subLedgerOutput.setSubledgerTotalCreditAmount(subLedgerOutput.getSubledgerTotalDebitAmount());
@@ -122,6 +116,14 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
         } else {
             subLedgerOutput.setSubledgerTotalDebitAmount(subLedgerOutput.getSubledgerTotalDebitAmount());
             subLedgerOutput.setSubledgerTotalCreditAmount(0d);
+        }
+        
+        // balance check
+        if (isBookingBalanced(subLedgerOutput)) {
+            LOGGER.info("Sub ledger record is balanced");
+        } else {
+            LOGGER.info("Sub ledger record is unbalanced - rebalancing is not yet ready");
+            rebalanceBooking(subLedgerOutput);
         }        
     }
 
@@ -161,7 +163,12 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
         call cassandra finacial market with bind params: fileRecord.getFinancialMarket() and homeEqServSbid (what column?)
         this call has to retrieve ust 1 record, if more records get back throw an error and move record to fail list
          */
-        FinancialMarket financialMarket = null; // this object come from database as a response of above call
+        FinancialMarket financialMarket = new FinancialMarket(); // this object come from database as a response of above call
+        financialMarket.setSidbid("VZHUB");
+        financialMarket.setAlternatebookingtype("Z");
+        financialMarket.setGllegalentityid("1");
+        financialMarket.setGlmarketid("1");
+        
         String homeLegalEntityId = null;
         String servingLegalEntityId = null;
 
@@ -274,6 +281,7 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
         financialEventCategory.setFinancialeventnumber(4756);
         financialEventCategory.setFinancialcategory(678);
         financialEventCategory.setFinancialmarketid("FM1");
+        financialEventCategory.setAlternatebookingindicator("Z");
         // end of fake object - to be removed
         
         boolean altBookingInd = this.isAlternateBookingApplicable((I) billedRec);
