@@ -6,6 +6,7 @@
 package com.vzw.booking.bg.batch.readers;
 
 import com.vzw.booking.bg.batch.domain.BookDateCsvFileDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
 /**
@@ -13,7 +14,14 @@ import org.springframework.core.env.Environment;
  * @author smorcja
  */
 public class BookDateCsvFileReader extends CsvFileGenericReader<BookDateCsvFileDTO> {    
+    private static final String[] COLUMN_NAMES = new String[]{"rptPerStartDate", "rptPerEndDate", "transPerStartDate", "transPerEndDate", "monthEndCycle"};
+    
+    @Autowired
     public BookDateCsvFileReader(Environment environment, String filename) {
-        super(BookDateCsvFileDTO.class, environment, filename, new String[]{"rptPerStartDate", "rptPerEndDate", "transPerStartDate", "transPerEndDate", "monthEndCycle"}, ",");
+        super(BookDateCsvFileDTO.class, environment, filename, COLUMN_NAMES, ",");
+    }
+    
+    public BookDateCsvFileReader(String filPath) {
+        super(BookDateCsvFileDTO.class, filPath, COLUMN_NAMES, ",", 0);
     }
 }

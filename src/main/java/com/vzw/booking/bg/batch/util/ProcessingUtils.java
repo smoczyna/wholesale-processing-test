@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,5 +75,14 @@ public class ProcessingUtils {
     public static String dateTimeToStringWithourSpaces(Date date) {
         String strDate = dateToString(date, SHORTDATETIME_FORMAT);
         return strDate.replace(" ", ".");
+    }
+    
+    public static String decodeDelimiter(String line) {
+        String[] delimiters = {",", ";", "|", "¦"};
+        for (String delimiter : delimiters) {
+            if (line.contains(delimiter))
+                return delimiter;
+        }
+        return "None of those was found "+Arrays.toString(delimiters);
     }
 }
