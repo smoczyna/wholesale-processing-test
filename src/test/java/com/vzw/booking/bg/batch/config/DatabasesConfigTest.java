@@ -5,32 +5,25 @@
  */
 package com.vzw.booking.bg.batch.config;
 
-//import com.datastax.driver.core.AuthProvider;
-//import com.datastax.driver.core.Cluster;
-//import com.datastax.driver.core.ColumnDefinitions;
-//import com.datastax.driver.core.ColumnDefinitions.Definition;
-//import com.datastax.driver.core.KeyspaceMetadata;
-//import com.datastax.driver.core.Metadata;
-//import com.datastax.driver.core.PlainTextAuthProvider;
-//import com.datastax.driver.core.ResultSet;
-//import com.datastax.driver.core.Row;
-//import com.datastax.driver.core.Session;
-import com.vzw.booking.bg.batch.config.AbstractMapper;
-import com.vzw.booking.bg.batch.config.CassandraQueryBuilder;
+import com.datastax.driver.core.AuthProvider;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ColumnDefinitions;
+import com.datastax.driver.core.ColumnDefinitions.Definition;
+import com.datastax.driver.core.KeyspaceMetadata;
+import com.datastax.driver.core.Metadata;
+import com.datastax.driver.core.PlainTextAuthProvider;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
-import com.vzw.booking.bg.batch.config.AbstractMapper;
-import com.vzw.booking.bg.batch.config.CassandraQueryBuilder;
 import com.vzw.booking.bg.batch.domain.casandra.FinancialMarket;
+import com.vzw.booking.bg.batch.domain.casandra.Misctran;
+import java.util.Iterator;
 import java.util.List;
-import javax.sql.DataSource;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
@@ -41,23 +34,30 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 //@PropertySource("classpath:application.properties")
 public class DatabasesConfigTest {
 
-//    @Bean
-//    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-//        return new PropertySourcesPlaceholderConfigurer();
-//    }
-//
-//    @Value("${cassandra.db.ip}")
-//    private String host;
-//    
-//    @Value("${cassandra.db.keyspace}")
-//    private String keyspace;
-//    
-//    @Value("${cassandra.db.username}")
-//    private String username;
-//    
-//    @Value("${cassandra.db.password}")
-//    private String password;
+    public static Session getCasandraSession(String keyspace) {
+        AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
+        Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
+        return cluster.connect(keyspace);
+    }
 
+    @Test
+    public void testCasandraConnectivity() throws Exception {
+        System.out.println("Check Casandra native connectivity using Datastax driver");
+        //Session session = DatabasesConfig.getCasandraSession();
+        AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
+        Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();    
+        assertNotNull(cluster);
+        Metadata meta = cluster.getMetadata();
+        List<KeyspaceMetadata> spaces = meta.getKeyspaces();
+        assertNotNull(spaces);
+        System.out.println("Keyspaces found: "+spaces.size());
+        spaces.forEach((keyspace) -> {
+            System.out.println("    "+keyspace.getName());
+        });
+        Session session = cluster.connect("j6_dev");
+        assertNotNull(session); 
+    }
+    
     @Test //(expected = NullPointerException.class)
     public void testCassandraFinancialMarketTable() throws Throwable {
         AbstractMapper<FinancialMarket> financialMarketMapper = new AbstractMapper<FinancialMarket>() {
@@ -75,12 +75,13 @@ public class DatabasesConfigTest {
                 .withMapper(financialMarketMapper);
         builder.build();
         assertNotNull(builder);
-        
+
         List<FinancialMarket> markets = builder.getResults();
-        assertEquals(0, markets.size());
-        
-        // Code will never arrive here because builder has not been built
-        // and requiring results before build it, builder raise NullPointerException        
+        assertNotNull(markets);
+        System.out.println("*** Financial Markets ***");
+        for (FinancialMarket market : markets) {
+            System.out.println(market.toString());
+        }
     }
 
     /**
@@ -96,37 +97,21 @@ public class DatabasesConfigTest {
 //        DataSource result = DatabasesConfig.getCasandraBasicDs(user, password);
 //        assertNotNull(result);
 //    }
-//    @Test
-//    public void testCasandraConnectivity() throws Exception {
-//        System.out.println("Check Casandra native connectivity using Datastax driver");
-//        //Session session = DatabasesConfig.getCasandraSession();
-//        AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
-//        Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();    
-//        assertNotNull(cluster);
-//        Metadata meta = cluster.getMetadata();
-//        List<KeyspaceMetadata> spaces = meta.getKeyspaces();
-//        assertNotNull(spaces);
-//        System.out.println("Keyspaces found: "+spaces.size());
-//        spaces.forEach((keyspace) -> {
-//            System.out.println("    "+keyspace.getName());
-//        });
-//        Session session = cluster.connect("j6_dev");
-//        assertNotNull(session); 
-//    }
-//
-//    @Test
-//    public void testSystemSchemaAccess() throws Exception {
-//        Session session = DatabasesConfig.getCasandraSession("system_schema");
-//        assertNotNull(session);
-//        
-//        ResultSet result = session.execute("select * from tables");
-//        assertTrue(result.all().size()>0);
-//        System.out.println("Tables found: "+result.all().size());
-//        for (Row row : result) {
-//            System.out.println(row.getString("table_name"));
-//        }
-//    }
-//    
+
+
+    @Test
+    public void testSystemSchemaAccess() throws Exception {
+        Session session = getCasandraSession("system_schema");
+        assertNotNull(session);
+        
+        ResultSet result = session.execute("select * from tables");
+        assertTrue(result.all().size()>0);
+        System.out.println("Tables found: "+result.all().size());
+        for (Row row : result) {
+            System.out.println(row.getString("table_name"));
+        }
+    }
+    
 //    @Test
 //    public void testCassandraUserTablesAccess() throws Exception {
 //        Session session = DatabasesConfig.getCasandraSession("j6_dev");
@@ -149,22 +134,81 @@ public class DatabasesConfigTest {
 ////        System.out.println("Users found in third call: "+userCount3);
 ////        assertEquals(userCount, userCount3);        
 //    }
-//    
-//    @Test
-//    public void testFinancialMarketTable() throws Exception {
-//        Session session = DatabasesConfig.getCasandraSession("j6_dev");
-//        assertNotNull(session);
-//        
-//        ResultSet result2 = session.execute("select * from financialmarket");
-//        List<ColumnDefinitions.Definition> cols = result2.getColumnDefinitions().asList();
-//        assertNotNull(cols);
-//        assertEquals(22, cols.size());
-//        System.out.println("Financial market table structure:");
-//        for (Definition def : cols)
-//            System.out.println("Column: " + def.getName());
-//        
-//        //MappingManager manager = new MappingManager(session);
-//        //Mapper<FinancialMarket> mapper = manager.mapper(FinancialMarket.class);
-//        //FinancialMarket market = mapper.get(""); //get’s arguments must match the partition key components (number of arguments and their types).
-//    }
+//  
+//        MappingManager manager = new MappingManager(session);
+//        Mapper<Misctran> mapper = manager.mapper(Misctran.class);
+//        Misctran records = mapper.get(""); //get’s arguments must match the partition key components (number of arguments and their types).    
+    
+    @Test
+    public void testFinancialMarketTable() throws Exception {
+        System.out.println("*** Cassandra MISCTRAN table test ***");
+        Session session = getCasandraSession("j6_dev");
+        assertNotNull(session);
+        System.out.println("Misctran table call without mapper, EXTRACTING structure:");
+        
+        ResultSet result1 = session.execute("select * from misctran");
+        List<ColumnDefinitions.Definition> cols = result1.getColumnDefinitions().asList();
+        assertNotNull(cols);
+        assertEquals(4, cols.size());
+        
+        System.out.println("Looks like the TABLE_NAME is all I need to know about the table? So what is the issue actually ???");
+        
+        for (Definition def : cols) {
+            System.out.println("Column: " + def.getName() + "   type: " + def.getType());
+        }
+        System.out.println("select * from misctran");
+        System.out.println("All records in the table: "+result1.all().size());
+        
+        System.out.println("select * from misctran where companycode = 'C'");
+        ResultSet result2 = session.execute("select * from misctran where companycode = 'C' ALLOW FILTERING");
+        System.out.println("Filtered records retreived: "+result2.all().size());
+        
+        System.out.println("select * from misctran where miscfinancialtransactionnumber > 100");
+        ResultSet result3 = session.execute("select * from misctran where miscfinancialtransactionnumber > 100 ALLOW FILTERING");
+        System.out.println("Filtered records retreived: "+result3.all().size());
+        
+        System.out.println("let's print first 5 records then:");
+        int i=0;
+        Iterator<Row> it = result3.all().iterator();
+        while(it.hasNext()) {
+            Row row = it.next();
+            System.out.println("printing row: " + row);
+            i++;
+            if (i>5) break;
+        }
+        System.out.println("It seeme that the only issue I have here is that I cannot retrieve rows from result set without a mapper !!!");
+        System.out.println("Query never fails, regardless there is an output or not");
+                    
+//        System.out.println("First column value: "+row.getInt("miscfinancialtransactionnumber"));
+//        System.out.println("Second column value: "+row.getInt("miscfinancialtransactiondescription"));
+//        System.out.println("Thrid column value: "+row.getInt("billtypecode"));
+//        System.out.println("Fiurth column value: "+row.getInt("companycode"));
+    }
+    
+    @Test
+    public void testMisctanTable() throws Throwable  {
+        AbstractMapper<Misctran> misctranMapper = new AbstractMapper<Misctran>() {
+            @Override
+            protected Mapper<Misctran> getMapper(MappingManager manager) {
+                return manager.mapper(Misctran.class);
+            }
+        };
+        
+        CassandraQueryBuilder<Misctran> builder = new CassandraQueryBuilder();
+        String cql = "select * from misctran where miscfinancialtransactionnumber > 100 ALLOW FILTERING";
+        builder = builder.withConDetails("170.127.114.154", "j6_dev", "j6_dev_user", "Ireland")
+                .openNewSession(true)
+                .withCql(cql)
+                .withMapper(misctranMapper);
+        builder.build();
+        assertNotNull(builder);
+
+        List<Misctran> records = builder.getResults();
+        assertNotNull(records);
+        System.out.println("*** Query Output ***");
+        for (Misctran rec : records) {
+            System.out.println(rec.toString());
+        }
+        System.out.println("*** End of output ***");
+    }
 }

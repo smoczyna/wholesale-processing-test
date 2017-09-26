@@ -5,18 +5,16 @@
  */
 package com.vzw.booking.bg.batch.jobs;
 
-import com.vzw.booking.bg.batch.readers.BilledBookingFileReader;
-import com.vzw.booking.bg.batch.readers.BookDateCsvFileReader;
+import com.vzw.booking.bg.batch.BookingWholesaleApplication;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.StepScopeTestExecutionListener;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.mock.env.MockEnvironment;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
@@ -25,14 +23,16 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
  *
  * @author smorcja
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, StepScopeTestExecutionListener.class})
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, StepScopeTestExecutionListener.class})
+//@ContextConfiguration(classes = {BookingWholesaleApplication.class, BookigFilesJobConfig.class})
 //@PropertySource("classpath:application.properties")
-//@SpringBootTest(classes = BookingWholesaleApplication.class)
-//@TestPropertySource(properties = {"csv.to.database.job.source.file.path", "./src/main/resources/data"})
 public class BookigFilesJobConfigTest {
     
-    MockEnvironment environment;
+    @Autowired
+    private JobLauncherTestUtils jobLauncherTestUtils;
+    
+//    MockEnvironment environment;
     
 //    @Mock
 //    BilledBookingFileReader billedFileItemReader;
@@ -42,9 +42,9 @@ public class BookigFilesJobConfigTest {
     
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        environment = new MockEnvironment();
-        environment.setProperty("csv.to.database.job.source.file.path", "./src/main/resources/data");
+//        MockitoAnnotations.initMocks(this);
+//        environment = new MockEnvironment();
+//        environment.setProperty("csv.to.database.job.source.file.path", "./src/main/resources/data");
         //reader = new BookDateCsvFileReader(environment, "bookdate.csv");
     }
 
@@ -69,24 +69,24 @@ public class BookigFilesJobConfigTest {
 //
 //Assert.assertEquals("Step stepId failed", ExitStatus.COMPLETED, execution.getExitStatus())
     
-    @Before
-    public void setup() {        
-    }
-    
-    @Test
-    public void launchJob() throws Exception {
-        ApplicationContext context = new AnnotationConfigApplicationContext(BookigFilesJobConfig.class);
-        assertNotNull(context);
-        
-        //JobLauncherTestUtils jobLauncherTestUtils = context.getBean(JobLauncherTestUtils.class);
-        
-//        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
-//        assertNotNull(jobExecution);
-        
-//        Assert.assertEquals(jobExecution.getStatus(), BatchStatus.COMPLETED);
-        
-        //assertNotNull(jobLauncherTestUtils);
-
-    }
+//    @Before
+//    public void setup() {        
+//    }
+//    
+//    @Test
+//    public void launchJob() throws Exception {
+////        ApplicationContext context = new AnnotationConfigApplicationContext(BookigFilesJobConfig.class);
+//        assertNotNull(jobLauncherTestUtils);
+//        
+//        //JobLauncherTestUtils jobLauncherTestUtils = context.getBean(JobLauncherTestUtils.class);
+//        
+////        JobExecution jobExecution = jobLauncherTestUtils.launchJob();
+////        assertNotNull(jobExecution);
+//        
+////        Assert.assertEquals(jobExecution.getStatus(), BatchStatus.COMPLETED);
+//        
+//        //assertNotNull(jobLauncherTestUtils);
+//
+//    }
     
 }

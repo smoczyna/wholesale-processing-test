@@ -6,7 +6,6 @@
 package com.vzw.booking.bg.batch.domain.casandra;
 
 import com.datastax.driver.mapping.annotations.Table;
-import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -14,9 +13,7 @@ import javax.validation.constraints.NotNull;
  */
 @Table(name = "financialeventcategory")
 public class FinancialEventCategory {
-    @NotNull
     private Integer financialeventnumber;
-    @NotNull
     private Integer financialcategory;
     private Integer financialmappingeffectivedate;
     private String glaccountnumber;
@@ -39,16 +36,12 @@ public class FinancialEventCategory {
     private String financialmappingenddate;
     private String glfinancialaccounttypecode;
     private String alternatebookingindicator;
-    @NotNull
     private String bamsaffiliateindicator;
-    @NotNull
     private String billingaccrualindicator;
     private String cashpostindicator;
     private String cellularcarrierrslcode;
-    @NotNull
     private String companycode;
     private String creditcardtypecode;
-    @NotNull
     private String debitcreditindicator;
     private String directindirectindicator;
     private String exceptioncode;
@@ -56,13 +49,10 @@ public class FinancialEventCategory {
     private String financialeventcategorytype;
     private String financialeventdescription;
     private String financialeventdetails;
-    @NotNull
     private String financialeventnormalsign;
     private String financialeventprocessingcode;
-    @NotNull
     private String financialmarketid;
     private String financialmarketsourcecode;
-    @NotNull
     private String foreignservedindicator;
     private String glaccountdescription;
     private String glcostcenternumber;
@@ -70,7 +60,6 @@ public class FinancialEventCategory {
     private String glenddate;
     private String gllocationid;
     private String glproductid;
-    @NotNull
     private String homesidequalsservingsidindicator;
     private String legalentityeqindicator;
     private String paymentmediacode;

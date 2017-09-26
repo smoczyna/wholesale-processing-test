@@ -6,7 +6,6 @@
 package com.vzw.booking.bg.batch.domain.casandra;
 
 import com.datastax.driver.mapping.annotations.Table;
-import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -14,12 +13,10 @@ import javax.validation.constraints.NotNull;
  */
 @Table(name = "financialmarket")
 public class FinancialMarket {
-    @NotNull
     private String financialmarketid;
     private String financialmarketmapeffectivedate;
     private String fcccgsanumber;
     private String fcccgsamapeffectivedate;
-    @NotNull
     private String glmarketid;
     private String glmarketeffectivedate;
     private String glmarketlegalentityeffectivedate;
@@ -29,17 +26,14 @@ public class FinancialMarket {
     private String glmarketmaptype;
     private String fcccgsamapenddate;
     private String glmarketenddate;
-    @NotNull
     private String alternatebookingtype;
     private String glmarketlegalentityenddate;
     private String financialmarketdefaultgeocode;
     private String financialmarketname;
     private String financialmarkettypecode;
-    @NotNull
     private String gllegalentityid;
     private String glmarketdescription;
     private String multiplemarketindicator;
-    @NotNull
     private String sidbid;
 
     public String getFinancialmarketid() {
@@ -217,4 +211,32 @@ public class FinancialMarket {
     public void setSidbid(String sidbid) {
         this.sidbid = sidbid;
     }
+
+    @Override
+    public String toString() {
+        return "FinancialMarket{" 
+                + "financialmarketid=" + financialmarketid 
+                + ", financialmarketmapeffectivedate=" + financialmarketmapeffectivedate 
+                + ", fcccgsanumber=" + fcccgsanumber 
+                + ", fcccgsamapeffectivedate=" + fcccgsamapeffectivedate 
+                + ", glmarketid=" + glmarketid 
+                + ", glmarketeffectivedate=" + glmarketeffectivedate 
+                + ", glmarketlegalentityeffectivedate=" + glmarketlegalentityeffectivedate 
+                + ", financialmarketeffectivedate=" + financialmarketeffectivedate 
+                + ", financialmarketenddate=" + financialmarketenddate 
+                + ", financialmarketmapenddate=" + financialmarketmapenddate 
+                + ", glmarketmaptype=" + glmarketmaptype 
+                + ", fcccgsamapenddate=" + fcccgsamapenddate 
+                + ", glmarketenddate=" + glmarketenddate 
+                + ", alternatebookingtype=" + alternatebookingtype 
+                + ", glmarketlegalentityenddate=" + glmarketlegalentityenddate 
+                + ", financialmarketdefaultgeocode=" + financialmarketdefaultgeocode 
+                + ", financialmarketname=" + financialmarketname 
+                + ", financialmarkettypecode=" + financialmarkettypecode 
+                + ", gllegalentityid=" + gllegalentityid 
+                + ", glmarketdescription=" + glmarketdescription 
+                + ", multiplemarketindicator=" + multiplemarketindicator 
+                + ", sidbid=" + sidbid + '}';
+    }
+    
 }
