@@ -6,7 +6,7 @@
 package com.vzw.booking.bg.batch.writers;
 
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
-import com.vzw.booking.bg.batch.util.ProcessingUtils;
+import com.vzw.booking.bg.batch.utils.ProcessingUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

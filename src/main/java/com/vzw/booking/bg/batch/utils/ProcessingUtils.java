@@ -1,6 +1,5 @@
-package com.vzw.booking.bg.batch.util;
+package com.vzw.booking.bg.batch.utils;
 
-import com.vzw.booking.bg.batch.domain.BilledCsvFileDTO;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
@@ -18,8 +17,11 @@ import java.util.logging.Logger;
 public class ProcessingUtils {
 
     public static final String STANDARD_FORMAT = "yyyy-MM-dd HH:mm:ss.SSSZ";
-    public static final String SHORT_FORMAT = "yyyy-MM-dd";
-    public static final String SHORTDATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String SHORT_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String REALY_SHORT_FORMAT = "yyyyMM";
+    public static final String SHORT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String SHORT_DATETIME_FORMAT_NOSPACE = "yyyy-MM-dd-HH:mm:ss";
+    public static final String MAINFRAME_FORMAT = "yyyy-MM-dd-HH:mm:ss.SSSZ";
     
     private static final String LBRACKET = "[";
     
@@ -62,7 +64,7 @@ public class ProcessingUtils {
     
     public static String getYearAndMonthFromStrDate(String strDate) {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat(SHORT_FORMAT);
+            SimpleDateFormat sdf = new SimpleDateFormat(SHORT_DATE_FORMAT);
             Date date = sdf.parse(strDate);
             SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMM");
             return sdf2.format(date);
@@ -73,10 +75,15 @@ public class ProcessingUtils {
     }
     
     public static String dateTimeToStringWithourSpaces(Date date) {
-        String strDate = dateToString(date, SHORTDATETIME_FORMAT);
+        String strDate = dateToString(date, SHORT_DATETIME_FORMAT);
         return strDate.replace(" ", ".");
     }
     
+    /**
+     * analyzing the line of CSV input file to determine delimiter of the fields
+     * @param line
+     * @return 
+     */
     public static String decodeDelimiter(String line) {
         String[] delimiters = {",", ";", "|", "¦"};
         for (String delimiter : delimiters) {
@@ -85,4 +92,5 @@ public class ProcessingUtils {
         }
         return "None of those was found "+Arrays.toString(delimiters);
     }
+    
 }

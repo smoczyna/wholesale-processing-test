@@ -33,8 +33,8 @@ public class SummarySubLedgerDTO {
     private String billAccrualIndicator = "N";
     private String paymentSourceCode;
     private Integer discountOfferId = 0;
-    private String updateUserId = "WholesaleBookingProcessor";
-    private String updateTimestamp; // = new ZonedDateTime();
+    private String updateUserId = "WholesaleBookingApp";
+    private String updateTimestamp;
 
     public String getJemsApplId() {
         return jemsApplId;

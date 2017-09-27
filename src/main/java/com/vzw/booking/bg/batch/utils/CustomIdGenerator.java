@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.vzw.booking.bg.batch.util;
+package com.vzw.booking.bg.batch.utils;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.stereotype.Component;

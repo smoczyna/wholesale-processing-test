@@ -6,7 +6,7 @@
 package com.vzw.booking.bg.batch.listeners;
 
 import com.vzw.booking.bg.batch.constants.Constants;
-import com.vzw.booking.bg.batch.util.ProcessingUtils;
+import com.vzw.booking.bg.batch.utils.ProcessingUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,13 +31,17 @@ public class BookingFilesJobListener implements JobExecutionListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(BookingFilesJobListener.class);
 
     @Value("${csv.to.database.job.source.file.path}")
-    private String BIILED_CSV_SOURCE_FILE_PATH;
+    private String INPUT_CSV_SOURCE_FILE_PATH;
 
     @Override
     public void beforeJob(JobExecution je) {
-        LOGGER.info("Wholesale booking processor started at: "+ProcessingUtils.dateToString(je.getJobParameters().getDate("currentTime"), ProcessingUtils.SHORTDATETIME_FORMAT));
+        LOGGER.info("Wholesale booking processor started at: "+ProcessingUtils.dateToString(je.getJobParameters().getDate("currentTime"), ProcessingUtils.SHORT_DATETIME_FORMAT));
     }
 
+    /**
+     * moves all source files to archive folder to avoid duplicate processing
+     * @param je 
+     */
     @Override
     public void afterJob(JobExecution je) {
         if (je.getStatus() == BatchStatus.COMPLETED) {
@@ -55,15 +59,14 @@ public class BookingFilesJobListener implements JobExecutionListener {
     }
 
     /**
-     * moved source file to archive folder to avoid duplicates
-     * process reacts for a file of such name
+     * moves source file to archive folder
      * @param filename 
      */
     private void moveFileToArchive(String filename) {
         try {
-            File srcFile = new File(BIILED_CSV_SOURCE_FILE_PATH.concat(filename));
-            String archiveFileName = filename.concat(".").concat(ProcessingUtils.dateToString(new Date(), ProcessingUtils.SHORT_FORMAT)).concat(".bak");
-            File destFile = new File(BIILED_CSV_SOURCE_FILE_PATH.concat("archive/").concat(archiveFileName));
+            File srcFile = new File(INPUT_CSV_SOURCE_FILE_PATH.concat(filename));
+            String archiveFileName = filename.concat(".").concat(ProcessingUtils.dateToString(new Date(), ProcessingUtils.SHORT_DATETIME_FORMAT_NOSPACE)).concat(".bak");
+            File destFile = new File(INPUT_CSV_SOURCE_FILE_PATH.concat("archive/").concat(archiveFileName));
 
             InputStream inStream = new FileInputStream(srcFile);
             OutputStream outStream = new FileOutputStream(destFile);

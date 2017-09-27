@@ -17,12 +17,13 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
+import com.vzw.booking.bg.batch.domain.casandra.FinancialEventCategory;
 import com.vzw.booking.bg.batch.domain.casandra.FinancialMarket;
 import com.vzw.booking.bg.batch.domain.casandra.Misctran;
 import java.util.Iterator;
 import java.util.List;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -31,7 +32,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @author smorcja
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-//@PropertySource("classpath:application.properties")
 public class DatabasesConfigTest {
 
     public static Session getCasandraSession(String keyspace) {
@@ -42,7 +42,7 @@ public class DatabasesConfigTest {
 
     @Test
     public void testCasandraConnectivity() throws Exception {
-        System.out.println("Check Casandra native connectivity using Datastax driver");
+        System.out.println("*** Checkin Casandra native connectivity using Datastax driver ***");
         //Session session = DatabasesConfig.getCasandraSession();
         AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
         Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();    
@@ -55,12 +55,14 @@ public class DatabasesConfigTest {
             System.out.println("    "+keyspace.getName());
         });
         Session session = cluster.connect("j6_dev");
-        assertNotNull(session); 
+        assertNotNull(session);
+        System.out.println("*** End of connectivity test ***");
     }
     
     @Test //(expected = NullPointerException.class)
     public void testCassandraFinancialMarketTable() throws Throwable {
-        AbstractMapper<FinancialMarket> financialMarketMapper = new AbstractMapper<FinancialMarket>() {
+        System.out.println("*** Checking Casandra Financial Market table ***");
+        AbstractMapper<FinancialMarket> financialMarketMapper = new AbstractMapper() {
             @Override
             protected Mapper<FinancialMarket> getMapper(MappingManager manager) {
                 return manager.mapper(FinancialMarket.class);
@@ -78,10 +80,11 @@ public class DatabasesConfigTest {
 
         List<FinancialMarket> markets = builder.getResults();
         assertNotNull(markets);
-        System.out.println("*** Financial Markets ***");
+        System.out.println("*** Query Output ***");
         for (FinancialMarket market : markets) {
             System.out.println(market.toString());
         }
+        System.out.println("*** End of output ***");
     }
 
     /**
@@ -101,6 +104,7 @@ public class DatabasesConfigTest {
 
     @Test
     public void testSystemSchemaAccess() throws Exception {
+        System.out.println("*** Checking Casandra System Schema ***");
         Session session = getCasandraSession("system_schema");
         assertNotNull(session);
         
@@ -110,6 +114,7 @@ public class DatabasesConfigTest {
         for (Row row : result) {
             System.out.println(row.getString("table_name"));
         }
+        System.out.println("*** End of System Schema check ***");
     }
     
 //    @Test
@@ -141,7 +146,7 @@ public class DatabasesConfigTest {
     
     @Test
     public void testFinancialMarketTable() throws Exception {
-        System.out.println("*** Cassandra MISCTRAN table test ***");
+        System.out.println("*** Checking Casandra Misctran table ***");
         Session session = getCasandraSession("j6_dev");
         assertNotNull(session);
         System.out.println("Misctran table call without mapper, EXTRACTING structure:");
@@ -178,7 +183,9 @@ public class DatabasesConfigTest {
         }
         System.out.println("It seeme that the only issue I have here is that I cannot retrieve rows from result set without a mapper !!!");
         System.out.println("Query never fails, regardless there is an output or not");
-                    
+            
+        System.out.println("*** End of Misctran check ***");
+        
 //        System.out.println("First column value: "+row.getInt("miscfinancialtransactionnumber"));
 //        System.out.println("Second column value: "+row.getInt("miscfinancialtransactiondescription"));
 //        System.out.println("Thrid column value: "+row.getInt("billtypecode"));
@@ -187,7 +194,8 @@ public class DatabasesConfigTest {
     
     @Test
     public void testMisctanTable() throws Throwable  {
-        AbstractMapper<Misctran> misctranMapper = new AbstractMapper<Misctran>() {
+        System.out.println("*** Checking Casandra Misctran table with CassandraQueryBuilder ***");
+        AbstractMapper<Misctran> misctranMapper = new AbstractMapper() {
             @Override
             protected Mapper<Misctran> getMapper(MappingManager manager) {
                 return manager.mapper(Misctran.class);
@@ -210,5 +218,45 @@ public class DatabasesConfigTest {
             System.out.println(rec.toString());
         }
         System.out.println("*** End of output ***");
+    }
+    
+    @Test
+    public void testFinancialEventCategoryTable() throws Throwable  {
+        System.out.println("*** Cheking Financial Event Category table ***");
+        AbstractMapper<FinancialEventCategory> misctranMapper = new AbstractMapper() {
+            @Override
+            protected Mapper<FinancialEventCategory> getMapper(MappingManager manager) {
+                return manager.mapper(FinancialEventCategory.class);
+            }
+        };
+//        CassandraQueryBuilder<FinancialEventCategory> builder = new CassandraQueryBuilder();
+//        String cql = "select * from financialeventcategory";
+//        builder = builder.withConDetails("170.127.114.154", "j6_dev", "j6_dev_user", "Ireland")
+//                .openNewSession(true)
+//                .withCql(cql)
+//                .withMapper(misctranMapper);
+//        builder.build();
+//        assertNotNull(builder);
+//        
+//        List<FinancialEventCategory> records = builder.getResults();
+//        assertNotNull(records);
+//        System.out.println("*** Query Output ***");
+//        for (FinancialEventCategory rec : records) {
+//            System.out.println(rec.toString());
+//        }
+//        System.out.println("*** End of output ***");
+        
+        System.out.println("*** Running conditianal query ***");
+        CassandraQueryBuilder<FinancialEventCategory> builder = new CassandraQueryBuilder();
+        String cql = "select * from financialeventcategory where billtypecode = 'something' ALLOW FILTERING";
+        builder = builder.withConDetails("170.127.114.154", "j6_dev", "j6_dev_user", "Ireland")
+                .openNewSession(true)
+                .withCql(cql)
+                .withMapper(misctranMapper);
+        builder.build();
+        assertNotNull(builder);
+        
+        List<FinancialEventCategory> records = builder.getResults();
+        assertNotNull(records);
     }
 }

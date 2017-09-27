@@ -3,7 +3,7 @@ package com.vzw.booking.bg.batch;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.vzw.booking.bg.batch.util.CustomIdGenerator;
+import com.vzw.booking.bg.batch.utils.CustomIdGenerator;
 
 import javax.sql.DataSource;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
