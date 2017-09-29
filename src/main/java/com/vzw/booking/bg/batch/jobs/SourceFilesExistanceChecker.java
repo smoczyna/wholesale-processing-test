@@ -5,6 +5,7 @@
  */
 package com.vzw.booking.bg.batch.jobs;
 
+import com.vzw.booking.bg.batch.constants.Constants;
 import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,20 +26,21 @@ public class SourceFilesExistanceChecker implements Tasklet {
     
     @Value("${csv.to.database.job.source.file.path}")
     private String SOURCE_FILES_PATH;
-    
-    private final String filename;
-    
-    public SourceFilesExistanceChecker(String filename) {
-        this.filename = filename;
-    }
-    
+
     @Override
     public RepeatStatus execute(StepContribution sc, ChunkContext cc) throws Exception {
-        LOGGER.info("Checkig if file exists...");
-        //String filename = (String) cc.getStepContext().getJobParameters().get("billed_csv_file_name");
-        File f = new File(SOURCE_FILES_PATH.concat(filename));
-        if (!f.exists() || f.isDirectory()) {
-            LOGGER.error("One or more required files not found, job aborted");
+        LOGGER.info("Checking if file exists...");
+        File f1 = new File(SOURCE_FILES_PATH.concat(Constants.BOOK_DATE_FILENAME));
+        File f2 = new File(SOURCE_FILES_PATH.concat(Constants.FINANCIAL_EVENT_OFFSET_FILENAME));
+        File f3 = new File(SOURCE_FILES_PATH.concat(Constants.BILLED_BOOKING_FILENAME));
+        File f4 = new File(SOURCE_FILES_PATH.concat(Constants.UNBILLED_BOOKING_FILENAME));
+        File f5 = new File(SOURCE_FILES_PATH.concat(Constants.ADMIN_FEES_FILENAME));        
+        if ((!f1.exists() || f1.isDirectory()) ||
+            (!f2.exists() || f2.isDirectory()) ||
+            (!f3.exists() || f3.isDirectory()) ||
+            (!f4.exists() || f4.isDirectory()) ||
+            (!f5.exists() || f4.isDirectory())) {
+            LOGGER.error("One or more required files not found, job aborted.");
             throw new JobInterruptedException("Source FIle does not exist");
         } else {
             return RepeatStatus.FINISHED;

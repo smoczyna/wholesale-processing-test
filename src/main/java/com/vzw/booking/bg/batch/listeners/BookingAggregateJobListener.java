@@ -26,16 +26,18 @@ import org.springframework.beans.factory.annotation.Value;
  *
  * @author smorcja
  */
-public class BookingFilesJobListener implements JobExecutionListener {
+public class BookingAggregateJobListener implements JobExecutionListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BookingFilesJobListener.class);
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(BookingAggregateJobListener.class);
+    private Date startTIme;
+    
     @Value("${csv.to.database.job.source.file.path}")
     private String INPUT_CSV_SOURCE_FILE_PATH;
 
     @Override
     public void beforeJob(JobExecution je) {
-        LOGGER.info("Wholesale booking processor started at: "+ProcessingUtils.dateToString(je.getJobParameters().getDate("currentTime"), ProcessingUtils.SHORT_DATETIME_FORMAT));
+        this.startTIme = new Date();
+        LOGGER.info("Wholesale booking processing started at: "+ProcessingUtils.dateToString(this.startTIme, ProcessingUtils.SHORT_DATETIME_FORMAT));
     }
 
     /**
@@ -45,10 +47,15 @@ public class BookingFilesJobListener implements JobExecutionListener {
     @Override
     public void afterJob(JobExecution je) {
         if (je.getStatus() == BatchStatus.COMPLETED) {
-            //String filename = je.getJobParameters().getString("billed_csv_file_name");
             this.moveFileToArchive(Constants.BOOK_DATE_FILENAME);
+            this.moveFileToArchive(Constants.FINANCIAL_EVENT_OFFSET_FILENAME);
             this.moveFileToArchive(Constants.BILLED_BOOKING_FILENAME);
-            //this.moveFileToArchive(Constants.UNBILLED_BOOKING_FILENAME);
+            this.moveFileToArchive(Constants.UNBILLED_BOOKING_FILENAME);
+            this.moveFileToArchive(Constants.ADMIN_FEES_FILENAME);
+            
+            Date endTime = new Date();
+            LOGGER.info("Wholesale booking processing ended at: "+ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT));
+            LOGGER.info("Overall processing time: " + (endTime.getTime() - this.startTIme.getTime())/1000 + " seconds.");
         } else {
             LOGGER.info("All encountered exceptions:");
             List<Throwable> exceptionList = je.getAllFailureExceptions();

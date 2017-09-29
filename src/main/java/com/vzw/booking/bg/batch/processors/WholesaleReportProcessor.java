@@ -27,9 +27,10 @@ import com.vzw.booking.bg.batch.utils.ProcessingUtils;
 /**
  *
  * @author smorcja
- * @param <I>
+ * @param <T> - payload of the processor, 
+ *              it must be a class implementing BaseBookingInputInterface or AdminFeeCsvFileDTO
  */
-public class WholesaleReportProcessor<I extends BaseBookingInputInterface> implements ItemProcessor<I, AggregateWholesaleReportDTO> {
+public class WholesaleReportProcessor<T> implements ItemProcessor<T, AggregateWholesaleReportDTO> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WholesaleReportProcessor.class);
      
@@ -53,7 +54,7 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
      * @throws Exception 
      */
     @Override
-    public AggregateWholesaleReportDTO process(I inRec) throws Exception {
+    public AggregateWholesaleReportDTO process(T inRec) throws Exception {
         this.searchServingSbid = null;
         this.searchHomeSbid = null;
         this.financialMarket = "";
@@ -66,16 +67,14 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
             return processBilledRecord((BilledCsvFileDTO) inRec);
         else if (inRec instanceof UnbilledCsvFileDTO)
             return processUnbilledRecord((UnbilledCsvFileDTO) inRec);
-
-        // this is not applicable, Admin Fees Record doesn't fit to the interface and as such cannot be processed at all
         else if (inRec instanceof AdminFeeCsvFileDTO)
             return processAdminFeesRecord((AdminFeeCsvFileDTO) inRec); 
         else
             return null;
     }
 
-    private void crateSubLedgerRecord(double tmpChargeAmt, FinancialEventCategory financialEventCategory, String financialMarket) {
-        SummarySubLedgerDTO subLedgerOutput = this.tempSubLedgerOuput.add();
+    private void createSubLedgerRecord(double tmpChargeAmt, FinancialEventCategory financialEventCategory, String financialMarket) {
+        SummarySubLedgerDTO subLedgerOutput = this.tempSubLedgerOuput.addSubledger();
         
         // second cassandra call goes here, it will check if product is wholesale product        
         String wholesaleBillingCode = null; // this object comes from db as response 
@@ -124,6 +123,10 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
         subLedgerOutput.setBillCycleMonthYear(ProcessingUtils.getYearAndMonthFromStrDate(this.tempSubLedgerOuput.getDates().getRptPerEndDate()));
         subLedgerOutput.setBillAccrualIndicator(financialEventCategory.getBillingaccrualindicator());
         
+        if (subLedgerOutput.getSubledgerTotalDebitAmount()==null) {
+            LOGGER.info("No subledger total debit amount, cannot determine booking side (DR/CR) !!!");            
+        }
+        
         if (subLedgerOutput.getSubledgerTotalDebitAmount() > 0) {
             subLedgerOutput.setSubledgerTotalCreditAmount(subLedgerOutput.getSubledgerTotalDebitAmount());
             subLedgerOutput.setSubledgerTotalDebitAmount(0d);
@@ -157,18 +160,17 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
         // ths logic is a little bit unclear and has been left over for further discution
     }
 
-    private boolean isAlternateBookingApplicable(I inRec) {
+    private boolean isAlternateBookingApplicable(BaseBookingInputInterface inRec) {
         boolean altBookingInd = false;
         String homeGlMarketId = null;
         String servingGlMarketId;
-
+        
         searchHomeSbid = inRec.getHomeSbid();
         if (inRec.getServingSbid().trim().isEmpty()) {
             searchServingSbid = searchHomeSbid;
         } else {
             searchHomeSbid = inRec.getServingSbid();
         }
-
         if (searchHomeSbid.equals(searchServingSbid)) {
             homeEqualsServingSbid = true;
         }
@@ -216,8 +218,8 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
         return altBookingInd;
     }
     
-    private boolean bypassBooking(FinancialEventCategory financialEventCategory, I inputRec) {        
-        boolean altBookingInd = this.isAlternateBookingApplicable((I) inputRec);
+    private boolean bypassBooking(FinancialEventCategory financialEventCategory, BaseBookingInputInterface inputRec) {        
+        boolean altBookingInd = this.isAlternateBookingApplicable(inputRec);
         boolean bypassBooking = false;
         
         // bypass booking check stage 1
@@ -254,10 +256,10 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
     
     private AggregateWholesaleReportDTO processBilledRecord(BilledCsvFileDTO billedRec) {
         AggregateWholesaleReportDTO outRec = new AggregateWholesaleReportDTO();
-        int tmpInterExchangeCarrierCode = 0;
+        //int tmpInterExchangeCarrierCode = 0;
         boolean bypassBooking;
-        boolean altBookingInd;
-        boolean defaultBooking;
+        //boolean altBookingInd;
+        //boolean defaultBooking;
         
         outRec.setBilledInd("Y");
         this.fileSource = "B";
@@ -312,25 +314,28 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
             }
         }
         outRec.setPeakDollarAmt(0d);
-        if (PROD_IDS_TOLL.contains(this.tmpProdId))
-            tmpInterExchangeCarrierCode = billedRec.getInterExchangeCarrierCode();
+        
+//        if (PROD_IDS_TOLL.contains(this.tmpProdId))
+//            tmpInterExchangeCarrierCode = billedRec.getInterExchangeCarrierCode();
         
         
         /* do events & book record */        
         FinancialEventCategory financialEventCategory = this.getEventCategoryFromDb();
-        bypassBooking = this.bypassBooking(financialEventCategory, (I) billedRec);
+        bypassBooking = this.bypassBooking(financialEventCategory, billedRec);
 
         /* default booking check - basically it means population of sub leadger record */   
         /* this rule here works only for billed booking */
-        if (this.tmpProdId == 0 || (PROD_IDS.contains(this.tmpProdId) && billedRec.getInterExchangeCarrierCode() == 0)) {
-            defaultBooking = true;
-        } else {
-            tmpInterExchangeCarrierCode = 0; // it is already intiialized with 0, no other values used
-        }
+        
+// this is dummy code, never used anywhere after
+//        if (this.tmpProdId == 0 || (PROD_IDS.contains(this.tmpProdId) && billedRec.getInterExchangeCarrierCode() == 0)) {
+//            defaultBooking = true;
+//        } else {
+//            tmpInterExchangeCarrierCode = 0; // it is already intiialized with 0, no other values used
+//        }
         if (bypassBooking)
             LOGGER.warn("Booking bypass detected, record skipped for sub ledger file ...");
         else
-            this.crateSubLedgerRecord(tmpChargeAmt, financialEventCategory, financialMarket);
+            this.createSubLedgerRecord(tmpChargeAmt, financialEventCategory, financialMarket);
                 
         return outRec;
     }
@@ -381,7 +386,7 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
             }
             
             FinancialEventCategory financialEventCategory = this.getEventCategoryFromDb();
-            this.crateSubLedgerRecord(tmpChargeAmt, financialEventCategory, financialMarket);            
+            this.createSubLedgerRecord(tmpChargeAmt, financialEventCategory, financialMarket);            
             return outRec;
         }
         else 
@@ -411,7 +416,7 @@ public class WholesaleReportProcessor<I extends BaseBookingInputInterface> imple
         if (bypassBooking)
             LOGGER.warn("Booking bypass detected, record skipped for sub ledger file ...");
         else
-            this.crateSubLedgerRecord(tmpChargeAmt, financialEventCategory, financialMarket);
+            this.createSubLedgerRecord(tmpChargeAmt, financialEventCategory, financialMarket);
         
         return outRec;
     }

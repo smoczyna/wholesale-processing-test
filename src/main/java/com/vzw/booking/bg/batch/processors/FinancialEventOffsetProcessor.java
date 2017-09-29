@@ -5,9 +5,7 @@
  */
 package com.vzw.booking.bg.batch.processors;
 
-import com.vzw.booking.bg.batch.domain.BookDateCsvFileDTO;
-import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
-import java.util.Set;
+import com.vzw.booking.bg.batch.domain.FinancialEventOffset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -17,16 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author smorcja
  */
-public class BookDateProcessor implements ItemProcessor<BookDateCsvFileDTO, Set<SummarySubLedgerDTO>> {
+public class FinancialEventOffsetProcessor implements ItemProcessor<FinancialEventOffset, Boolean> {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(BookDateProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FinancialEventOffsetProcessor.class);
     
     @Autowired
     SubLedgerProcessor tempSubLedgerOuput;
     
     @Override
-    public Set process(BookDateCsvFileDTO dates) throws Exception {
-        this.tempSubLedgerOuput.setDates(dates);
-        return this.tempSubLedgerOuput.getAggregatedOutput();
+    public Boolean process(FinancialEventOffset offset) throws Exception {
+        return this.tempSubLedgerOuput.addOffset(offset);
     }
 }

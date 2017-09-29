@@ -101,7 +101,6 @@ public class DatabasesConfigTest {
 //        assertNotNull(result);
 //    }
 
-
     @Test
     public void testSystemSchemaAccess() throws Exception {
         System.out.println("*** Checking Casandra System Schema ***");

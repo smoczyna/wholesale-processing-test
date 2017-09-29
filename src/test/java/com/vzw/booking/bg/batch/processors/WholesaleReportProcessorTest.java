@@ -5,10 +5,12 @@
  */
 package com.vzw.booking.bg.batch.processors;
 
+import com.vzw.booking.bg.batch.domain.AdminFeeCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import com.vzw.booking.bg.batch.domain.BilledCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.BookDateCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
+import com.vzw.booking.bg.batch.domain.UnbilledCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.casandra.DataEvent;
 import com.vzw.booking.bg.batch.domain.casandra.FinancialEventCategory;
 import com.vzw.booking.bg.batch.domain.casandra.WholesalePrice;
@@ -37,20 +39,17 @@ public class WholesaleReportProcessorTest {
     @InjectMocks
     private final WholesaleReportProcessor wholesaleBookingProcessor = new WholesaleReportProcessor();
     
-    BilledCsvFileDTO billedBookingRecord;
     
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);                
-        when(tempSubLedgerOuput.add()).thenReturn(new SummarySubLedgerDTO());
+        when(tempSubLedgerOuput.addSubledger()).thenReturn(new SummarySubLedgerDTO());
         when(tempSubLedgerOuput.getDates()).thenReturn(this.createBookDateRecord());
          
 //  following stuff need to be stubbed when the real db calls will be in place, right now it is exactly the same   
 //        when(wholesaleBookingProcessor.getEventCategoryFromDb()).thenReturn(this.createEventCategory(true));
 //        when(wholesaleBookingProcessor.getDataEventFromDb()).thenReturn(this.createDataEvent(true));
 //        when(wholesaleBookingProcessor.getWholesalePriceFromDb()).thenReturn(this.createWholesalePrice());
-
-        billedBookingRecord = createInputRecord();        
     }
 
     private BookDateCsvFileDTO createBookDateRecord() {
@@ -62,7 +61,7 @@ public class WholesaleReportProcessorTest {
         return bookDates;
     }
     
-    private BilledCsvFileDTO createInputRecord() {
+    private BilledCsvFileDTO createBilledBookingsInputRecord() {
         BilledCsvFileDTO record = new BilledCsvFileDTO();
         record.setAirBillSeconds(1235);
         record.setAirProdId(1);
@@ -91,6 +90,31 @@ public class WholesaleReportProcessorTest {
         record.setWholesaleTollChargeLDOther(345.65d);
         record.setWholesaleTollChargeLDPeak(765.34d);
         record.setWholesaleUsageBytes(34567l);
+        return record;
+    }
+    
+    private UnbilledCsvFileDTO createUnbilledBookingsInputRecord() {
+        UnbilledCsvFileDTO record = new UnbilledCsvFileDTO();
+        record.setHomeSbid("athlone");
+        record.setServingSbid("dublin");
+        record.setAirBillSeconds(457687);
+        record.setAirProdId(100);
+        record.setFinancialMarket("Ireland");
+        record.setMessageSource("U");
+        record.setSource("unit test");
+        record.setTotalWholesaleUsage(34878L);
+        record.setWholesaleOffpeakAirCharge(3465.87);
+        record.setWholesalePeakAirCharge(464567.87);
+        return record;
+    }
+    
+    private AdminFeeCsvFileDTO createAdminFeesBookingInputRecord() {
+        AdminFeeCsvFileDTO record = new AdminFeeCsvFileDTO();
+        record.setSbid("galway");
+        record.setProductId(123);
+        record.setFinancialMarket("Ireland");
+        record.setAdminChargeAmt(34756.87);
+        record.setAdminCount(7867);
         return record;
     }
     
@@ -130,11 +154,27 @@ public class WholesaleReportProcessorTest {
      * @throws java.lang.Exception
      */
     @Test
-    public void testProcess() throws Exception {
-        AggregateWholesaleReportDTO result = wholesaleBookingProcessor.process(billedBookingRecord);        
-        verify(tempSubLedgerOuput, times(1)).add();
+    public void testBilledBookingProcess() throws Exception {
+        BilledCsvFileDTO billedBookingRecord = createBilledBookingsInputRecord();
+        AggregateWholesaleReportDTO result = wholesaleBookingProcessor.process(billedBookingRecord);
+        verify(tempSubLedgerOuput, times(1)).addSubledger();
         assertNotNull(result);
         //assertTrue(tempSubLedgerOuput.getAggregatedOutput().size()>0);
     }
 
+    @Test
+    public void testUnbilledBookingProcess() throws Exception {
+        UnbilledCsvFileDTO unbilledBookingRecord = createUnbilledBookingsInputRecord();
+        AggregateWholesaleReportDTO result = wholesaleBookingProcessor.process(unbilledBookingRecord);
+        verify(tempSubLedgerOuput, times(1)).addSubledger();
+        assertNotNull(result);
+    }
+    
+    @Test
+    public void testAdmiFeesBookingProcess() throws Exception {
+        AdminFeeCsvFileDTO adminFeesBookingRecord = createAdminFeesBookingInputRecord();
+        AggregateWholesaleReportDTO result = wholesaleBookingProcessor.process(adminFeesBookingRecord);
+        verify(tempSubLedgerOuput, times(1)).addSubledger();
+        assertNotNull(result);
+    }
 }
