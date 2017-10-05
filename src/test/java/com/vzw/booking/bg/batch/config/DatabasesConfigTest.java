@@ -5,6 +5,7 @@
  */
 package com.vzw.booking.bg.batch.config;
 
+import com.vzw.booking.bg.batch.utils.AbstractMapper;
 import com.datastax.driver.core.AuthProvider;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ColumnDefinitions;
@@ -19,6 +20,7 @@ import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
 import com.vzw.booking.bg.batch.domain.casandra.FinancialEventCategory;
 import com.vzw.booking.bg.batch.domain.casandra.FinancialMarket;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import static org.junit.Assert.*;
@@ -39,9 +41,9 @@ public class DatabasesConfigTest {
         return cluster.connect(keyspace);
     }
 
-    @Test
+    //@Test
     public void testCasandraConnectivity() throws Exception {
-        System.out.println("*** Checkin Casandra native connectivity using Datastax driver ***");
+        System.out.println("*** Checking Casandra native connectivity using Datastax driver ***");
         //Session session = DatabasesConfig.getCasandraSession();
         AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
         Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
@@ -58,7 +60,7 @@ public class DatabasesConfigTest {
         System.out.println("*** End of connectivity test ***");
     }
 
-    @Test //(expected = NullPointerException.class)
+    //@Test //(expected = NullPointerException.class)
     public void testCassandraFinancialMarketTable() throws Throwable {
         System.out.println("*** Checking Casandra Financial Market table ***");
         AbstractMapper<FinancialMarket> financialMarketMapper = new AbstractMapper() {
@@ -79,27 +81,40 @@ public class DatabasesConfigTest {
 
         List<FinancialMarket> markets = builder.getResults();
         assertNotNull(markets);
-        System.out.println("*** Query Output ***");
-        for (FinancialMarket market : markets) {
-            System.out.println(market.toString());
-        }
-        System.out.println("*** End of output ***");
+        assertTrue(markets.size()==1265);
+        System.out.println("Financial Market records found: "+ markets.size());
     }
 
-    /**
-     * Test of getCasandraBasicDs method, of class DatabasesConfig.
-     *
-     * @throws java.lang.Exception
-     */
-//    @Test
-//    public void testGetCasandraBasicDs() throws Exception {
-//        System.out.println("Check Casandra DEV space connection");
-//        String user = "j6_dev_user";
-//        String password = "Ireland";
-//        DataSource result = DatabasesConfig.getCasandraBasicDs(user, password);
-//        assertNotNull(result);
-//    }
     @Test
+    public void testCassandraResultCaching() throws Throwable {
+        System.out.println("*** Checking Casandra Result Caching ***");
+        AbstractMapper<FinancialMarket> financialMarketMapper = new AbstractMapper() {
+            @Override
+            protected Mapper<FinancialMarket> getMapper(MappingManager manager) {
+                return manager.mapper(FinancialMarket.class);
+            }
+        };
+        Date startDate = new Date();
+        CassandraQueryBuilder<FinancialMarket> builder = new CassandraQueryBuilder();
+        String cql = "select * from financialmarket where financialmarketid = '838'  ALLOW FILTERING";
+        builder = builder.withConDetails("170.127.114.154", "j6_dev", "j6_dev_user", "Ireland")
+                .openNewSession(true)
+                .withCql(cql)
+                .withMapper(financialMarketMapper);
+        builder.build();
+        assertNotNull(builder);
+        
+        List<FinancialMarket> markets = builder.getResults();
+        Date endDate = new Date();
+        System.out.println("First call time: " + (endDate.getTime() - startDate .getTime()) / 1000);
+        
+        startDate = new Date();
+        markets = builder.getResults();
+        endDate = new Date();
+        System.out.println("Second call time: " + (endDate.getTime() - startDate .getTime()) / 1000);
+    }
+    
+    //@Test
     public void testSystemSchemaAccess() throws Exception {
         System.out.println("*** Checking Casandra System Schema ***");
         Session session = getCasandraSession("system_schema");
@@ -114,7 +129,7 @@ public class DatabasesConfigTest {
         System.out.println("*** End of System Schema check ***");
     }
   
-    @Test
+    //@Test
     public void testMisctranTable() throws Exception {
         System.out.println("*** Checking Casandra Misctran table ***");
         Session session = getCasandraSession("j6_dev");
@@ -159,7 +174,7 @@ public class DatabasesConfigTest {
         System.out.println("*** End of Misctran check ***");
     }
 
-    @Test
+    //@Test
     public void testFinancialEventCategoryTable() throws Throwable {
         System.out.println("*** Cheking Financial Event Category table ***");
         AbstractMapper<FinancialEventCategory> misctranMapper = new AbstractMapper() {

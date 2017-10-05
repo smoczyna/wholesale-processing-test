@@ -1,4 +1,4 @@
-package com.vzw.booking.bg.batch.domain.casandra.exceptions;
+package com.vzw.booking.bg.batch.domain.exceptions;
 
 public class MultipleRowsReturnedException extends Exception {
 

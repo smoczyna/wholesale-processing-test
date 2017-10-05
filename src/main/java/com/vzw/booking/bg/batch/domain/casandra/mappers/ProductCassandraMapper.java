@@ -2,7 +2,7 @@ package com.vzw.booking.bg.batch.domain.casandra.mappers;
 
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
-import com.vzw.booking.bg.batch.config.AbstractMapper;
+import com.vzw.booking.bg.batch.utils.AbstractMapper;
 import com.vzw.booking.bg.batch.domain.casandra.Product;
 
 public class ProductCassandraMapper extends AbstractMapper<Product> {

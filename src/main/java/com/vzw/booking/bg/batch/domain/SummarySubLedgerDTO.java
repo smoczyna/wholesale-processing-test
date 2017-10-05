@@ -5,11 +5,14 @@
  */
 package com.vzw.booking.bg.batch.domain;
 
+import org.springframework.stereotype.Component;
+
 /**
  * Summary Sub Ledger internal payload class. 
  * This class represents the output file of the application.
  * @author smorcja
  */
+@Component
 public class SummarySubLedgerDTO {
     
     private String jemsApplId = "BL";

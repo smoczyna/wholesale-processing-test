@@ -1,4 +1,4 @@
-package com.vzw.booking.bg.batch.config;
+package com.vzw.booking.bg.batch.utils;
 
 import java.util.concurrent.ExecutionException;
 

@@ -21,26 +21,24 @@ import org.springframework.core.io.FileSystemResource;
 public class CsvFileGenericWriter<T> extends FlatFileItemWriter<T> {
     private static final String PROPERTY_CSV_EXPORT_FILE_PATH = "database.to.csv.job.export.file.path";
     
-    public CsvFileGenericWriter(String fileName, String[] fieldNames) {
+    public CsvFileGenericWriter(String fileName, String[] fieldNames, String delimiter) {
         super.setAppendAllowed(true);
         this.setResource(new FileSystemResource(fileName));
-        LineAggregator<T> lineAggregator = createWholesaleReportLineAggregator(fieldNames);
-        this.setLineAggregator(lineAggregator);
+        this.setLineAggregator(createLineAggregator(fieldNames, delimiter));
     }
     
-    public CsvFileGenericWriter(Environment environment, String fileName, String[] fieldNames) {
-        this(environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(fileName), fieldNames);
+    public CsvFileGenericWriter(Environment environment, String fileName, String[] fieldNames, String delimiter) {
+        this(environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(fileName), fieldNames, delimiter);
     }
     
-    private LineAggregator<T> createWholesaleReportLineAggregator(String[] fieldNames) {
+    private LineAggregator<T> createLineAggregator(String[] fieldNames, String delimiter) {
         DelimitedLineAggregator<T> lineAggregator = new DelimitedLineAggregator<>();
-        lineAggregator.setDelimiter(";");
-        FieldExtractor<T> fieldExtractor = createWholesaleReportFieldExtractor(fieldNames);
-        lineAggregator.setFieldExtractor(fieldExtractor);
+        lineAggregator.setDelimiter(delimiter);
+        lineAggregator.setFieldExtractor(createFieldExtractor(fieldNames));
         return lineAggregator;
     }
     
-    private FieldExtractor<T> createWholesaleReportFieldExtractor(String[] fieldNames) {
+    private FieldExtractor<T> createFieldExtractor(String[] fieldNames) {
         BeanWrapperFieldExtractor<T> extractor = new BeanWrapperFieldExtractor<>();
         extractor.setNames(fieldNames);
         return extractor;

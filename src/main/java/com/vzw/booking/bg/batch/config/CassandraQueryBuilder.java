@@ -1,5 +1,6 @@
 package com.vzw.booking.bg.batch.config;
 
+import com.vzw.booking.bg.batch.utils.AbstractMapper;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 

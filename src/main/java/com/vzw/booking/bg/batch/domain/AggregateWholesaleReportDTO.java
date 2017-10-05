@@ -5,11 +5,14 @@
  */
 package com.vzw.booking.bg.batch.domain;
 
+import org.springframework.stereotype.Component;
+
 /**
  * Aggregate Wholesale Report DTO payload class. 
  * This class represents the output file of the application called aggregate wholesale report
  * @author smorcja
  */
+@Component
 public class AggregateWholesaleReportDTO {
     
     private String cycleMonthYear;
