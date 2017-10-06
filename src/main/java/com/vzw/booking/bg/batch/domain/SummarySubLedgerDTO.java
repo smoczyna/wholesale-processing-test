@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * @author smorcja
  */
 @Component
-public class SummarySubLedgerDTO {
+public class SummarySubLedgerDTO implements Cloneable {
     
     private String jemsApplId = "BL";
     private String reportStartDate;
@@ -221,5 +221,10 @@ public class SummarySubLedgerDTO {
 
     public void setUpdateTimestamp(String updateTimestamp) {
         this.updateTimestamp = updateTimestamp;
+    }
+    
+    @Override
+    public SummarySubLedgerDTO clone() throws CloneNotSupportedException {
+        return (SummarySubLedgerDTO) super.clone();
     }
 }
