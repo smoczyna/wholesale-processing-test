@@ -85,7 +85,7 @@ public class CassandraQueryManagerTest {
 //        }
 //    }
 
-    //@Test (expected = NoResultsReturnedException.class)
+    @Test //(expected = NoResultsReturnedException.class)
     public void testGetFinancialEventCategoryRecord() throws Throwable {
         Integer TmpProdId = 18958;
         //String financialmarketid = "K34";
@@ -93,11 +93,12 @@ public class CassandraQueryManagerTest {
         String homesidequalsservingsidindicator = "Y";
         String alternatebookingindicator = "N";
         List<FinancialEventCategory> recordsActual = queryManager.getFinancialEventCategoryNoClusteringRecord(TmpProdId, homesidequalsservingsidindicator, alternatebookingindicator);
+        
         //List<FinancialEventCategory> recordsExpected = getFinancialEventCategoryLists();
         //Assert.assertEquals(recordsExpected, recordsActual);
     }
 
-    //@Test(expected = NoResultsReturnedException.class)
+    @Test(expected = NoResultsReturnedException.class)
     public void testGetDataEventRecords() throws Throwable {
         Integer productid = 1;
         List<DataEvent> dbResult = queryManager.getDataEventRecords(productid);
@@ -105,7 +106,7 @@ public class CassandraQueryManagerTest {
         // Assert.assertEquals(recordExpected, record);
     }
 
-    //@Test //(expected = NoResultsReturnedException.class)
+    @Test //(expected = NoResultsReturnedException.class)
     public void testgetProductRecords() throws Throwable {
         Integer productid = 19182;
         String homesidbid = "30332";

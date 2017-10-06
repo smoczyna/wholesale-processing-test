@@ -88,8 +88,9 @@ public class WholesaleReportProcessor<T> implements ItemProcessor<T, AggregateWh
         
         SummarySubLedgerDTO subLedgerOutput = this.tempSubLedgerOuput.addSubledger();
         
+        // this is pointless, no used ever after
         // second cassandra call goes here, it will check if product is wholesale product        
-        String wholesaleBillingCode = null; // this object comes from db as response 
+        //String wholesaleBillingCode = null; // this object comes from db as response 
         //if (wholesaleBillingCode != null) it is
         //else it is not
         // what is that for ??? It's never used anywhere after 
@@ -273,12 +274,7 @@ public class WholesaleReportProcessor<T> implements ItemProcessor<T, AggregateWh
         
         outRec.setBilledInd("Y");
         this.fileSource = "B";
-        
-//        if (billedRec.getFinancialMarket()==null) { 
-//            LOGGER.warn("Financial Market value missing, skipping record...");
-//            return null;
-//        }
-        
+ 
         if (billedRec.getAirProdId() > 0 && (billedRec.getWholesalePeakAirCharge() > 0 || billedRec.getWholesaleOffpeakAirCharge() > 0)) {
             outRec.setPeakDollarAmt(billedRec.getWholesalePeakAirCharge());
             outRec.setOffpeakDollarAmt(billedRec.getWholesaleOffpeakAirCharge());

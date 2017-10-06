@@ -32,9 +32,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  *
  * @author smorcja
  */
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@TestExecutionListeners({StepScopeTestExecutionListener.class})
-//@ContextConfiguration
+@RunWith(SpringJUnit4ClassRunner.class)
+@TestExecutionListeners({StepScopeTestExecutionListener.class})
+@ContextConfiguration
 public class WholesaleReportFixedLengthFileWriterTest {
     
     private WholesaleReportFixedLengthFileWriter writer;
@@ -45,10 +45,10 @@ public class WholesaleReportFixedLengthFileWriterTest {
         ClassLoader classLoader = getClass().getClassLoader();
         workingFoler = classLoader.getResource("./data").getPath();
         Logger.getLogger(WholesaleReportFixedLengthFileWriterTest.class.getName()).log(Level.INFO, "Write path: {0}", workingFoler);
-        //writer = new WholesaleReportFixedLengthFileWriter(workingFoler+"/fixed_length_report.csv");
+        writer = new WholesaleReportFixedLengthFileWriter(workingFoler+"/fixed_length_wholesale_report.txt");
     }
     
-    //@Test
+    @Test
     public void testWriter() throws Exception {
         List<AggregateWholesaleReportDTO> report = new LinkedList();
         AggregateWholesaleReportDTO record = new AggregateWholesaleReportDTO();
@@ -84,7 +84,7 @@ public class WholesaleReportFixedLengthFileWriterTest {
      * @throws IOException 
      */
     private void verifyWrittenFile() throws IOException {
-        File file = new File(workingFoler+"/fixed_length_report.csv");
+        File file = new File(workingFoler+"/fixed_length_wholesale_report.txt");
         assertNotNull(file.exists());
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();

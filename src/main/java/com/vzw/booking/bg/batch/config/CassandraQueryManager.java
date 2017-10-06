@@ -7,9 +7,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
@@ -44,66 +42,22 @@ import org.springframework.cache.annotation.Cacheable;
  * @author khanaas
  */
 @Configuration
-//@PropertySource("classpath:cassandra.properties")
 public class CassandraQueryManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraQueryManager.class);
     
-//    com.vzw.services.cassandra.FccCgsaMapEndDate=12/31/9999
-//    com.vzw.services.cassandra.FinancialMarketMapEndDate=12/31/9999
-//    com.vzw.services.cassandra.GLMarketLegalEntityEndDate=12/31/9999
-//    com.vzw.services.cassandra.GLMarketMapType=D
-//    com.vzw.services.cassandra.GLMarketEndDate=12/31/9999
-//    com.vzw.services.cassandra.AlternateBookingType=D
-//    com.vzw.services.cassandra.FinancialEventCategoryTable=financialeventcategory
-//    com.vzw.services.cassandra.FinancialMarketTable=financialmarket
-//    com.vzw.services.cassandra.ProductTable=product
-//    com.vzw.services.cassandra.DataEventTable=dataevent
-//    com.vzw.services.cassandra.WholesalePriceTable=wholesaleprice
-    
-    //@Value("${com.vzw.services.cassandra.FccCgsaMapEndDate}")
-    private String fcccgsamapenddate = "12/31/9999";
+    /**
+     * static variables used in below queries
+     */
+    private final String fcccgsamapenddate = "12/31/9999";
+    private final String financialmarketmapenddate = "12/31/9999";
+    private final String glmarketlegalentityenddate = "12/31/9999";
+    private final String glmarketmaptype = "D";
+    private final String glmarketenddate = "12/31/9999";
+    private final String alternatebookingtype = "D";
 
-    //@Value("${com.vzw.services.cassandra.FinancialMarketMapEndDate}")
-    private String financialmarketmapenddate = "12/31/9999";
-
-    //@Value("${com.vzw.services.cassandra.GLMarketLegalEntityEndDate}")
-    private String glmarketlegalentityenddate = "12/31/9999";
-
-    //@Value("${com.vzw.services.cassandra.GLMarketMapType}")
-    private String glmarketmaptype = "D";
-
-    //@Value("${com.vzw.services.cassandra.GLMarketEndDate}")
-    private String glmarketenddate = "12/31/9999";
-
-    //@Value("${com.vzw.services.cassandra.AlternateBookingType}")
-    private String alternatebookingtype = "D";
-
-//    @Value("${com.vzw.services.cassandra.FinancialEventCategoryTable}")
-//    private String financialEventCategoryTable;
-//
-//    @Value("${com.vzw.services.cassandra.FinancialMarketTable}")
-//    private String financialMarketTable;
-//
-//    @Value("${com.vzw.services.cassandra.ProductTable}")
-//    private String productTable;
-//
-//    @Value("${com.vzw.services.cassandra.DataEventTable}")
-//    private String dataEventTable;
-//
-//    @Value("${com.vzw.services.cassandra.WholesalePriceTable}")
-//    private String WholesalePriceTable;
-
-    static Logger logger = LoggerFactory.getLogger(CassandraQueryManager.class);
-
-    private Session cassandraSession;
-    
+    private Session cassandraSession;    
     private static final String CASSANDRA_KEYSPACE = "j6_dev";
-
-//    private final String finMarketQuery = "SELECT" + " *" + " FROM financialmarket"
-//                + " WHERE financialmarketid=? AND fcccgsamapenddate=? "
-//                + " AND financialmarketmapenddate=? AND glmarketlegalentityenddate=? AND glmarketmaptype=? "
-//                + " AND glmarketenddate=? ALLOW FILTERING";
     
     private static final String finMarketQuery = "SELECT * FROM financialmarket"
             + " WHERE financialmarketid=? AND financialmarketmapenddate=? AND glmarketlegalentityenddate=? "
@@ -138,7 +92,7 @@ public class CassandraQueryManager {
     }
     
     /**
-     * I had to add this to make calls
+     * Pre-ready session used across all queries
      *
      * @return
      */
@@ -175,14 +129,13 @@ public class CassandraQueryManager {
             LOGGER.error(e.getLocalizedMessage());
             throw new CassandraQueryException("Query Execution exception", e);
         }
-
         if (fms.isEmpty()) {
-            logger.info("Error message:" + ErrorEnum.NO_ROWS);
+            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS);
             throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
         }
         if (fms.size() >= 2) {
-            logger.info("Error message:" + ErrorEnum.MULTIPLE_ROWS);
-            logger.info("Rows returned:" + fms.toString());
+            LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS);
+            LOGGER.info("Rows returned:" + fms.toString());
             throw new MultipleRowsReturnedException(ErrorEnum.MULTIPLE_ROWS,
                     " rows returned: " + Integer.toString(fms.size()));
         }
@@ -218,7 +171,6 @@ public class CassandraQueryManager {
             LOGGER.error(e.getLocalizedMessage());
             throw new CassandraQueryException("Query Execution exception", e);
         }
-
         if (listoffep.size() == 1) {
             isWholesaleProduct = listoffep.get(0).getWholesalebillingcode().charAt(0);
         } else {
@@ -226,61 +178,6 @@ public class CassandraQueryManager {
         }
         return isWholesaleProduct;
     }
-
-    /**
-     * Returns list of FinancialEventCategory records
-     * <p>
-     * Cassandra Table Name=FinancialEventCategory
-     *
-     * @param session
-     * @param TmpProdId
-     * @param File2FinancialMarketId
-     * @param InterExchangeCarrierCode
-     * @param homesidequalsservingsidindicator
-     * @param alternatebookingindicator
-     * @return List<FinancialEventCategory>
-     * @throws CassandraQueryException
-     * @throws NoResultsReturnedException
-     * @throws MultipleRowsReturnedException
-     */    
-//    public List<FinancialEventCategory> getFinancialEventCategoryRecord(Session session, Integer TmpProdId,
-//            String File2FinancialMarketId, Integer InterExchangeCarrierCode, String homesidequalsservingsidindicator,
-//            String alternatebookingindicator)
-//            throws MultipleRowsReturnedException, NoResultsReturnedException, CassandraQueryException {
-//
-//        List<FinancialEventCategory> listoffec = new ArrayList<>();
-//        String cql_selectTest = "SELECT " + "*" + " FROM financialeventcategory"
-//                + " WHERE productid=? AND homesidequalsservingsidindicator=? AND alternatebookingindicator=? "
-//                + "  AND (financialmarketid, interexchangecarriercode) = (?, ?)  ALLOW FILTERING";
-//
-//        PreparedStatement preparedStatement = session.prepare(cql_selectTest);
-//        BoundStatement statement = new BoundStatement(preparedStatement);
-//        statement.bind(TmpProdId, homesidequalsservingsidindicator, alternatebookingindicator, File2FinancialMarketId,
-//                InterExchangeCarrierCode);
-//        try {
-//            Result<FinancialEventCategory> result = new FinancialEventCategoryCassandraMapper()
-//                    .executeAndMapResults(session, statement, new MappingManager(session), false);
-//            listoffec = result.all();
-//        } catch (NoHostAvailableException | QueryExecutionException | QueryValidationException | UnsupportedFeatureException e) {
-//            LOGGER.error(e.getLocalizedMessage());
-//            throw new CassandraQueryException("Casandra Query Exception", e);       
-//        } catch (NullPointerException | InterruptedException | ExecutionException e) {
-//            LOGGER.error(e.getLocalizedMessage());
-//            throw new CassandraQueryException("Query Execution exception", e);
-//        }
-//
-//        if (listoffec.isEmpty()) {
-//            logger.info("Error message:" + ErrorEnum.NO_ROWS);
-//            throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
-//        }
-//        if (listoffec.size() >= 2) {
-//            logger.info("Error message:" + ErrorEnum.MULTIPLE_ROWS);
-//            logger.info("Rows returned:" + listoffec.toString());
-//            throw new MultipleRowsReturnedException(ErrorEnum.MULTIPLE_ROWS,
-//                    " rows returned: " + Integer.toString(listoffec.size()));
-//        }
-//        return listoffec;
-//    }
 
     /**
      * Returns list of FinancialEventCategory records
@@ -315,15 +212,14 @@ public class CassandraQueryManager {
         } catch (NullPointerException | InterruptedException | ExecutionException e) {
             LOGGER.error(e.getLocalizedMessage());
             throw new CassandraQueryException("Query Execution exception", e);
-        }
-        
+        }        
         if (listoffec.isEmpty()) {
-            logger.info("Error message:" + ErrorEnum.NO_ROWS);
+            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS);
             throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
         }
         if (listoffec.size() > 1) {
-            logger.info("Error message:" + ErrorEnum.MULTIPLE_ROWS);
-            logger.info("Rows returned:" + listoffec.toString());
+            LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS);
+            LOGGER.info("Rows returned:" + listoffec.toString());
             throw new MultipleRowsReturnedException(ErrorEnum.MULTIPLE_ROWS,
                     " rows returned: " + Integer.toString(listoffec.size()));
         }
@@ -349,8 +245,7 @@ public class CassandraQueryManager {
         BoundStatement statement = new BoundStatement(this.dataEventStatement);
         statement.bind(productid);
         try {
-            Result<DataEvent> result = new DataEventCassandraMapper().executeAndMapResults(this.cassandraSession, statement,
-                    new MappingManager(this.cassandraSession), false);
+            Result<DataEvent> result = new DataEventCassandraMapper().executeAndMapResults(this.cassandraSession, statement, new MappingManager(this.cassandraSession), false);
             listofde = result.all();
         } catch (NoHostAvailableException | QueryExecutionException | QueryValidationException | UnsupportedFeatureException e) {
             LOGGER.error(e.getLocalizedMessage());
@@ -359,7 +254,6 @@ public class CassandraQueryManager {
             LOGGER.error(e.getLocalizedMessage());
             throw new CassandraQueryException("Query Execution exception", e);
         }
-
         if (listofde.isEmpty()) {
             throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
         }
@@ -397,12 +291,12 @@ public class CassandraQueryManager {
         }
 
         if (listofwp.isEmpty()) {
-            logger.info("Error message:" + ErrorEnum.NO_ROWS);
+            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS);
             throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
         }
         if (listofwp.size() >= 2) {
-            logger.info("Error message:" + ErrorEnum.MULTIPLE_ROWS);
-            logger.info("Rows returned:" + listofwp.toString());
+            LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS);
+            LOGGER.info("Rows returned:" + listofwp.toString());
             throw new MultipleRowsReturnedException(ErrorEnum.MULTIPLE_ROWS,
                     " rows returned: " + Integer.toString(listofwp.size()));
         }

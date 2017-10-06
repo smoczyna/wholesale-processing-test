@@ -6,7 +6,7 @@
 package com.vzw.booking.bg.batch.writers;
 
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
-import com.vzw.booking.bg.batch.utils.ProcessingUtils;
+import com.vzw.booking.bg.batch.utils.SubledgerFixedLengthFileReader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -15,12 +15,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.batch.test.StepScopeTestExecutionListener;
 import org.springframework.batch.test.StepScopeTestUtils;
@@ -32,9 +33,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  *
  * @author smorcja
  */
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@TestExecutionListeners({StepScopeTestExecutionListener.class})
-//@ContextConfiguration
+@RunWith(SpringJUnit4ClassRunner.class)
+@TestExecutionListeners({StepScopeTestExecutionListener.class})
+@ContextConfiguration
 public class SubledgerFixedLengthFielWriterTest {
     
     private SubledgerFixedLengthFileWriter writer;
@@ -45,18 +46,19 @@ public class SubledgerFixedLengthFielWriterTest {
         ClassLoader classLoader = getClass().getClassLoader();
         workingFoler = classLoader.getResource("./data").getPath();
         Logger.getLogger(SubledgerFixedLengthFielWriterTest.class.getName()).log(Level.INFO, "Write path: {0}", workingFoler);
-        //writer = new SubledgerFixedLengthFileWriter(workingFoler+"/fixed_length_report.csv");
+        writer = new SubledgerFixedLengthFileWriter(workingFoler+"/fixed_length_subledger_report.txt");
     }
     
-    //@Test
+    @Test
     public void testWriter() throws Exception {
         List<SummarySubLedgerDTO> list = new LinkedList();
         SummarySubLedgerDTO item = new SummarySubLedgerDTO();
         item.setFinancialCategory(123);
         item.setFinancialEventNumber(456789);
-        item.setFinancialmarketId("Dublin");
+        item.setFinancialmarketId("DUB");
         item.setSubledgerTotalCreditAmount(-1234.78);
         item.setSubledgerTotalDebitAmount(86654.89);
+        item.setUpdateUserId("WSBTest1"); // default value is too long !!!
         list.add(item);
         
         StepExecution execution = MetaDataInstanceFactory.createStepExecution();
@@ -73,13 +75,12 @@ public class SubledgerFixedLengthFielWriterTest {
         });
     }
     
-    private void verifyWrittenFile() throws IOException {
-        File file = new File(workingFoler+"/subledger_summary.csv");
+    private void verifyWrittenFile() throws IOException, Exception {
+        File file = new File(workingFoler+"/fixed_length_subledger_report.txt");
         assertNotNull(file.exists());
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
-        String delimiter = ProcessingUtils.decodeDelimiter(line);
-        String[] parsed = line.split(delimiter);
-        assertEquals(22, parsed.length);
+        assertTrue(line.length()==170);
+        // add above fields presence check 
     }
 }
