@@ -6,7 +6,7 @@
 package com.vzw.booking.bg.batch.processors;
 
 import com.vzw.booking.bg.batch.domain.BookDateCsvFileDTO;
-import com.vzw.booking.bg.batch.domain.FinancialEventOffset;
+import com.vzw.booking.bg.batch.domain.FinancialEventOffsetDTO;
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,7 +74,7 @@ public class SubLedgerProcessor {
 //        this.financialEventOffset = financialEventOffset;
 //    }
 
-    public boolean addOffset(FinancialEventOffset offset) {
+    public boolean addOffset(FinancialEventOffsetDTO offset) {
         this.financialEventOffset.put(offset.getFinancialEvent(), offset.getOffsetFinancialCategory());
         return true;
     }

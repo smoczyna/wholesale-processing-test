@@ -66,7 +66,7 @@ public class CassandraQueryManager {
     private final String productQuery = "SELECT * FROM product WHERE productid=?" + " ALLOW FILTERING";
     
     private final String finEventCatQuery = "SELECT * FROM financialeventcategory "
-            + "WHERE productid=? AND homesidequalsservingsidindicator=? AND alternatebookingindicator=? ALLOW FILTERING";
+            + "WHERE productid=? AND homesidequalsservingsidindicator=? AND alternatebookingindicator=? AND interexchangecarriercode=? ALLOW FILTERING";
 
     private final String dataEventQuery = "SELECT *  FROM dataevent WHERE productid=? ALLOW FILTERING";
     
@@ -130,12 +130,14 @@ public class CassandraQueryManager {
             throw new CassandraQueryException("Query Execution exception", e);
         }
         if (fms.isEmpty()) {
-            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS);
+            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS+"Table: FinancialMarket, Input params[" 
+                    + financialmarketid+","+financialmarketmapenddate+","+glmarketlegalentityenddate+","+glmarketmaptype+","+glmarketenddate+"]");
             throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
         }
         if (fms.size() >= 2) {
-            LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS);
-            LOGGER.info("Rows returned:" + fms.toString());
+            LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS+"Table: FinancialMarket, Input params[" 
+                    + financialmarketid+","+financialmarketmapenddate+","+glmarketlegalentityenddate+","+glmarketmaptype+","+glmarketenddate+"]");
+            LOGGER.info("Number of rows returned:" + Integer.toString(fms.size()));
             throw new MultipleRowsReturnedException(ErrorEnum.MULTIPLE_ROWS,
                     " rows returned: " + Integer.toString(fms.size()));
         }
@@ -197,12 +199,12 @@ public class CassandraQueryManager {
      */
     @Cacheable("FinancialEventCategory")
     public List<FinancialEventCategory> getFinancialEventCategoryNoClusteringRecord(Integer TmpProdId, 
-            String homesidequalsservingsidindicator, String alternatebookingindicator)
+            String homesidequalsservingsidindicator, String alternatebookingindicator, int interExchangeCarrierCode)
             throws MultipleRowsReturnedException, NoResultsReturnedException, CassandraQueryException {
         
         List<FinancialEventCategory> listoffec = new ArrayList<>();        
         BoundStatement statement = new BoundStatement(this.finEventCatStatement);
-        statement.bind(TmpProdId, homesidequalsservingsidindicator, alternatebookingindicator);
+        statement.bind(TmpProdId, homesidequalsservingsidindicator, alternatebookingindicator, interExchangeCarrierCode);
         try {
             Result<FinancialEventCategory> result = new FinancialEventCategoryCassandraMapper().executeAndMapResults(this.cassandraSession, statement, new MappingManager(this.cassandraSession), false);
             listoffec = result.all();
@@ -214,12 +216,14 @@ public class CassandraQueryManager {
             throw new CassandraQueryException("Query Execution exception", e);
         }        
         if (listoffec.isEmpty()) {
-            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS);
+            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS+"Table: FinancialEventCategory, Input params[" 
+                    + TmpProdId+","+homesidequalsservingsidindicator+","+alternatebookingindicator+","+interExchangeCarrierCode+"]");
             throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
         }
         if (listoffec.size() > 1) {
-            LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS);
-            LOGGER.info("Rows returned:" + listoffec.toString());
+            LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS+"Table: FinancialEventCategory, Input params[" 
+                    + TmpProdId+","+homesidequalsservingsidindicator+","+alternatebookingindicator+","+interExchangeCarrierCode+"]");
+            LOGGER.info("Number of rows returned:" + Integer.toString(listoffec.size()));
             throw new MultipleRowsReturnedException(ErrorEnum.MULTIPLE_ROWS,
                     " rows returned: " + Integer.toString(listoffec.size()));
         }
@@ -255,6 +259,7 @@ public class CassandraQueryManager {
             throw new CassandraQueryException("Query Execution exception", e);
         }
         if (listofde.isEmpty()) {
+            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS+"Table: FinancialEventCategory, Input params[" +productid+"]");
             throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
         }
         return listofde;
@@ -291,12 +296,12 @@ public class CassandraQueryManager {
         }
 
         if (listofwp.isEmpty()) {
-            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS);
+            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS+"Table: FinancialEventCategory, Input params[" +productid+","+homesidbid+",00000]");
             throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
         }
         if (listofwp.size() >= 2) {
-            LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS);
-            LOGGER.info("Rows returned:" + listofwp.toString());
+            LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS+"Table: FinancialEventCategory, Input params["+productid+","+homesidbid+",00000]");
+            LOGGER.info("Number of rows returned:" + Integer.toString(listofwp.size()));
             throw new MultipleRowsReturnedException(ErrorEnum.MULTIPLE_ROWS,
                     " rows returned: " + Integer.toString(listofwp.size()));
         }

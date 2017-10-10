@@ -9,7 +9,7 @@ package com.vzw.booking.bg.batch.domain;
  *
  * @author smorcja
  */
-public class FinancialEventOffset {
+public class FinancialEventOffsetDTO {
     private Integer financialEvent;
     private Integer offsetFinancialCategory;
 

@@ -11,7 +11,7 @@ import com.vzw.booking.bg.batch.domain.AdminFeeCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import com.vzw.booking.bg.batch.domain.BilledCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.BookDateCsvFileDTO;
-import com.vzw.booking.bg.batch.domain.FinancialEventOffset;
+import com.vzw.booking.bg.batch.domain.FinancialEventOffsetDTO;
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
 import com.vzw.booking.bg.batch.domain.UnbilledCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.casandra.DataEvent;
@@ -59,7 +59,7 @@ public class WholesaleReportProcessorTest {
        // when(tempSubLedgerOuput.getFinancialEventOffset()).thenReturn(this.createFinancialEventOffset());
         
         when(wholesaleBookingProcessor.getFinancialMarketFromDb(anyString())).thenReturn(this.createFinancialMarket());
-        when(wholesaleBookingProcessor.getEventCategoryFromDb(anyInt(), anyString(), anyBoolean())).thenReturn(this.createEventCategory(true));
+        when(wholesaleBookingProcessor.getEventCategoryFromDb(anyInt(), anyString(), anyBoolean(), anyInt())).thenReturn(this.createEventCategory(true));
         when(wholesaleBookingProcessor.getDataEventFromDb(anyInt())).thenReturn(this.createDataEvent(true));
         when(wholesaleBookingProcessor.getWholesalePriceFromDb(anyInt(), anyString())).thenReturn(this.createWholesalePrice());
     }
@@ -120,9 +120,9 @@ public class WholesaleReportProcessorTest {
         return record;
     }
     
-    private Set<FinancialEventOffset> createFinancialEventOffset() {
-        Set<FinancialEventOffset> items = new HashSet();
-        FinancialEventOffset offset = new FinancialEventOffset();
+    private Set<FinancialEventOffsetDTO> createFinancialEventOffset() {
+        Set<FinancialEventOffsetDTO> items = new HashSet();
+        FinancialEventOffsetDTO offset = new FinancialEventOffsetDTO();
         offset.setFinancialEvent(1);
         offset.setOffsetFinancialCategory(2);
         items.add(offset);

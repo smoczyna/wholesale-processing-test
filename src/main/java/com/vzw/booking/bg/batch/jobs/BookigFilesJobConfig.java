@@ -10,7 +10,7 @@ import com.vzw.booking.bg.batch.domain.AdminFeeCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import com.vzw.booking.bg.batch.domain.BilledCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.BookDateCsvFileDTO;
-import com.vzw.booking.bg.batch.domain.FinancialEventOffset;
+import com.vzw.booking.bg.batch.domain.FinancialEventOffsetDTO;
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
 import com.vzw.booking.bg.batch.domain.UnbilledCsvFileDTO;
 import com.vzw.booking.bg.batch.listeners.BookingAggregateJobListener;
@@ -22,7 +22,7 @@ import com.vzw.booking.bg.batch.processors.WholesaleReportProcessor;
 import com.vzw.booking.bg.batch.readers.AdminFeesBookingFileReader;
 import com.vzw.booking.bg.batch.readers.BilledBookingFileReader;
 import com.vzw.booking.bg.batch.readers.BookDateCsvFileReader;
-import com.vzw.booking.bg.batch.readers.FinancialEventOffsetRader;
+import com.vzw.booking.bg.batch.readers.FinancialEventOffsetReader;
 import com.vzw.booking.bg.batch.readers.UnbilledBookingFileReader;
 import com.vzw.booking.bg.batch.validation.CsvFileVerificationSkipper;
 import com.vzw.booking.bg.batch.writers.AggregatedSubLedgerWriter;
@@ -84,8 +84,8 @@ public class BookigFilesJobConfig {
     }
 
     @Bean
-    ItemReader<FinancialEventOffset> financialEventOffsetReader(Environment environment) {
-        return new FinancialEventOffsetRader(environment, Constants.FINANCIAL_EVENT_OFFSET_FILENAME);
+    ItemReader<FinancialEventOffsetDTO> financialEventOffsetReader(Environment environment) {
+        return new FinancialEventOffsetReader(environment, Constants.FINANCIAL_EVENT_OFFSET_FILENAME);
     }
     
     @Bean
@@ -117,7 +117,7 @@ public class BookigFilesJobConfig {
     }
     
     @Bean
-    ItemProcessor<FinancialEventOffset, Boolean> financialEventOffsetProcessor() {
+    ItemProcessor<FinancialEventOffsetDTO, Boolean> financialEventOffsetProcessor() {
         return new FinancialEventOffsetProcessor();
     }
 
@@ -177,11 +177,11 @@ public class BookigFilesJobConfig {
     }
 
     @Bean
-    Step readOffsetDataStep(ItemReader<FinancialEventOffset> financialEventOffsetReader,
-                            ItemProcessor<FinancialEventOffset, Boolean> financialEventOffsetProcessor,
+    Step readOffsetDataStep(ItemReader<FinancialEventOffsetDTO> financialEventOffsetReader,
+                            ItemProcessor<FinancialEventOffsetDTO, Boolean> financialEventOffsetProcessor,
                             StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("readOffsetDataStep")
-                .<FinancialEventOffset, Boolean>chunk(1)
+                .<FinancialEventOffsetDTO, Boolean>chunk(1)
                 .reader(financialEventOffsetReader)
                 .processor(financialEventOffsetProcessor)
                 .build();

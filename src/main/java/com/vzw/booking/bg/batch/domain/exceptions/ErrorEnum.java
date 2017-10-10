@@ -2,10 +2,10 @@ package com.vzw.booking.bg.batch.domain.exceptions;
 
 public enum ErrorEnum {
 	
-	SINGLE_ROW(0, "This query returned single row."), 
-	NO_ROWS(1, "This query returned no rows."), 
-	MULTIPLE_ROWS(2, "This query returned multiple rows."), 
-	DATABASE_ERROR(3, "A database error has occured.");
+	SINGLE_ROW(0, "Query returned single row."), 
+	NO_ROWS(1, "Query returned no rows."), 
+	MULTIPLE_ROWS(2, "Query returned multiple rows."), 
+	DATABASE_ERROR(3, "A database error occured.");
 
 	private final int code;
 	private final String description;
