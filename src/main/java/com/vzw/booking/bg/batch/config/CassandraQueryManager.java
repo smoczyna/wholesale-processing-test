@@ -44,11 +44,27 @@ import org.springframework.cache.annotation.Cacheable;
 @Configuration
 public class CassandraQueryManager {
 
+//    @Autowired
+//    Environment environment;
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraQueryManager.class);
     
     /**
-     * static variables used in below queries
+     * due to autowire issue getting properties also fail
      */
+    
+//    @Value("${cassandra.db.ip}") //=170.127.114.154
+//    private String host;
+//    
+//    @Value("${cassandra.db.keyspace}") //=j6_dev
+//    private String keyspace;
+//    
+//    @Value("${cassandra.db.username}") //=j6_dev_user
+//    private String username;
+//    
+//    @Value("${cassandra.db.password}") //=Ireland
+//    private String password;
+    
     private final String fcccgsamapenddate = "12/31/9999";
     private final String financialmarketmapenddate = "12/31/9999";
     private final String glmarketlegalentityenddate = "12/31/9999";
@@ -82,6 +98,8 @@ public class CassandraQueryManager {
     public void init() {
         AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
         Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
+//        AuthProvider authProvider = new PlainTextAuthProvider(username, password);
+//        Cluster cluster = Cluster.builder().addContactPoint(host).withAuthProvider(authProvider).build();
         this.cassandraSession = cluster.connect(CASSANDRA_KEYSPACE);
         
         this.finMarketStatement = this.cassandraSession.prepare(finMarketQuery);
@@ -259,7 +277,7 @@ public class CassandraQueryManager {
             throw new CassandraQueryException("Query Execution exception", e);
         }
         if (listofde.isEmpty()) {
-            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS+"Table: FinancialEventCategory, Input params[" +productid+"]");
+            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS+"Table: DataEvent, Input params[" +productid+"]");
             throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
         }
         return listofde;
@@ -296,11 +314,11 @@ public class CassandraQueryManager {
         }
 
         if (listofwp.isEmpty()) {
-            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS+"Table: FinancialEventCategory, Input params[" +productid+","+homesidbid+",00000]");
+            LOGGER.info("Error message:" + ErrorEnum.NO_ROWS+"Table: WholesalePrice, Input params[" +productid+","+homesidbid+",00000]");
             throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
         }
         if (listofwp.size() >= 2) {
-            LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS+"Table: FinancialEventCategory, Input params["+productid+","+homesidbid+",00000]");
+            LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS+"Table: WholesalePrice, Input params["+productid+","+homesidbid+",00000]");
             LOGGER.info("Number of rows returned:" + Integer.toString(listofwp.size()));
             throw new MultipleRowsReturnedException(ErrorEnum.MULTIPLE_ROWS,
                     " rows returned: " + Integer.toString(listofwp.size()));
