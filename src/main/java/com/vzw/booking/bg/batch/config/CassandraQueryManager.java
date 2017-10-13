@@ -247,12 +247,12 @@ public class CassandraQueryManager {
         }        
         if (listoffec.isEmpty()) {
             LOGGER.info("Error message:" + ErrorEnum.NO_ROWS+"Table: FinancialEventCategory, Input params[" 
-                    + TmpProdId+","+homesidequalsservingsidindicator+","+alternatebookingindicator+","+interExchangeCarrierCode+"]");
+                    + TmpProdId+","+homesidequalsservingsidindicator+","+alternatebookingindicator+","+interExchangeCarrierCode+","+financialeventnormalsign+"]");
             throw new NoResultsReturnedException(ErrorEnum.NO_ROWS);
         }
         if (listoffec.size() > 1) {
             LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS+"Table: FinancialEventCategory, Input params[" 
-                    + TmpProdId+","+homesidequalsservingsidindicator+","+alternatebookingindicator+","+interExchangeCarrierCode+"]");
+                    + TmpProdId+","+homesidequalsservingsidindicator+","+alternatebookingindicator+","+interExchangeCarrierCode+","+financialeventnormalsign+"]");
             LOGGER.info("Number of rows returned:" + Integer.toString(listoffec.size()));
             throw new MultipleRowsReturnedException(ErrorEnum.MULTIPLE_ROWS, " rows returned: " + Integer.toString(listoffec.size()));
         }
