@@ -9,11 +9,13 @@ import com.vzw.booking.bg.batch.constants.Constants;
 import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author smorcja
  */
+@Component
 public class WholesaleReportCsvWriter extends CsvFileGenericWriter<AggregateWholesaleReportDTO> {
     
     private static final String[] COLUMN_NAMES = new String[] {

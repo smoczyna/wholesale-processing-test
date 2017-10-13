@@ -6,7 +6,9 @@
  */
 package com.vzw.booking.bg.batch.processors;
 
+import com.vzw.booking.bg.batch.utils.WholesaleBookingProcessorHelper;
 import com.vzw.booking.bg.batch.config.CassandraQueryManager;
+import com.vzw.booking.bg.batch.domain.WholesaleProcessingOutput;
 import com.vzw.booking.bg.batch.domain.AdminFeeCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import com.vzw.booking.bg.batch.domain.BilledCsvFileDTO;
@@ -40,13 +42,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class WholesaleReportProcessorTest {
 
     @Mock
-    private SubLedgerProcessor tempSubLedgerOuput;
+    private WholesaleBookingProcessorHelper processHelper;
 
     @Mock
     private CassandraQueryManager queryManager;
       
     @Mock //@InjectMocks
-    private WholesaleReportProcessor wholesaleBookingProcessor; // = new WholesaleReportProcessor();
+    private WholesaleBookingProcessor wholesaleBookingProcessor;
     
     
     @Before
@@ -54,9 +56,10 @@ public class WholesaleReportProcessorTest {
         MockitoAnnotations.initMocks(this);
         //when(CassandraQueryManager.getCassandraSession()).thenCallRealMethod();
         
-        when(tempSubLedgerOuput.addSubledger()).thenReturn(new SummarySubLedgerDTO());
-        when(tempSubLedgerOuput.getDates()).thenReturn(this.createBookDateRecord());
-       // when(tempSubLedgerOuput.getFinancialEventOffset()).thenReturn(this.createFinancialEventOffset());
+        when(processHelper.addWholesaleReport()).thenReturn(new AggregateWholesaleReportDTO());
+        when(processHelper.addSubledger()).thenReturn(new SummarySubLedgerDTO());
+        when(processHelper.getDates()).thenReturn(this.createBookDateRecord());
+        //when(processHelper.getFinancialEventOffset()).thenReturn(this.createFinancialEventOffset());
         
         when(wholesaleBookingProcessor.getFinancialMarketFromDb(anyString())).thenReturn(this.createFinancialMarket());
         when(wholesaleBookingProcessor.getEventCategoryFromDb(anyInt(), anyString(), anyBoolean(), anyBoolean(), anyInt())).thenReturn(this.createEventCategory(true));
@@ -188,7 +191,7 @@ public class WholesaleReportProcessorTest {
     @Test
     public void testBilledBookingProcess() throws Exception {
         BilledCsvFileDTO billedBookingRecord = createBilledBookingsInputRecord();
-        AggregateWholesaleReportDTO result = wholesaleBookingProcessor.process(billedBookingRecord);
+        WholesaleProcessingOutput result = wholesaleBookingProcessor.process(billedBookingRecord);
         //verify(tempSubLedgerOuput, times(1)).addSubledger();
         assertNull(result);
         //assertTrue(tempSubLedgerOuput.getAggregatedOutput().size()>0);
@@ -197,7 +200,7 @@ public class WholesaleReportProcessorTest {
     @Test
     public void testUnbilledBookingProcess() throws Exception {
         UnbilledCsvFileDTO unbilledBookingRecord = createUnbilledBookingsInputRecord();
-        AggregateWholesaleReportDTO result = wholesaleBookingProcessor.process(unbilledBookingRecord);
+        WholesaleProcessingOutput result = wholesaleBookingProcessor.process(unbilledBookingRecord);
         //verify(tempSubLedgerOuput, times(1)).addSubledger();
         assertNull(result);
     }
@@ -205,7 +208,7 @@ public class WholesaleReportProcessorTest {
     @Test
     public void testAdmiFeesBookingProcess() throws Exception {
         AdminFeeCsvFileDTO adminFeesBookingRecord = createAdminFeesBookingInputRecord();
-        AggregateWholesaleReportDTO result = wholesaleBookingProcessor.process(adminFeesBookingRecord);
+        WholesaleProcessingOutput result = wholesaleBookingProcessor.process(adminFeesBookingRecord);
         //verify(tempSubLedgerOuput, times(1)).addSubledger();
         assertNull(result);
     }
