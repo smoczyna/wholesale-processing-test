@@ -42,7 +42,8 @@ public class BilledBookingFileReader extends CsvFileGenericReader<BilledCsvFileD
             "deviceType",
             "airBillSeconds",
             "tollBillSeconds",
-            "wholesaleUsageBytes"};
+            "wholesaleUsageBytes",
+            "debitcreditindicator"};
     
     @Autowired
     public BilledBookingFileReader(Environment environment, String filename) {

@@ -87,13 +87,14 @@ public class CassandraQueryManagerTest {
 
     @Test //(expected = NoResultsReturnedException.class)
     public void testGetFinancialEventCategoryRecord() throws Throwable {
-        Integer TmpProdId = 18958;
+        int TmpProdId = 18958;
         //String financialmarketid = "K34";
-        Integer InterExchangeCarrierCode = 0;
+        int interExchangeCarrierCode = 0;
         String homesidequalsservingsidindicator = "Y";
         String alternatebookingindicator = "N";
         String financialeventnormalsign = "DR"; 
-        List<FinancialEventCategory> recordsActual = queryManager.getFinancialEventCategoryNoClusteringRecord(TmpProdId, homesidequalsservingsidindicator, financialeventnormalsign, alternatebookingindicator, InterExchangeCarrierCode);
+        List<FinancialEventCategory> recordsActual = queryManager.getFinancialEventCategoryNoClusteringRecord(TmpProdId, 
+                homesidequalsservingsidindicator, alternatebookingindicator, interExchangeCarrierCode, financialeventnormalsign);
         
         //List<FinancialEventCategory> recordsExpected = getFinancialEventCategoryLists();
         //Assert.assertEquals(recordsExpected, recordsActual);

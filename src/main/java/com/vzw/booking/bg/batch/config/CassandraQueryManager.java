@@ -82,7 +82,11 @@ public class CassandraQueryManager {
     private final String productQuery = "SELECT * FROM product WHERE productid=?" + " ALLOW FILTERING";
     
     private final String finEventCatQuery = "SELECT * FROM financialeventcategory "
-            + "WHERE productid=? AND homesidequalsservingsidindicator=? AND financialeventnormalsign=? AND alternatebookingindicator=? AND interexchangecarriercode=? ALLOW FILTERING";
+            + "WHERE productid=? AND homesidequalsservingsidindicator=? AND alternatebookingindicator=? AND interexchangecarriercode=? ALLOW FILTERING";
+
+    private final String finEventCatQueryBilled = "SELECT * FROM financialeventcategory "
+            + "WHERE productid=? AND homesidequalsservingsidindicator=? AND financialeventnormalsign=? "
+            + "AND alternatebookingindicator=? AND interexchangecarriercode=? ALLOW FILTERING";
 
     private final String dataEventQuery = "SELECT *  FROM dataevent WHERE productid=? ALLOW FILTERING";
     
@@ -91,6 +95,7 @@ public class CassandraQueryManager {
     private PreparedStatement finMarketStatement;
     private PreparedStatement productStatement;
     private PreparedStatement finEventCatStatement;
+    private PreparedStatement finEventCatStatementBilled;
     private PreparedStatement dataEventStatement;
     private PreparedStatement wholesalePriceStatement;
     
@@ -105,6 +110,7 @@ public class CassandraQueryManager {
         this.finMarketStatement = this.cassandraSession.prepare(finMarketQuery);
         this.productStatement = this.cassandraSession.prepare(productQuery);
         this.finEventCatStatement = this.cassandraSession.prepare(finEventCatQuery);
+        this.finEventCatStatementBilled = this.cassandraSession.prepare(finEventCatQueryBilled);
         this.dataEventStatement = this.cassandraSession.prepare(dataEventQuery);
         this.wholesalePriceStatement = this.cassandraSession.prepare(wholesalePriceQuery);
     }
@@ -217,12 +223,18 @@ public class CassandraQueryManager {
      */
     @Cacheable("FinancialEventCategory")
     public List<FinancialEventCategory> getFinancialEventCategoryNoClusteringRecord(Integer TmpProdId, 
-            String homesidequalsservingsidindicator, String financialeventnormalsign, String alternatebookingindicator, int interExchangeCarrierCode)
+            String homesidequalsservingsidindicator, String alternatebookingindicator, int interExchangeCarrierCode, String financialeventnormalsign)
             throws MultipleRowsReturnedException, NoResultsReturnedException, CassandraQueryException {
         
-        List<FinancialEventCategory> listoffec = new ArrayList<>();        
-        BoundStatement statement = new BoundStatement(this.finEventCatStatement);
-        statement.bind(TmpProdId, homesidequalsservingsidindicator, financialeventnormalsign, alternatebookingindicator, interExchangeCarrierCode);
+        List<FinancialEventCategory> listoffec = new ArrayList<>();   
+        BoundStatement statement;
+        if (financialeventnormalsign==null) {
+            statement = new BoundStatement(this.finEventCatStatement);
+            statement.bind(TmpProdId, homesidequalsservingsidindicator, alternatebookingindicator, interExchangeCarrierCode);        
+        } else {
+            statement = new BoundStatement(this.finEventCatStatementBilled);
+            statement.bind(TmpProdId, homesidequalsservingsidindicator, financialeventnormalsign, alternatebookingindicator, interExchangeCarrierCode);
+        }
         try {
             Result<FinancialEventCategory> result = new FinancialEventCategoryCassandraMapper().executeAndMapResults(this.cassandraSession, statement, new MappingManager(this.cassandraSession), false);
             listoffec = result.all();

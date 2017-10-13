@@ -24,13 +24,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class WholesaleBookingProcessorHelper {
 
-//    public static final String ZERO_CHARGES = "zero";
-//    public static final String GAPS ="gaps";
-//    public static final String DATA_ERRORS;
-//    public static final String BYPASS;
-//    public static final String SUBLEDGER;
-//    public static final String WHOLESALES_REPORT;
-    
     private BookDateCsvFileDTO dates;
     private final Map<Integer, Integer> financialEventOffset;
     private long zeroChargesCounter;
@@ -61,11 +54,11 @@ public class WholesaleBookingProcessorHelper {
     }
 
     public long getMaxSkippedRecords() {
-        return this.maxSkippedRecords==0 ? Constants.MAX_SKIPPED_RECORDS : this.maxSkippedRecords;
+        return this.maxSkippedRecords==0 ? Constants.DEFAULT_MAX_SKIPPED_RECORDS : this.maxSkippedRecords;
     }
 
     public void setMaxSkippedRecords(long maxSkippedRecords) {
-        this.maxSkippedRecords = maxSkippedRecords>0 ? maxSkippedRecords : Constants.MAX_SKIPPED_RECORDS;
+        this.maxSkippedRecords = maxSkippedRecords>0 ? maxSkippedRecords : Constants.DEFAULT_MAX_SKIPPED_RECORDS;
     }
 
     public boolean addOffset(FinancialEventOffsetDTO offset) {
@@ -95,22 +88,22 @@ public class WholesaleBookingProcessorHelper {
     
     public void incrementCounter(String name) {
         switch (name) {
-            case "zero":
+            case Constants.ZERO_CHARGES:
                 this.zeroChargesCounter++;
                 break;
-            case "gap":
+            case Constants.GAPS:
                 this.gapsCounter++;
                 break;
-            case "error":
+            case Constants.DATA_ERRORS:
                 this.dataErrorsCounter++;
                 break;
-            case "bypass":
+            case Constants.BYPASS:
                 this.bypassCounter++;
                 break;
-            case "subledger":
+            case Constants.SUBLEDGER:
                 this.subledgerWriteCounter++;
                 break;
-            case "report":
+            case Constants.WHOLESALES_REPORT:
                 this.wholesaleReportCounter++;
                 break;
             default:
@@ -120,17 +113,17 @@ public class WholesaleBookingProcessorHelper {
 
     public long getCounter(String name) {
         switch (name) {
-            case "zero":
+            case Constants.ZERO_CHARGES:
                 return this.zeroChargesCounter;
-            case "gap":
+            case Constants.GAPS:
                 return this.gapsCounter;
-            case "error":
+            case Constants.DATA_ERRORS:
                 return this.dataErrorsCounter;
-            case "bypass":
+            case Constants.BYPASS:
                 return this.bypassCounter;
-            case "subledger":
+            case Constants.SUBLEDGER:
                 return this.subledgerWriteCounter;
-            case "report":
+            case Constants.WHOLESALES_REPORT:
                 return this.wholesaleReportCounter;
             default:
                 return -1;

@@ -6,9 +6,9 @@
  */
 package com.vzw.booking.bg.batch.processors;
 
+import com.vzw.booking.bg.batch.domain.WholesaleProcessingOutput;
 import com.vzw.booking.bg.batch.utils.WholesaleBookingProcessorHelper;
 import com.vzw.booking.bg.batch.config.CassandraQueryManager;
-import com.vzw.booking.bg.batch.domain.WholesaleProcessingOutput;
 import com.vzw.booking.bg.batch.domain.AdminFeeCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import com.vzw.booking.bg.batch.domain.BilledCsvFileDTO;
@@ -62,7 +62,7 @@ public class WholesaleReportProcessorTest {
         //when(processHelper.getFinancialEventOffset()).thenReturn(this.createFinancialEventOffset());
         
         when(wholesaleBookingProcessor.getFinancialMarketFromDb(anyString())).thenReturn(this.createFinancialMarket());
-        when(wholesaleBookingProcessor.getEventCategoryFromDb(anyInt(), anyString(), anyBoolean(), anyBoolean(), anyInt())).thenReturn(this.createEventCategory(true));
+        when(wholesaleBookingProcessor.getEventCategoryFromDb(anyInt(), anyString(), anyBoolean(), anyInt(), anyString())).thenReturn(this.createEventCategory(true));
         when(wholesaleBookingProcessor.getDataEventFromDb(anyInt())).thenReturn(this.createDataEvent(true));
         when(wholesaleBookingProcessor.getWholesalePriceFromDb(anyInt(), anyString())).thenReturn(this.createWholesalePrice());
     }
@@ -105,6 +105,7 @@ public class WholesaleReportProcessorTest {
         record.setWholesaleTollChargeLDOther(345.65d);
         record.setWholesaleTollChargeLDPeak(765.34d);
         record.setWholesaleUsageBytes(34567l);
+        record.setDebitcreditindicator("DR");
         return record;
     }
     
@@ -164,7 +165,8 @@ public class WholesaleReportProcessorTest {
         financialEventCategory.setFinancialeventnumber(4756);
         financialEventCategory.setFinancialcategory(678);
         financialEventCategory.setFinancialmarketid("FM1");
-        financialEventCategory.setAlternatebookingindicator("Z");        
+        financialEventCategory.setAlternatebookingindicator("Z");  
+        financialEventCategory.setDebitcreditindicator("DB");
         return financialEventCategory;
     } 
     
