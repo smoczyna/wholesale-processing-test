@@ -43,7 +43,7 @@ public class Constants {
     public static final String CREDIT_CODE = "CR";
     
     public static final String ZERO_CHARGES = "zero";
-    public static final String GAPS ="gaps";
+    public static final String GAPS ="gap";
     public static final String DATA_ERRORS = "error";
     public static final String BYPASS = "bypass";
     public static final String SUBLEDGER = "subledger";
