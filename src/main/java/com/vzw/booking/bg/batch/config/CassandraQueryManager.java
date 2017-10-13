@@ -242,8 +242,7 @@ public class CassandraQueryManager {
             LOGGER.info("Error message:" + ErrorEnum.MULTIPLE_ROWS+"Table: FinancialEventCategory, Input params[" 
                     + TmpProdId+","+homesidequalsservingsidindicator+","+alternatebookingindicator+","+interExchangeCarrierCode+"]");
             LOGGER.info("Number of rows returned:" + Integer.toString(listoffec.size()));
-            throw new MultipleRowsReturnedException(ErrorEnum.MULTIPLE_ROWS,
-                    " rows returned: " + Integer.toString(listoffec.size()));
+            throw new MultipleRowsReturnedException(ErrorEnum.MULTIPLE_ROWS, " rows returned: " + Integer.toString(listoffec.size()));
         }
         return listoffec;
     }

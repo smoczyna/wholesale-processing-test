@@ -5,6 +5,7 @@
  */
 package com.vzw.booking.bg.batch.processors;
 
+import com.vzw.booking.bg.batch.utils.WholesaleBookingProcessorHelper;
 import com.vzw.booking.bg.batch.domain.FinancialEventOffsetDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,7 @@ public class FinancialEventOffsetProcessor implements ItemProcessor<FinancialEve
     private static final Logger LOGGER = LoggerFactory.getLogger(FinancialEventOffsetProcessor.class);
     
     @Autowired
-    SubLedgerProcessor tempSubLedgerOuput;
+    WholesaleBookingProcessorHelper tempSubLedgerOuput;
     
     @Override
     public Boolean process(FinancialEventOffsetDTO offset) throws Exception {

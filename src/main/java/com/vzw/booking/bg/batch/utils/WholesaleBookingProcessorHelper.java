@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.vzw.booking.bg.batch.processors;
+package com.vzw.booking.bg.batch.utils;
 
+import com.vzw.booking.bg.batch.constants.Constants;
 import com.vzw.booking.bg.batch.domain.BookDateCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.FinancialEventOffsetDTO;
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
+import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,54 +22,34 @@ import org.springframework.stereotype.Component;
  * @author smorcja
  */
 @Component
-public class SubLedgerProcessor {
+public class WholesaleBookingProcessorHelper {
 
-    private Set<SummarySubLedgerDTO> aggregatedOutput;
+//    public static final String ZERO_CHARGES = "zero";
+//    public static final String GAPS ="gaps";
+//    public static final String DATA_ERRORS;
+//    public static final String BYPASS;
+//    public static final String SUBLEDGER;
+//    public static final String WHOLESALES_REPORT;
+    
     private BookDateCsvFileDTO dates;
     private final Map<Integer, Integer> financialEventOffset;
-    private int zeroChargesCounter;
-    private int gapsCounter;
-    private int dataErrorsCounter;
-    private int bypassCounter;
-    private int subledgerWriteCounter;
+    private long zeroChargesCounter;
+    private long gapsCounter;
+    private long dataErrorsCounter;
+    private long bypassCounter;
+    private long subledgerWriteCounter;
+    private long wholesaleReportCounter;
+    private long maxSkippedRecords;
 
-    public SubLedgerProcessor() {
-        this.aggregatedOutput = new HashSet();
+    public WholesaleBookingProcessorHelper() {
         this.financialEventOffset = new HashMap();
         this.zeroChargesCounter = 0;
         this.gapsCounter = 0;
         this.dataErrorsCounter = 0;
         this.bypassCounter = 0;
         this.subledgerWriteCounter = 0;
-    }
-
-    public Set<SummarySubLedgerDTO> getAggregatedOutput() {
-        return aggregatedOutput;
-    }
-
-    public void setAggregatedOutput(Set<SummarySubLedgerDTO> aggregatedOutput) {
-        this.aggregatedOutput = aggregatedOutput;
-    }
-
-    public SummarySubLedgerDTO addSubledger() {
-        SummarySubLedgerDTO slRecord = new SummarySubLedgerDTO();
-        if (this.dates != null) {
-            slRecord.setReportStartDate(this.dates.getRptPerStartDate());
-            slRecord.setJemsApplTransactioDate(this.dates.getTransPerEndDate());
-        }
-        if (this.aggregatedOutput.add(slRecord)) {
-            return slRecord;
-        } else {
-            return null;
-        }
-    }
-
-    public SummarySubLedgerDTO addOffsetSubledger(SummarySubLedgerDTO subledger) {
-        if (this.aggregatedOutput.add(subledger)) {
-            return subledger;
-        } else {
-            return null;
-        }
+        this.wholesaleReportCounter = 0;
+        this.maxSkippedRecords = 0;
     }
 
     public BookDateCsvFileDTO getDates() {
@@ -78,6 +58,14 @@ public class SubLedgerProcessor {
 
     public void setDates(BookDateCsvFileDTO dates) {
         this.dates = dates;
+    }
+
+    public long getMaxSkippedRecords() {
+        return this.maxSkippedRecords==0 ? Constants.MAX_SKIPPED_RECORDS : this.maxSkippedRecords;
+    }
+
+    public void setMaxSkippedRecords(long maxSkippedRecords) {
+        this.maxSkippedRecords = maxSkippedRecords>0 ? maxSkippedRecords : Constants.MAX_SKIPPED_RECORDS;
     }
 
     public boolean addOffset(FinancialEventOffsetDTO offset) {
@@ -89,6 +77,22 @@ public class SubLedgerProcessor {
         return this.financialEventOffset.get(finCat);
     }
 
+    public SummarySubLedgerDTO addSubledger() {
+        SummarySubLedgerDTO slRecord = new SummarySubLedgerDTO();
+        if (this.dates != null) {
+            slRecord.setReportStartDate(dates.getRptPerStartDate());
+            slRecord.setJemsApplTransactioDate(dates.getTransPerEndDate());
+        }
+        this.subledgerWriteCounter++;
+        return slRecord;                
+    }
+    
+    public AggregateWholesaleReportDTO addWholesaleReport() {
+        AggregateWholesaleReportDTO report = new AggregateWholesaleReportDTO();
+        this.wholesaleReportCounter++;
+        return report;
+    }
+    
     public void incrementCounter(String name) {
         switch (name) {
             case "zero":
@@ -103,15 +107,18 @@ public class SubLedgerProcessor {
             case "bypass":
                 this.bypassCounter++;
                 break;
-            case "sub":
+            case "subledger":
                 this.subledgerWriteCounter++;
+                break;
+            case "report":
+                this.wholesaleReportCounter++;
                 break;
             default:
                 break;
         }
     }
 
-    public int getCounter(String name) {
+    public long getCounter(String name) {
         switch (name) {
             case "zero":
                 return this.zeroChargesCounter;
@@ -121,8 +128,10 @@ public class SubLedgerProcessor {
                 return this.dataErrorsCounter;
             case "bypass":
                 return this.bypassCounter;
-            case "sub":
+            case "subledger":
                 return this.subledgerWriteCounter;
+            case "report":
+                return this.wholesaleReportCounter;
             default:
                 return -1;
         }
@@ -133,6 +142,7 @@ public class SubLedgerProcessor {
         this.gapsCounter = 0;
         this.dataErrorsCounter = 0;
         this.bypassCounter = 0;
-        this.subledgerWriteCounter=0;
+        this.subledgerWriteCounter = 0;
+        this.wholesaleReportCounter = 0;
     }
 }
