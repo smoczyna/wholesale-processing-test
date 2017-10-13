@@ -39,7 +39,10 @@ import java.util.List;
  *              it must be a class implementing BaseBookingInputInterface or AdminFeeCsvFileDTO
  */
 public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleProcessingOutput> {
-
+    
+    private static final String FINANCIAL_EVENT_NORMAL_SIGN_NEGATIVE_AMOUNT_VALUE = "DR";
+    private static final String FINANCIAL_EVENT_NORMAL_SIGN_POSITIVE_AMOUNT_VALUE = "CR";
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(WholesaleBookingProcessor.class);
      
     @Autowired
@@ -90,8 +93,8 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         
         SummarySubLedgerDTO subLedgerOutput = this.processingHelper.addSubledger();
         
-        if (financialEventCategory.getFinancialeventnormalsign().equals("DR")) {
-            if (financialEventCategory.getDebitcreditindicator().equals("DR")) {
+        if (financialEventCategory.getFinancialeventnormalsign().equals(FINANCIAL_EVENT_NORMAL_SIGN_NEGATIVE_AMOUNT_VALUE)) {
+            if (financialEventCategory.getDebitcreditindicator().equals(FINANCIAL_EVENT_NORMAL_SIGN_NEGATIVE_AMOUNT_VALUE)) {
                 if (financialEventCategory.getBillingaccrualindicator().equals("Y")) {
                     if (tmpChargeAmt > 0) {
                         subLedgerOutput.setSubledgerTotalDebitAmount(tmpChargeAmt);
@@ -111,8 +114,8 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 }
             }
         }
-        else if (financialEventCategory.getFinancialeventnormalsign().equals("CR")) {
-            if (financialEventCategory.getDebitcreditindicator().equals("CR")) {
+        else if (financialEventCategory.getFinancialeventnormalsign().equals(FINANCIAL_EVENT_NORMAL_SIGN_POSITIVE_AMOUNT_VALUE)) {
+            if (financialEventCategory.getDebitcreditindicator().equals(FINANCIAL_EVENT_NORMAL_SIGN_POSITIVE_AMOUNT_VALUE)) {
                 if (tmpChargeAmt > 0) {
                     subLedgerOutput.setSubledgerTotalCreditAmount(tmpChargeAmt);
                     subLedgerOutput.setSubledgerTotalDebitAmount(0d);
@@ -121,7 +124,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                     subLedgerOutput.setSubledgerTotalCreditAmount(0d);
                 }
             }
-            else if (financialEventCategory.getDebitcreditindicator().equals("DR")) {
+            else if (financialEventCategory.getDebitcreditindicator().equals(FINANCIAL_EVENT_NORMAL_SIGN_NEGATIVE_AMOUNT_VALUE)) {
                 if (tmpChargeAmt > 0) {
                     subLedgerOutput.setSubledgerTotalDebitAmount(tmpChargeAmt);
                     subLedgerOutput.setSubledgerTotalCreditAmount(0d);
@@ -354,7 +357,9 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     
     private void makeBookings(BilledCsvFileDTO billedRec, WholesaleProcessingOutput outRec, int iecCode) {
         boolean altBookingInd = this.isAlternateBookingApplicable(billedRec);
-        FinancialEventCategory financialEventCategory = this.getEventCategoryFromDb(this.tmpProdId, this.homeEqualsServingSbid ? "Y" : "N", altBookingInd, iecCode);
+        //TODO: Change it!!
+        boolean negativeAmount = false;
+        FinancialEventCategory financialEventCategory = this.getEventCategoryFromDb(this.tmpProdId, this.homeEqualsServingSbid ? "Y" : "N", negativeAmount, altBookingInd, iecCode);
         boolean bypassBooking = this.bypassBooking(financialEventCategory, altBookingInd);
 
         if (bypassBooking) {
@@ -414,8 +419,10 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                     report.setUsage4G(Math.round(unbilledRec.getTotalWholesaleUsage().doubleValue() / 1024));
                 }
             }
+			//TODO: Change it!!
+			boolean negativeAmount = false;
             altBookingInd = this.isAlternateBookingApplicable(unbilledRec);
-            FinancialEventCategory financialEventCategory = this.getEventCategoryFromDb(this.tmpProdId, this.homeEqualsServingSbid ? "Y" : "N", altBookingInd, 0); 
+            FinancialEventCategory financialEventCategory = this.getEventCategoryFromDb(this.tmpProdId, this.homeEqualsServingSbid ? "Y" : "N", negativeAmount, altBookingInd, 0); 
             
             SummarySubLedgerDTO subledger = this.createSubLedgerBooking(tmpChargeAmt, financialEventCategory, financialMarket);            
             outRec.addSubledgerRecord(subledger);
@@ -442,7 +449,8 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         report.setDollarAmtOther(this.tmpChargeAmt);
         
         boolean altBookingInd = false; // alternate booking cannot be checked here due incompatible payload (adminfees file doesn't fit the interface as it has no all required fields)
-        FinancialEventCategory financialEventCategory = this.getEventCategoryFromDb(this.tmpProdId, " ", altBookingInd, 0);
+        boolean negativeAmount = false;
+        FinancialEventCategory financialEventCategory = this.getEventCategoryFromDb(this.tmpProdId, " ", negativeAmount, altBookingInd, 0);
                 
         // this is pointless - it's false by default
         //if (financialEventCategory.getHomesidequalsservingsidindicator().trim().isEmpty())
@@ -473,11 +481,11 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         return result;
     }
     
-    protected FinancialEventCategory getEventCategoryFromDb(Integer tmpProdId, String homeEqualsServingSbid, boolean altBookingInd, int interExchangeCarrierCode) {
+    protected FinancialEventCategory getEventCategoryFromDb(Integer tmpProdId, String homeEqualsServingSbid, boolean negativeAmount, boolean altBookingInd, int interExchangeCarrierCode) {
         FinancialEventCategory result = null;
         try {
             List<FinancialEventCategory> dbResult = queryManager.getFinancialEventCategoryNoClusteringRecord(
-                    tmpProdId, homeEqualsServingSbid, altBookingInd ? "Y" : "N", interExchangeCarrierCode);
+                    tmpProdId, homeEqualsServingSbid, negativeAmount?FINANCIAL_EVENT_NORMAL_SIGN_NEGATIVE_AMOUNT_VALUE:FINANCIAL_EVENT_NORMAL_SIGN_POSITIVE_AMOUNT_VALUE, altBookingInd ? "Y" : "N", interExchangeCarrierCode);
             if (dbResult.size()==1)
                 result = dbResult.get(0);
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {

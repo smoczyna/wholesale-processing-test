@@ -82,7 +82,7 @@ public class CassandraQueryManager {
     private final String productQuery = "SELECT * FROM product WHERE productid=?" + " ALLOW FILTERING";
     
     private final String finEventCatQuery = "SELECT * FROM financialeventcategory "
-            + "WHERE productid=? AND homesidequalsservingsidindicator=? AND alternatebookingindicator=? AND interexchangecarriercode=? ALLOW FILTERING";
+            + "WHERE productid=? AND homesidequalsservingsidindicator=? AND financialeventnormalsign=? AND alternatebookingindicator=? AND interexchangecarriercode=? ALLOW FILTERING";
 
     private final String dataEventQuery = "SELECT *  FROM dataevent WHERE productid=? ALLOW FILTERING";
     
@@ -217,12 +217,12 @@ public class CassandraQueryManager {
      */
     @Cacheable("FinancialEventCategory")
     public List<FinancialEventCategory> getFinancialEventCategoryNoClusteringRecord(Integer TmpProdId, 
-            String homesidequalsservingsidindicator, String alternatebookingindicator, int interExchangeCarrierCode)
+            String homesidequalsservingsidindicator, String financialeventnormalsign, String alternatebookingindicator, int interExchangeCarrierCode)
             throws MultipleRowsReturnedException, NoResultsReturnedException, CassandraQueryException {
         
         List<FinancialEventCategory> listoffec = new ArrayList<>();        
         BoundStatement statement = new BoundStatement(this.finEventCatStatement);
-        statement.bind(TmpProdId, homesidequalsservingsidindicator, alternatebookingindicator, interExchangeCarrierCode);
+        statement.bind(TmpProdId, homesidequalsservingsidindicator, financialeventnormalsign, alternatebookingindicator, interExchangeCarrierCode);
         try {
             Result<FinancialEventCategory> result = new FinancialEventCategoryCassandraMapper().executeAndMapResults(this.cassandraSession, statement, new MappingManager(this.cassandraSession), false);
             listoffec = result.all();
