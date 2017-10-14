@@ -50,7 +50,7 @@ public class BookingsJobLauncher {
     private JobParameters newExecution() {
         Map<String, JobParameter> parameters = new HashMap<>();  
         parameters.put("currentTime", new JobParameter(new Date()));
-        parameters.put("maxSkippedRecords", new JobParameter(10L));
+        parameters.put("maxSkippedRecords", new JobParameter(1000000L));
         return new JobParameters(parameters);
     }
 }
