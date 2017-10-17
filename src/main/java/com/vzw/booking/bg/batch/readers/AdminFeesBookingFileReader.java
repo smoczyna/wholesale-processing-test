@@ -19,7 +19,8 @@ public class AdminFeesBookingFileReader extends CsvFileGenericReader<AdminFeeCsv
         "productId",
         "adminChargeAmt",
         "adminCount",
-        "financialMarket"};
+        "financialMarket",
+        "debitcreditindicator"};
     
     @Autowired
     public AdminFeesBookingFileReader(Environment environment, String filename) {
