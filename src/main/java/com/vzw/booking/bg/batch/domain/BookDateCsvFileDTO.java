@@ -6,7 +6,7 @@
 package com.vzw.booking.bg.batch.domain;
 
 /**
- * Booking Dates source payload class. This class represents the input file of booking dates: bookdate.txt
+ * Booking Dates source payload class. This class represents the input file of booking dates: bookdate.csv
  * @author smorcja
  */
 public class BookDateCsvFileDTO {

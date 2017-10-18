@@ -44,38 +44,19 @@ import org.springframework.cache.annotation.Cacheable;
 @Configuration
 public class CassandraQueryManager {
 
-//    @Autowired
-//    Environment environment;
-    
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraQueryManager.class);
-    
-    /**
-     * due to autowire issue getting properties also fail
-     */
-    
-//    @Value("${cassandra.db.ip}") //=170.127.114.154
-//    private String host;
-//    
-//    @Value("${cassandra.db.keyspace}") //=j6_dev
-//    private String keyspace;
-//    
-//    @Value("${cassandra.db.username}") //=j6_dev_user
-//    private String username;
-//    
-//    @Value("${cassandra.db.password}") //=Ireland
-//    private String password;
-    
-    private final String fcccgsamapenddate = "12/31/9999";
+   
+    //private final String fcccgsamapenddate = "12/31/9999";
     private final String financialmarketmapenddate = "12/31/9999";
     private final String glmarketlegalentityenddate = "12/31/9999";
     private final String glmarketmaptype = "D";
     private final String glmarketenddate = "12/31/9999";
-    private final String alternatebookingtype = "D";
+    //private final String alternatebookingtype = "D";
 
     private Session cassandraSession;    
     private static final String CASSANDRA_KEYSPACE = "j6_dev";
     
-    private static final String finMarketQuery = "SELECT * FROM financialmarket"
+    private final String finMarketQuery = "SELECT * FROM financialmarket"
             + " WHERE financialmarketid=? AND financialmarketmapenddate=? AND glmarketlegalentityenddate=? "
             + " AND glmarketmaptype=? AND glmarketenddate=? ALLOW FILTERING";
     

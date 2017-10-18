@@ -64,4 +64,17 @@ public class AdminFeeCsvFileDTO {
     public void setDebitcreditindicator(String debitcreditindicator) {
         this.debitcreditindicator = debitcreditindicator;
     }
+
+    @Override
+    public String toString() {
+        return "AdminFeeCsvFileDTO{" 
+                + "sbid=" + sbid 
+                + ", productId=" + productId 
+                + ", adminChargeAmt=" + adminChargeAmt 
+                + ", adminCount=" + adminCount 
+                + ", financialMarket=" + financialMarket 
+                + ", debitcreditindicator=" + debitcreditindicator 
+                + '}';
+    }
+    
 }

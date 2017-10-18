@@ -272,6 +272,7 @@ public class BilledCsvFileDTO implements BaseBookingInputInterface {
         this.wholesaleUsageBytes = wholesaleUsageBytes;
     }
 
+    @Override
     public String getDebitcreditindicator() {
         return debitcreditindicator;
     }
@@ -310,6 +311,7 @@ public class BilledCsvFileDTO implements BaseBookingInputInterface {
                 + ", airBillSeconds=" + airBillSeconds 
                 + ", tollBillSeconds=" + tollBillSeconds 
                 + ", wholesaleUsageBytes=" + wholesaleUsageBytes 
-                + ", debitcreditindicator=" + debitcreditindicator + '}';
+                + ", debitcreditindicator=" + debitcreditindicator 
+                + '}';
     }
 }

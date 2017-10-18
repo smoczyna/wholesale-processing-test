@@ -103,22 +103,6 @@ public final class CassandraQueryBuilder<T> {
         this.executor = new CQLExecutor();
     }
 
-    /**
-     * Read properties from custom loaded property file.
-     *
-     * @param config
-     * @return
-     * @throws NullPointerException
-     */
-    public CassandraQueryBuilder<T> withProperties(Properties config) throws NullPointerException {
-        this.hosts = config.getProperty("cassandra.db.ip").split(",");
-        this.username = config.getProperty("cassandra.db.username");
-        this.password = config.getProperty("cassandra.db.password");
-        this.keySpace = config.getProperty("cassandra.db.keyspace");
-        this.dcName = config.getProperty("cassandra.db.dcname");
-        return this;
-    }
-
     public CassandraQueryBuilder<T> withConDetails(String host, String keyspace, String username, String password) throws NullPointerException {
         this.hosts = host.split(",");
         this.username = username;

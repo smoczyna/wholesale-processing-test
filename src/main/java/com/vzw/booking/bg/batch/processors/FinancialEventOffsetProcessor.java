@@ -7,8 +7,6 @@ package com.vzw.booking.bg.batch.processors;
 
 import com.vzw.booking.bg.batch.utils.WholesaleBookingProcessorHelper;
 import com.vzw.booking.bg.batch.domain.FinancialEventOffsetDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author smorcja
  */
 public class FinancialEventOffsetProcessor implements ItemProcessor<FinancialEventOffsetDTO, Boolean> {
-    
-    private static final Logger LOGGER = LoggerFactory.getLogger(FinancialEventOffsetProcessor.class);
     
     @Autowired
     WholesaleBookingProcessorHelper tempSubLedgerOuput;

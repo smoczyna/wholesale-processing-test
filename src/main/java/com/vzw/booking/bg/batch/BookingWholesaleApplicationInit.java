@@ -2,9 +2,6 @@ package com.vzw.booking.bg.batch;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-
-import com.vzw.booking.bg.batch.utils.CustomIdGenerator;
-
 import javax.sql.DataSource;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -22,30 +19,6 @@ import org.springframework.context.annotation.Primary;
  */
 @Component
 public class BookingWholesaleApplicationInit {
-
-//    @Autowired
-//    private LoggerConfig loggerConfig;
-
-    /**
-     * Stateful bean providing generated IDs
-     */
-    public CustomIdGenerator idGenerator = new CustomIdGenerator();
-    
-    /**
-     * Define a Bean to initialize the logger.
-     *
-     * @return Verizon Logger
-     */
-//    @Bean
-//    public VlfLogger vlfLogger() {
-//        VlfLogger logger = new VlfLogger();
-//        logger.setAppName(this.loggerConfig.getAppname());
-//        logger.setServiceName(this.loggerConfig.getServicename());
-//        logger.setRegion(this.loggerConfig.getRegion());
-//        logger.setZone(this.loggerConfig.getZone());
-//        VlfLogger.setLogLevel(LogLevel.INFO);
-//        return logger;
-//    }
 
     /**
      * This is meta data source

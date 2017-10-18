@@ -7,8 +7,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <h1>DateTimeUtils</h1> DateTimeUtils is a utility class that provides
@@ -17,6 +17,8 @@ import java.util.logging.Logger;
  */
 public class ProcessingUtils {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessingUtils.class);
+    
     public static final String STANDARD_FORMAT = "yyyy-MM-dd HH:mm:ss.SSSZ";
     public static final String SHORT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String FILE_DATE_FORMAT = "MM/dd/yyyy";
@@ -25,7 +27,7 @@ public class ProcessingUtils {
     public static final String SHORT_DATETIME_FORMAT_NOSPACE = "yyyy-MM-dd-HHmmss";
     public static final String MAINFRAME_FORMAT = "yyyy-MM-dd-HH:mm:ss.SSSZ";
     public static final String DECIMAL_ROUND_FORMAT = "#.##";
-    
+    public static final String UNKNOWN_DELIMITER = "None of known delimiters found %s";    
     private static final String LBRACKET = "[";
     
     /**
@@ -69,10 +71,10 @@ public class ProcessingUtils {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat(FILE_DATE_FORMAT);
             Date date = sdf.parse(strDate);
-            SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMM");
+            SimpleDateFormat sdf2 = new SimpleDateFormat(REALY_SHORT_FORMAT);
             return sdf2.format(date);
         } catch (ParseException ex) {
-            Logger.getLogger(ProcessingUtils.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error(ex.getMessage());
             return null;
         }
     }
@@ -93,7 +95,7 @@ public class ProcessingUtils {
             if (line.contains(delimiter))
                 return delimiter;
         }
-        return "None of those was found "+Arrays.toString(delimiters);
+        return String.format(UNKNOWN_DELIMITER, Arrays.toString(delimiters));
     }
     
     public static Double roundDecimalNumber(Double inputNumber) {

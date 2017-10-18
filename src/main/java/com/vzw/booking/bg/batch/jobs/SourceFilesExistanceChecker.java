@@ -29,7 +29,7 @@ public class SourceFilesExistanceChecker implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution sc, ChunkContext cc) throws Exception {
-        LOGGER.info("Checking if file exists...");
+        LOGGER.info(Constants.CHECK_IF_FILES_EXIST);
         File f1 = new File(SOURCE_FILES_PATH.concat(Constants.BOOK_DATE_FILENAME));
         File f2 = new File(SOURCE_FILES_PATH.concat(Constants.FINANCIAL_EVENT_OFFSET_FILENAME));
         File f3 = new File(SOURCE_FILES_PATH.concat(Constants.BILLED_BOOKING_FILENAME));
@@ -40,8 +40,8 @@ public class SourceFilesExistanceChecker implements Tasklet {
             (!f3.exists() || f3.isDirectory()) ||
             (!f4.exists() || f4.isDirectory()) ||
             (!f5.exists() || f4.isDirectory())) {
-            LOGGER.error("One or more required files not found, job aborted.");
-            throw new JobInterruptedException("Source FIle does not exist");
+            LOGGER.error(Constants.FILES_NOT_FOUND_JOB_ABORTED);
+            throw new JobInterruptedException(Constants.FILES_NOT_FOUND_MESSAGE);
         } else {
             return RepeatStatus.FINISHED;
         }

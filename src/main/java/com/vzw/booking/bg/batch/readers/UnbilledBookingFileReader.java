@@ -24,7 +24,8 @@ public class UnbilledBookingFileReader extends CsvFileGenericReader<UnbilledCsvF
         "source",
         "financialMarket",
         "airBillSeconds",
-        "totalWholesaleUsage"};
+        "totalWholesaleUsage",
+        "debitcreditindicator"};
     
     @Autowired
     public UnbilledBookingFileReader(Environment environment, String filename) {

@@ -1,5 +1,6 @@
 package com.vzw.booking.bg.batch.launchers;
 
+import com.vzw.booking.bg.batch.constants.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -42,9 +43,9 @@ public class BookingsJobLauncher {
 
     @Scheduled(cron = "${csv.to.database.job.cron}")
     void launchCsvFileToDatabaseJob() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
-        LOGGER.info("Starting booking files processing job");
+        LOGGER.info(Constants.JOB_STARTED);
         jobLauncher.run(job, newExecution());
-        LOGGER.info("Stopping booking files processing job");
+        LOGGER.info(Constants.JOB_FINISHED);        
     }
 
     private JobParameters newExecution() {
