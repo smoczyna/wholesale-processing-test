@@ -30,6 +30,9 @@ public class SourceFilesExistanceChecker implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution sc, ChunkContext cc) throws Exception {
         LOGGER.info(Constants.CHECK_IF_FILES_EXIST);
+        if (SOURCE_FILES_PATH==null || SOURCE_FILES_PATH.isEmpty())
+            throw new JobInterruptedException(Constants.SOURCE_LOCATION_MISSING_MESSAGE);
+            
         File f1 = new File(SOURCE_FILES_PATH.concat(Constants.BOOK_DATE_FILENAME));
         File f2 = new File(SOURCE_FILES_PATH.concat(Constants.FINANCIAL_EVENT_OFFSET_FILENAME));
         File f3 = new File(SOURCE_FILES_PATH.concat(Constants.BILLED_BOOKING_FILENAME));
