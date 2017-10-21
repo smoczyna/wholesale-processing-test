@@ -60,7 +60,7 @@ public class CassandraQueryManager {
             + " WHERE financialmarketid=? AND financialmarketmapenddate=? AND glmarketlegalentityenddate=? "
             + " AND glmarketmaptype=? AND glmarketenddate=? ALLOW FILTERING";
     
-    private final String productQuery = "SELECT * FROM product WHERE productid=?" + " ALLOW FILTERING";
+    //private final String productQuery = "SELECT * FROM product WHERE productid=?" + " ALLOW FILTERING";
     
     private final String finEventCatQuery = "SELECT * FROM financialeventcategory "
             + "WHERE productid=? AND homesidequalsservingsidindicator=? AND alternatebookingindicator=? AND interexchangecarriercode=? ALLOW FILTERING";
@@ -89,7 +89,7 @@ public class CassandraQueryManager {
         this.cassandraSession = cluster.connect(CASSANDRA_KEYSPACE);
         
         this.finMarketStatement = this.cassandraSession.prepare(finMarketQuery);
-        this.productStatement = this.cassandraSession.prepare(productQuery);
+        //this.productStatement = this.cassandraSession.prepare(productQuery);
         this.finEventCatStatement = this.cassandraSession.prepare(finEventCatQuery);
         this.finEventCatStatementBilled = this.cassandraSession.prepare(finEventCatQueryBilled);
         this.dataEventStatement = this.cassandraSession.prepare(dataEventQuery);

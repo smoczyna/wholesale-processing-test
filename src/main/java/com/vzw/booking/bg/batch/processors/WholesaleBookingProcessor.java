@@ -271,11 +271,11 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             LOGGER.warn(Constants.BOOKING_BYPASS_DETECTED);
             this.processingHelper.incrementCounter(Constants.BYPASS);
         } else {
-            if (tmpChargeAmt == 0) {
+            if (this.tmpChargeAmt == 0) {
                 LOGGER.warn(Constants.ZERO_CHARGES_DETECTED);
                 this.processingHelper.incrementCounter(Constants.ZERO_CHARGES);
             } else {
-                SummarySubLedgerDTO subledger = this.createSubLedgerBooking(tmpChargeAmt, financialEventCategory, financialMarket, inRec.getDebitcreditindicator());
+                SummarySubLedgerDTO subledger = this.createSubLedgerBooking(this.tmpChargeAmt, financialEventCategory, this.financialMarket, inRec.getDebitcreditindicator());
                 outRec.addSubledgerRecord(subledger);
                 outRec.addSubledgerRecord(this.createOffsetBooking(subledger));
             }
@@ -443,11 +443,10 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         this.fileSource = "M";
         this.searchHomeSbid = adminFeesRec.getSbid();
         this.tmpProdId = adminFeesRec.getProductId();
-        this.financialMarket = adminFeesRec.getFinancialMarket();
-
-        // call cassandra wholesale price table
+        this.financialMarket = adminFeesRec.getFinancialMarket().isEmpty() ? "003" : adminFeesRec.getFinancialMarket();
+        
         WholesalePrice wholesalePrice = this.getWholesalePriceFromDb(this.tmpProdId, this.searchHomeSbid);
-
+        
         this.tmpChargeAmt = wholesalePrice.getProductwholesaleprice().multiply(BigDecimal.valueOf(adminFeesRec.getAdminCount())).floatValue();
         report.setDollarAmtOther(this.tmpChargeAmt);
         outRec.addWholesaleReportRecord(report);
@@ -476,25 +475,32 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             dbResult = queryManager.getFinancialEventCategoryNoClusteringRecord(
                     tmpProdId, homeEqualsServingSbid, altBookingInd ? "Y" : "N", interExchangeCarrierCode, financialeventnormalsign);
 
+            // for admin fees without fin market value change fin cat to 677 (no suitable record in cassandra table)
+            // this thing deosn't work, it affects other records too
+//            if (this.fileSource.equals("M") && financialeventnormalsign.equals("CR") && this.financialMarket.equals("003"))
+//                dbResult.get(0).setFinancialcategory(677);
+            
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
             LOGGER.error(ex.getMessage());
             dbResult = null;
         }
         if (dbResult == null && financialeventnormalsign.equals("DR")) {
             LOGGER.warn(Constants.FEC_NOT_FOUND_MESSAGE);
-            int tmpProductId;
-            if (this.fileSource.equals("M")) // for admin fees call 0 product
-                tmpProductId = 0;
-            else
-                tmpProductId = 36;           // for the rest 2 files call 36 product
-            
+            if (this.fileSource.equals("M")) {  // for admin fees call 0 product and 1 as inter exchange code
+                tmpProdId = 0;
+                if (!this.financialMarket.equals("003"))
+                    interExchangeCarrierCode = 1;                
+            } else {
+                tmpProdId = 36;                 // for the rest 2 files call 36 product
+            }
             try {
                 dbResult = queryManager.getFinancialEventCategoryNoClusteringRecord(
-                        tmpProductId, homeEqualsServingSbid, altBookingInd ? "Y" : "N", interExchangeCarrierCode, financialeventnormalsign);
+                        tmpProdId, homeEqualsServingSbid, altBookingInd ? "Y" : "N", interExchangeCarrierCode, financialeventnormalsign);
 
                 LOGGER.info(Constants.DEFAULT_FEC_OBTAINED);
             } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
                 LOGGER.error(ex.getMessage());
+                LOGGER.error(Constants.DEFAULT_FEC_NOT_FOUND);
             }
         }
         if (dbResult.size() == 1) {
