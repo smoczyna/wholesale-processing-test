@@ -137,7 +137,11 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             }
         }
         subLedgerOutput.setFinancialEventNumber(financialEventCategory.getFinancialeventnumber());
-        subLedgerOutput.setFinancialCategory(financialEventCategory.getFinancialcategory());
+        if (this.fileSource.equals("M") && this.financialMarket.equals("003") && dbcrIndicatorFromFile.equals("CR"))
+            subLedgerOutput.setFinancialCategory(677);
+        else
+            subLedgerOutput.setFinancialCategory(financialEventCategory.getFinancialcategory());
+        
         subLedgerOutput.setFinancialmarketId(financialMarket);
         subLedgerOutput.setBillCycleMonthYear(ProcessingUtils.getYearAndMonthFromStrDate(this.processingHelper.getDates().getRptPerEndDate()));
         subLedgerOutput.setBillAccrualIndicator(financialEventCategory.getBillingaccrualindicator());
@@ -267,6 +271,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         FinancialEventCategory financialEventCategory = null;        
         financialEventCategory = this.getEventCategoryFromDb(this.tmpProdId, tmpHomeEqualsServingSbid, altBookingInd, iecCode, inRec.getDebitcreditindicator());
         boolean bypassBooking = this.bypassBooking(financialEventCategory, altBookingInd);
+        
         if (bypassBooking) {
             LOGGER.warn(Constants.BOOKING_BYPASS_DETECTED);
             this.processingHelper.incrementCounter(Constants.BYPASS);

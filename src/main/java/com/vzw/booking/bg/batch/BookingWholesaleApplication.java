@@ -30,6 +30,7 @@ public class BookingWholesaleApplication {
                 // could be nice to have few modes of running (for instacne: continuous listening and single run)
                 context.registerShutdownHook();
                 SpringApplication.exit(context);
+                System.exit(0);
 	}
 
 }
