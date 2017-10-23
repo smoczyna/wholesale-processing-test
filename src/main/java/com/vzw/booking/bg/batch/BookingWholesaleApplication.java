@@ -4,7 +4,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * <h1>WholesaleBookingProcessorApplication</h1> 
@@ -16,7 +16,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableBatchProcessing
-@EnableScheduling
 @EnableCaching
 public class BookingWholesaleApplication {
 
@@ -27,7 +26,10 @@ public class BookingWholesaleApplication {
 	 * @param args - arguments passed to the spring boot application.
 	 */
 	public static void main(String[] args) {
-		SpringApplication.run(BookingWholesaleApplication.class, args);
+		ConfigurableApplicationContext context = SpringApplication.run(BookingWholesaleApplication.class, args);
+                // could be nice to have few modes of running (for instacne: continuous listening and single run)
+                context.registerShutdownHook();
+                SpringApplication.exit(context);
 	}
 
 }

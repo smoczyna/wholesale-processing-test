@@ -33,6 +33,7 @@ public class WholesaleBookingProcessorHelper {
     private long subledgerWriteCounter;
     private long wholesaleReportCounter;
     private long maxSkippedRecords;
+    private long numberOfChunks;
 
     public WholesaleBookingProcessorHelper() {
         this.financialEventOffset = new HashMap();
@@ -59,6 +60,14 @@ public class WholesaleBookingProcessorHelper {
 
     public void setMaxSkippedRecords(long maxSkippedRecords) {
         this.maxSkippedRecords = maxSkippedRecords>0 ? maxSkippedRecords : Constants.DEFAULT_MAX_SKIPPED_RECORDS;
+    }
+
+    public long getNumberOfChunks() {
+        return this.numberOfChunks==0 ? Constants.DEFAULT_NUMBER_OF_CHUNKS : this.numberOfChunks;
+    }
+
+    public void setNumberOfChunks(long numberOfChunks) {
+        this.numberOfChunks = numberOfChunks>0 ? numberOfChunks : Constants.DEFAULT_NUMBER_OF_CHUNKS;
     }
 
     public boolean addOffset(FinancialEventOffsetDTO offset) {

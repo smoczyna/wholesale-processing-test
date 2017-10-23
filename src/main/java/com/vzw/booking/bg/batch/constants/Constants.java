@@ -22,6 +22,7 @@ public class Constants {
     
     public static final String DEFAULT_CSV_FIELDS_DELIMITER = ",";
     public static final Integer DEFAULT_MAX_SKIPPED_RECORDS = 100;
+    public static final Integer DEFAULT_NUMBER_OF_CHUNKS = 1;
     
     public static final String DEBIT_CODE = "DR";
     public static final String CREDIT_CODE = "CR";

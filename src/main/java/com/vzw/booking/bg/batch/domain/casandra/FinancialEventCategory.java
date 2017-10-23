@@ -7,7 +7,7 @@ import com.datastax.driver.mapping.annotations.ClusteringColumn;
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
-import javax.validation.constraints.NotNull;
+
 
 /**
  *
@@ -25,8 +25,7 @@ public class FinancialEventCategory {
     private String homesidequalsservingsidindicator;
     
     @PartitionKey(value = 2)
-    @Column(name = "financialeventnormalsign")
-    @NotNull
+    @Column(name = "financialeventnormalsign")    
    private String financialeventnormalsign;
 
     @PartitionKey(value = 3)
@@ -40,10 +39,9 @@ public class FinancialEventCategory {
     @ClusteringColumn(value = 1)
     @Column(name = "interexchangecarriercode")
     private Integer interexchangecarriercode;
-
-    @NotNull
+    
     private Integer financialeventnumber;
-    @NotNull
+    
     private Integer financialcategory;
     private String financialmappingeffectivedate;
     private String glaccountnumber;
@@ -62,17 +60,13 @@ public class FinancialEventCategory {
     private String statecode;
     private String adminfeereasoncode;
     private String financialmappingenddate;
-    private String glfinancialaccounttypecode;
-    @NotNull
-    private String bamsaffiliateindicator;
-    @NotNull
+    private String glfinancialaccounttypecode;    
+    private String bamsaffiliateindicator;    
     private String billingaccrualindicator;
     private String cashpostindicator;
-    private String cellularcarrierrslcode;
-    @NotNull
+    private String cellularcarrierrslcode;    
     private String companycode;
-    private String creditcardtypecode;
-    @NotNull
+    private String creditcardtypecode;    
     private String debitcreditindicator;
     private String directindirectindicator;
     private String exceptioncode;
@@ -81,8 +75,7 @@ public class FinancialEventCategory {
     private String financialeventdescription;
     private String financialeventdetails;
     private String financialeventprocessingcode;
-    private String financialmarketsourcecode;
-    @NotNull
+    private String financialmarketsourcecode;    
     private String foreignservedindicator;
     private String glaccountdescription;
     private String glcostcenternumber;
