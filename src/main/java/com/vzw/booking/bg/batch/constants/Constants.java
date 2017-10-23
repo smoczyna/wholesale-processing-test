@@ -54,7 +54,7 @@ public class Constants {
     public static final String BOOKING_BYPASS_DETECTED = "Booking bypass detected, record skipped for sub ledger file ...";
     public static final String ZERO_CHARGES_DETECTED = "Zero charges detected, skipping...";
     public static final String ZERO_CHARGES_SKIP = "Record skipped due to zero charges !!!";
-    public static final String GAP_DETECTED = "Gap in the logic encountered, skipping valid charges from processing !!!";
+    public static final String GAP_DETECTED = "Valid Toll Charges skipped from processing !!!";
     public static final String INVALID_INPUT = "Invalid input record encountered !!!";
     public static final String OFFSET_NOT_FOUND = "Offset fin cat value not found !!!";
     public static final String ZERO_SUBLEDGER_AMOUNT = "Zero amounts in sub ledger record found !!!";

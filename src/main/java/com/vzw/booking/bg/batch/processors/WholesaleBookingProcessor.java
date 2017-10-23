@@ -217,7 +217,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 altBookingInd = true;
             }
         }
-        //altBookingInd = false; // temporary fix, will be reviewed later
+        altBookingInd = false; // temporary fix, will be reviewed later
         return altBookingInd;
     }
 
