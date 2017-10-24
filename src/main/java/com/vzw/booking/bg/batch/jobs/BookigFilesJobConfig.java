@@ -24,7 +24,6 @@ import com.vzw.booking.bg.batch.readers.BilledBookingFileReader;
 import com.vzw.booking.bg.batch.readers.BookDateCsvFileReader;
 import com.vzw.booking.bg.batch.readers.FinancialEventOffsetReader;
 import com.vzw.booking.bg.batch.readers.UnbilledBookingFileReader;
-import com.vzw.booking.bg.batch.utils.WholesaleBookingProcessorHelper;
 import com.vzw.booking.bg.batch.validation.CsvFileVerificationSkipper;
 import com.vzw.booking.bg.batch.writers.SubledgerCsvFileWriter;
 import com.vzw.booking.bg.batch.writers.WholesaleOutputWriter;
@@ -41,7 +40,6 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,10 +53,7 @@ import org.springframework.core.env.Environment;
 public class BookigFilesJobConfig {
     
     /* listeners and helpers */
-    
-    @Autowired
-    WholesaleBookingProcessorHelper processingHelper;
-    
+
     @Bean
     JobExecutionListener bookingFileJobListener() {
         return new BookingAggregateJobListener();
@@ -190,7 +185,7 @@ public class BookigFilesJobConfig {
                                ItemWriter<WholesaleProcessingOutput> wholesaleOutputWriter,
                                StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("billedBookingFileStep")
-                .<BilledCsvFileDTO, WholesaleProcessingOutput>chunk(this.processingHelper.getNumberOfChunks())
+                .<BilledCsvFileDTO, WholesaleProcessingOutput>chunk(1)
                 .reader(billedFileItemReader)
                 .faultTolerant()
                 .skipPolicy(fileVerificationSkipper)
@@ -208,7 +203,7 @@ public class BookigFilesJobConfig {
                                  ItemWriter<WholesaleProcessingOutput> wholesaleOutputWriter,
                                  StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("unbilledBookingFileStep")
-                .<UnbilledCsvFileDTO, WholesaleProcessingOutput>chunk(this.processingHelper.getNumberOfChunks())
+                .<UnbilledCsvFileDTO, WholesaleProcessingOutput>chunk(1)
                 .reader(unbilledFileItemReader)
                 .faultTolerant()
                 .skipPolicy(fileVerificationSkipper)
@@ -226,7 +221,7 @@ public class BookigFilesJobConfig {
                                   ItemWriter<WholesaleProcessingOutput> wholesaleOutputWriter,
                                   StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("adminFeesBookingFileStep")
-                .<AdminFeeCsvFileDTO, WholesaleProcessingOutput>chunk(this.processingHelper.getNumberOfChunks())
+                .<AdminFeeCsvFileDTO, WholesaleProcessingOutput>chunk(1)
                 .reader(adminFeesFileItemReader)
                 .faultTolerant()
                 .skipPolicy(fileVerificationSkipper)

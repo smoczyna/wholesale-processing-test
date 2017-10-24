@@ -170,7 +170,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             clone.setSubledgerTotalDebitAmount(creditAmt);
             clone.setSubledgerTotalCreditAmount(debitAmt);
         }
-        //this.processingHelper.incrementCounter(Constants.SUBLEDGER);
+        this.processingHelper.incrementCounter(Constants.SUBLEDGER);
         return clone;
     }
 
@@ -274,11 +274,11 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         
         if (bypassBooking) {
             LOGGER.warn(Constants.BOOKING_BYPASS_DETECTED);
-            //this.processingHelper.incrementCounter(Constants.BYPASS);
+            this.processingHelper.incrementCounter(Constants.BYPASS);
         } else {
             if (this.tmpChargeAmt == 0) {
                 LOGGER.warn(Constants.ZERO_CHARGES_DETECTED);
-                //this.processingHelper.incrementCounter(Constants.ZERO_CHARGES);
+                this.processingHelper.incrementCounter(Constants.ZERO_CHARGES);
             } else {
                 SummarySubLedgerDTO subledger = this.createSubLedgerBooking(this.tmpChargeAmt, financialEventCategory, this.financialMarket, inRec.getDebitcreditindicator());
                 outRec.addSubledgerRecord(subledger);
@@ -305,7 +305,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
 
         if (billedRec.getWholesalePeakAirCharge() == 0 && billedRec.getWholesaleOffpeakAirCharge() == 0 && billedRec.getTollCharge() == 0) {
             LOGGER.info(Constants.ZERO_CHARGES_SKIP);
-            //this.processingHelper.incrementCounter(Constants.ZERO_CHARGES);
+            this.processingHelper.incrementCounter(Constants.ZERO_CHARGES);
             return null;
         }
 
@@ -372,7 +372,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 this.makeBookings(billedRec, outRec, tmpInterExchangeCarrierCode);
             } else {
                 LOGGER.info(Constants.GAP_DETECTED);
-                //this.processingHelper.incrementCounter(Constants.GAPS);
+                this.processingHelper.incrementCounter(Constants.GAPS);
             }
         } else {
             zeroTollCharge = true;
@@ -380,7 +380,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
 
         if (zeroAirCharge && zeroTollCharge) {
             LOGGER.info(Constants.INVALID_INPUT);
-            //this.processingHelper.incrementCounter(Constants.DATA_ERRORS);
+            this.processingHelper.incrementCounter(Constants.DATA_ERRORS);
             return null;
         }
         outRec.addWholesaleReportRecord(report);
@@ -436,7 +436,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             this.makeBookings(unbilledRec, outRec, tmpInterExchangeCarrierCode);
             return outRec;
         } else {
-            //this.processingHelper.incrementCounter(Constants.ZERO_CHARGES);
+            this.processingHelper.incrementCounter(Constants.ZERO_CHARGES);
             return null;
         }
     }
