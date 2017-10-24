@@ -27,7 +27,7 @@ public class BookingWholesaleApplication {
 	 */
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(BookingWholesaleApplication.class, args);
-                // could be nice to have few modes of running (for instacne: continuous listening and single run)
+                // could be nice to have few modes of running (for instance: continuous lister and single run)
                 context.registerShutdownHook();
                 SpringApplication.exit(context);
                 System.exit(0);

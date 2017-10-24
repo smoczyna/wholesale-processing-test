@@ -26,21 +26,14 @@ public class WholesaleBookingProcessorHelper {
 
     private BookDateCsvFileDTO dates;
     private final Map<Integer, Integer> financialEventOffset;
-    private long zeroChargesCounter;
-    private long gapsCounter;
-    private long dataErrorsCounter;
-    private long bypassCounter;
+    
     private long subledgerWriteCounter;
     private long wholesaleReportCounter;
     private long maxSkippedRecords;
-    private long numberOfChunks;
+    private int numberOfChunks;
 
     public WholesaleBookingProcessorHelper() {
         this.financialEventOffset = new HashMap();
-        this.zeroChargesCounter = 0;
-        this.gapsCounter = 0;
-        this.dataErrorsCounter = 0;
-        this.bypassCounter = 0;
         this.subledgerWriteCounter = 0;
         this.wholesaleReportCounter = 0;
         this.maxSkippedRecords = 0;
@@ -62,11 +55,11 @@ public class WholesaleBookingProcessorHelper {
         this.maxSkippedRecords = maxSkippedRecords>0 ? maxSkippedRecords : Constants.DEFAULT_MAX_SKIPPED_RECORDS;
     }
 
-    public long getNumberOfChunks() {
+    public int getNumberOfChunks() {
         return this.numberOfChunks==0 ? Constants.DEFAULT_NUMBER_OF_CHUNKS : this.numberOfChunks;
     }
 
-    public void setNumberOfChunks(long numberOfChunks) {
+    public void setNumberOfChunks(int numberOfChunks) {
         this.numberOfChunks = numberOfChunks>0 ? numberOfChunks : Constants.DEFAULT_NUMBER_OF_CHUNKS;
     }
 
@@ -95,41 +88,8 @@ public class WholesaleBookingProcessorHelper {
         return report;
     }
     
-    public void incrementCounter(String name) {
-        switch (name) {
-            case Constants.ZERO_CHARGES:
-                this.zeroChargesCounter++;
-                break;
-            case Constants.GAPS:
-                this.gapsCounter++;
-                break;
-            case Constants.DATA_ERRORS:
-                this.dataErrorsCounter++;
-                break;
-            case Constants.BYPASS:
-                this.bypassCounter++;
-                break;
-            case Constants.SUBLEDGER:
-                this.subledgerWriteCounter++;
-                break;
-            case Constants.WHOLESALES_REPORT:
-                this.wholesaleReportCounter++;
-                break;
-            default:
-                break;
-        }
-    }
-
     public long getCounter(String name) {
         switch (name) {
-            case Constants.ZERO_CHARGES:
-                return this.zeroChargesCounter;
-            case Constants.GAPS:
-                return this.gapsCounter;
-            case Constants.DATA_ERRORS:
-                return this.dataErrorsCounter;
-            case Constants.BYPASS:
-                return this.bypassCounter;
             case Constants.SUBLEDGER:
                 return this.subledgerWriteCounter;
             case Constants.WHOLESALES_REPORT:
@@ -140,10 +100,6 @@ public class WholesaleBookingProcessorHelper {
     }
 
     public void clearCounters() {
-        this.zeroChargesCounter = 0;
-        this.gapsCounter = 0;
-        this.dataErrorsCounter = 0;
-        this.bypassCounter = 0;
         this.subledgerWriteCounter = 0;
         this.wholesaleReportCounter = 0;
     }

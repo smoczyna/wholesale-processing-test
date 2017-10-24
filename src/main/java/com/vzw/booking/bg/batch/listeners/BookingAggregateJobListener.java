@@ -44,7 +44,7 @@ public class BookingAggregateJobListener implements JobExecutionListener {
         this.startTIme = new Date();
         LOGGER.info(String.format(Constants.JOB_STARTED_MESSAGE, ProcessingUtils.dateToString(this.startTIme, ProcessingUtils.SHORT_DATETIME_FORMAT)));
         this.helper.setMaxSkippedRecords(je.getJobParameters().getLong("maxSkippedRecords"));
-        this.helper.setNumberOfChunks(je.getJobParameters().getLong("numberOfChunks"));
+        this.helper.setNumberOfChunks(je.getJobParameters().getLong("numberOfChunks").intValue());
     }
 
     /**

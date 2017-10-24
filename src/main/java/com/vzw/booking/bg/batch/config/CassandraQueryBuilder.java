@@ -9,7 +9,6 @@ import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
 import com.datastax.driver.core.exceptions.QueryValidationException;
 import com.datastax.driver.core.exceptions.UnsupportedFeatureException;
-import java.util.Properties;
 
 /**
  * @author Fabrizio Torelli (fabrizio.torelli@ie.verizon.com)
