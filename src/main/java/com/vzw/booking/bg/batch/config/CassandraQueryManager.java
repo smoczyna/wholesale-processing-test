@@ -53,7 +53,7 @@ public class CassandraQueryManager {
     private final String glmarketenddate = "12/31/9999";
     //private final String alternatebookingtype = "D";
 
-    private Session cassandraSession;    
+    private static Session cassandraSession;    
     private static final String CASSANDRA_KEYSPACE = "j6_dev";
     
     private final String finMarketQuery = "SELECT * FROM financialmarket"
@@ -86,14 +86,15 @@ public class CassandraQueryManager {
         Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
 //        AuthProvider authProvider = new PlainTextAuthProvider(username, password);
 //        Cluster cluster = Cluster.builder().addContactPoint(host).withAuthProvider(authProvider).build();
-        this.cassandraSession = cluster.connect(CASSANDRA_KEYSPACE);
+        cassandraSession = cluster.connect(CASSANDRA_KEYSPACE);
         
-        this.finMarketStatement = this.cassandraSession.prepare(finMarketQuery);
-        //this.productStatement = this.cassandraSession.prepare(productQuery);
-        this.finEventCatStatement = this.cassandraSession.prepare(finEventCatQuery);
-        this.finEventCatStatementBilled = this.cassandraSession.prepare(finEventCatQueryBilled);
-        this.dataEventStatement = this.cassandraSession.prepare(dataEventQuery);
-        this.wholesalePriceStatement = this.cassandraSession.prepare(wholesalePriceQuery);
+        this.finMarketStatement = cassandraSession.prepare(finMarketQuery);
+        this.finEventCatStatement = cassandraSession.prepare(finEventCatQuery);
+        this.finEventCatStatementBilled = cassandraSession.prepare(finEventCatQueryBilled);
+        this.dataEventStatement = cassandraSession.prepare(dataEventQuery);
+        this.wholesalePriceStatement = cassandraSession.prepare(wholesalePriceQuery);
+        
+        LOGGER.info("After construction of Cassandra connection");
     }
     
     /**
@@ -102,7 +103,7 @@ public class CassandraQueryManager {
      * @return
      */
     public Session getCassandraSession() {
-        return this.cassandraSession;
+        return cassandraSession;
     }
 
     /**
