@@ -5,9 +5,6 @@
  */
 package com.vzw.booking.bg.batch.readers;
 
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -15,7 +12,6 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.file.transform.LineTokenizer;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 
 /**
@@ -28,18 +24,13 @@ import org.springframework.core.io.FileSystemResource;
 public class CsvFileGenericReader<T> extends FlatFileItemReader<T> {
 
     private final Class<T> payloadClass;
-    private static final String PROPERTY_CSV_SOURCE_FILE_PATH = "csv.to.database.job.source.file.path";
-
+    
     public CsvFileGenericReader(Class<T> payloadClass, String filePath, String[] fieldNames, String delimiter, int linesToSkip) {
         super();
         this.payloadClass = payloadClass;
         this.setResource(new FileSystemResource(filePath));
         this.setLinesToSkip(linesToSkip);
         this.setLineMapper(createLineMapper(fieldNames, delimiter));
-    }
-    
-    public CsvFileGenericReader(Class<T> payloadClass, Environment environment, String filename, String[] fieldNames, String delimiter) {
-        this(payloadClass, environment.getRequiredProperty(PROPERTY_CSV_SOURCE_FILE_PATH).concat(filename), fieldNames, delimiter, 0);
     }
 
     protected final LineMapper<T> createLineMapper(String[] fieldNames, String delimiter) {

@@ -20,6 +20,7 @@ public class Constants {
     public static final String SUBLEDGER_SUMMARY_FILENAME = "subledger_summary.csv";
     public static final String WHOLESALE_REPORT_FILENAME = "wholesale_report.csv";
     
+    public static final String FILE_SPLIT_MESSAGE = "File %s has been splitted into %d chunks";
     public static final String DEFAULT_CSV_FIELDS_DELIMITER = ",";
     public static final Integer DEFAULT_MAX_SKIPPED_RECORDS = 100;
     public static final Integer DEFAULT_NUMBER_OF_CHUNKS = 1;
