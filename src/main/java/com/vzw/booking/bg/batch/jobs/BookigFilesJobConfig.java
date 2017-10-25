@@ -61,8 +61,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class BookigFilesJobConfig {
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    
     
     /* listeners and helpers */
     @Bean
@@ -83,9 +82,9 @@ public class BookigFilesJobConfig {
     @Bean
     @StepScope
     RangePartitioner billedFilePartitioner(Environment environment) throws IOException {
-        String PROPERTY_CSV_SOURCE_FILE_PATH = "csv.to.database.job.source.file.path";
+        //String PROPERTY_CSV_SOURCE_FILE_PATH = "csv.to.database.job.source.file.path";
         //Resource[] resources = resourceResolver.loadResources(environment.getRequiredProperty(PROPERTY_CSV_SOURCE_FILE_PATH).concat("unbilled_split/*.csv"));
-        Resource[] resources = applicationContext.getResources(environment.getRequiredProperty(PROPERTY_CSV_SOURCE_FILE_PATH).concat("billed_split/*.csv"));
+        
         return new RangePartitioner(resources);        
     }
     
