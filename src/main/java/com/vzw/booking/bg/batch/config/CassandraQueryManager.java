@@ -84,8 +84,7 @@ public class CassandraQueryManager {
     public void init() {
         AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
         Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
-//        AuthProvider authProvider = new PlainTextAuthProvider(username, password);
-//        Cluster cluster = Cluster.builder().addContactPoint(host).withAuthProvider(authProvider).build();
+
         cassandraSession = cluster.connect(CASSANDRA_KEYSPACE);
         
         this.finMarketStatement = cassandraSession.prepare(finMarketQuery);
