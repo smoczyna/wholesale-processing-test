@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -32,10 +34,10 @@ public class BookingAggregateJobListener implements JobExecutionListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BookingAggregateJobListener.class);
     private Date startTIme;
-    
+
     @Autowired
     private WholesaleBookingProcessorHelper helper;
-    
+
     @Value("${csv.to.database.job.source.file.path}")
     private String INPUT_CSV_SOURCE_FILE_PATH;
 
@@ -49,20 +51,29 @@ public class BookingAggregateJobListener implements JobExecutionListener {
 
     /**
      * moves all source files to archive folder to avoid duplicate processing
-     * @param je 
+     *
+     * @param je
      */
     @Override
     public void afterJob(JobExecution je) {
         if (je.getStatus() == BatchStatus.COMPLETED) {
-            this.moveFileToArchive(Constants.BOOK_DATE_FILENAME);
-            this.moveFileToArchive(Constants.FINANCIAL_EVENT_OFFSET_FILENAME);
-            this.moveFileToArchive(Constants.BILLED_BOOKING_FILENAME);
-            this.moveFileToArchive(Constants.UNBILLED_BOOKING_FILENAME);
-            this.moveFileToArchive(Constants.ADMIN_FEES_FILENAME);
-            
-            Date endTime = new Date();
-            LOGGER.info(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
-            LOGGER.info(String.format(Constants.JOB_PROCESSIG_TIME_MESSAGE, ((endTime.getTime() - this.startTIme.getTime())/1000)));
+            try {
+                this.moveFileToArchive(Constants.BOOK_DATE_FILENAME);
+                this.moveFileToArchive(Constants.FINANCIAL_EVENT_OFFSET_FILENAME);
+                this.moveFileToArchive(Constants.BILLED_BOOKING_FILENAME);
+                this.moveFileToArchive(Constants.UNBILLED_BOOKING_FILENAME);
+                this.moveFileToArchive(Constants.ADMIN_FEES_FILENAME);
+                
+                FileUtils.cleanDirectory(new File(INPUT_CSV_SOURCE_FILE_PATH.concat("billed_split")));
+                FileUtils.cleanDirectory(new File(INPUT_CSV_SOURCE_FILE_PATH.concat("unbilled_split")));
+                FileUtils.cleanDirectory(new File(INPUT_CSV_SOURCE_FILE_PATH.concat("adminfees_split")));
+                
+                Date endTime = new Date();
+                LOGGER.info(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
+                LOGGER.info(String.format(Constants.JOB_PROCESSIG_TIME_MESSAGE, ((endTime.getTime() - this.startTIme.getTime()) / 1000)));
+            } catch (IOException ex) {
+                java.util.logging.Logger.getLogger(BookingAggregateJobListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } else {
             LOGGER.info(Constants.JOB_EXCEPTIONS_ENCOUNTERED);
             List<Throwable> exceptionList = je.getAllFailureExceptions();
@@ -74,7 +85,8 @@ public class BookingAggregateJobListener implements JobExecutionListener {
 
     /**
      * moves source file to archive folder
-     * @param filename 
+     *
+     * @param filename
      */
     private void moveFileToArchive(String filename) {
         try {

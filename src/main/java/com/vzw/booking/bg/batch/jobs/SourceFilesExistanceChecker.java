@@ -66,7 +66,7 @@ public class SourceFilesExistanceChecker implements Tasklet {
         String ext = FilenameUtils.getExtension(bigFile.getName());
         String fileNoExt = bigFile.getName().replace("."+ext, "");        
         File newDir = new File(bigFile.getParent() + "/" + fileNoExt + "_split");
-        //newDir.mkdirs();
+        if (!newDir.exists()) newDir.mkdirs();        
         try (BufferedReader reader = Files.newBufferedReader(bigFile.toPath())) {
             String line;
             int lineNum = 1;
