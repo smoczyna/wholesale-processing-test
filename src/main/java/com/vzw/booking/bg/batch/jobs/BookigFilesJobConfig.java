@@ -165,16 +165,19 @@ public class BookigFilesJobConfig {
     }
 
     @Bean
+    @StepScope
     ItemProcessor<BilledCsvFileDTO, WholesaleProcessingOutput> billedBookingProcessor() {
         return new WholesaleBookingProcessor();
     }
 
     @Bean
+    @StepScope
     ItemProcessor<UnbilledCsvFileDTO, WholesaleProcessingOutput> unbilledBookingProcessor() {
         return new WholesaleBookingProcessor();
     }
 
     @Bean
+    @StepScope
     ItemProcessor<AdminFeeCsvFileDTO, WholesaleProcessingOutput> adminFeesBookingProcessor() {
         return new WholesaleBookingProcessor();
     }
@@ -182,16 +185,19 @@ public class BookigFilesJobConfig {
     /* writers */
     
     @Bean
+    @StepScope
     ItemWriter<AggregateWholesaleReportDTO> wholesaleReportWriter(Environment environment) {
         return new WholesaleReportCsvWriter(environment);
     }
 
     @Bean
+    @StepScope
     ItemWriter<SummarySubLedgerDTO> subledgerItemWriter(Environment environment) {
         return new SubledgerCsvFileWriter(environment);
     }
 
     @Bean
+    @StepScope
     ItemWriter<WholesaleProcessingOutput> wholesaleOutputWriter(Environment environment) {
         return new WholesaleOutputWriter();
     }
