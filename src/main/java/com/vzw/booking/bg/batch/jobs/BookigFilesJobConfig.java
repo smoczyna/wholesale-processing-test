@@ -25,6 +25,7 @@ import com.vzw.booking.bg.batch.readers.BilledBookingFileReader;
 import com.vzw.booking.bg.batch.readers.BookDateCsvFileReader;
 import com.vzw.booking.bg.batch.readers.FinancialEventOffsetReader;
 import com.vzw.booking.bg.batch.readers.UnbilledBookingFileReader;
+import com.vzw.booking.bg.batch.utils.WholesaleBookingProcessorHelper;
 import com.vzw.booking.bg.batch.validation.CsvFileVerificationSkipper;
 import com.vzw.booking.bg.batch.writers.SubledgerCsvFileWriter;
 import com.vzw.booking.bg.batch.writers.WholesaleOutputWriter;
@@ -44,6 +45,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,6 +61,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class BookigFilesJobConfig {
     
     /* listeners and helpers */
+    
+    @Autowired
+    WholesaleBookingProcessorHelper processingHelper;
+    
     @Bean
     JobExecutionListener bookingFileJobListener() {
         return new BookingAggregateJobListener();
@@ -75,19 +81,19 @@ public class BookigFilesJobConfig {
     }
 
     @Bean
-    //@StepScope
+    @StepScope
     RangePartitioner billedFilePartitioner(Environment environment) {           
         return new RangePartitioner(environment, "billed_split/");
     }
     
     @Bean
-    //@StepScope
+    @StepScope
     RangePartitioner unbilledFilePartitioner(Environment environment) throws IOException {
         return new RangePartitioner(environment, "unbilled_split/");
     }
 
     @Bean
-    //@StepScope
+    @StepScope
     RangePartitioner adminFeesFilePartitioner(Environment environment) throws IOException {
         return new RangePartitioner(environment, "adminfees_split/");
     }
@@ -116,20 +122,29 @@ public class BookigFilesJobConfig {
 
     @Bean
     @StepScope
-    ItemReader<BilledCsvFileDTO> billedFileItemReader(ExecutionContext context) {
-        return new BilledBookingFileReader(context.getString("fileName"));
+    ItemReader<BilledCsvFileDTO> billedFileItemReader() {
+        ExecutionContext context = this.processingHelper.getStepExecutionContext();
+        BilledBookingFileReader reader = new BilledBookingFileReader(context.getString("fileName"));
+        reader.open(context);
+        return reader;
     }
     
     @Bean
     @StepScope
-    ItemReader<UnbilledCsvFileDTO> unbilledFileItemReader(ExecutionContext context) {
-        return new UnbilledBookingFileReader(context.getString("fileName"));
+    ItemReader<UnbilledCsvFileDTO> unbilledFileItemReader() {
+        ExecutionContext context = this.processingHelper.getStepExecutionContext();
+        UnbilledBookingFileReader reader = new UnbilledBookingFileReader(context.getString("fileName"));
+        reader.open(context);
+        return reader;
     }
     
     @Bean
     @StepScope
-    ItemReader<AdminFeeCsvFileDTO> adminFeesFileItemReader(ExecutionContext context) {
-        return new AdminFeesBookingFileReader(context.getString("fileName"));
+    ItemReader<AdminFeeCsvFileDTO> adminFeesFileItemReader() {
+        ExecutionContext context = this.processingHelper.getStepExecutionContext();
+        AdminFeesBookingFileReader reader = new AdminFeesBookingFileReader(context.getString("fileName"));
+        reader.open(context);
+        return reader;
     }
     
     @Bean

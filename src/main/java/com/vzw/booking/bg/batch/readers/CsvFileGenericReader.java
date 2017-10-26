@@ -30,7 +30,7 @@ public class CsvFileGenericReader<T> extends FlatFileItemReader<T> {
         this.payloadClass = payloadClass;
         this.setResource(new FileSystemResource(filePath));
         this.setLinesToSkip(linesToSkip);
-        this.setLineMapper(createLineMapper(fieldNames, delimiter));
+        this.setLineMapper(createLineMapper(fieldNames, delimiter));        
     }
 
     protected final LineMapper<T> createLineMapper(String[] fieldNames, String delimiter) {
@@ -54,4 +54,6 @@ public class CsvFileGenericReader<T> extends FlatFileItemReader<T> {
         informationMapper.setTargetType(payloadClass);
         return informationMapper;
     }
+    
+    
 }

@@ -10,26 +10,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  *
  * @author smorcja
  */
-@Component
 public class RangePartitioner implements Partitioner {
 
     private static final String PROPERTY_CSV_SOURCE_FILE_PATH = "csv.to.database.job.source.file.path";
     private final String resourceLocation;
-    
-    @Autowired
-    private ApplicationContext applicationContext;
 
     public RangePartitioner(Environment environment, String splitFolder) {
         this.resourceLocation = environment.getRequiredProperty(PROPERTY_CSV_SOURCE_FILE_PATH).concat(splitFolder);
@@ -38,14 +35,21 @@ public class RangePartitioner implements Partitioner {
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         Map<String, ExecutionContext> result = new HashMap();
+        ClassLoader cl = this.getClass().getClassLoader();
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
         Resource[] resources;
         try {
-            resources = applicationContext.getResources(resourceLocation.concat("*.csv"));
+            resources = resolver.getResources("file:" + resourceLocation.concat("*.csv"));
             for (Resource resource : resources) {
                 ExecutionContext context = new ExecutionContext();
                 String fileName = resource.getFilename();
-                int fileNo = Integer.parseInt(fileName.substring(fileName.indexOf("_")));
-                context.putString("fileName", fileName);
+                int fileNo=0;
+                Pattern intsOnly = Pattern.compile("\\d+");
+                Matcher makeMatch = intsOnly.matcher(fileName);
+                if (makeMatch.find())
+                    fileNo = Integer.parseInt(makeMatch.group());
+
+                context.putString("fileName", resourceLocation.concat(fileName));
                 result.put("partition" + fileNo, context);
             }
         } catch (IOException ex) {

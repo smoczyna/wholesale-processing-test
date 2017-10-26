@@ -32,5 +32,4 @@ public class BookingWholesaleApplicationInit {
     public DataSource metaDataSource() {
         return DataSourceBuilder.create().build();
     }
-
 }

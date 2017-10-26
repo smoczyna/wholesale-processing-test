@@ -35,7 +35,7 @@ public class Constants {
     public static final String SUBLEDGER = "subledger";
     public static final String WHOLESALES_REPORT = "report";
     
-    public static final String JOB_STARTED = "Starting booking files processing job\"";
+    public static final String JOB_STARTED = "Starting booking files processing job";
     public static final String JOB_FINISHED = "Stopping booking files processing job";
     public static final String JOB_STARTED_MESSAGE = "Wholesale booking processing started at: %S";
     public static final String JOB_FINISHED_MESSAGE = "Wholesale booking processing ended at: %s";

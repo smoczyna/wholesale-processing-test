@@ -19,7 +19,7 @@ public class BookDateCsvFileReader extends CsvFileGenericReader<BookDateCsvFileD
     
     @Autowired
     public BookDateCsvFileReader(Environment environment, String filename) {
-        super(BookDateCsvFileDTO.class, environment.getRequiredProperty(PROPERTY_CSV_SOURCE_FILE_PATH).concat(filename), COLUMN_NAMES, ",", 0);
+        super(BookDateCsvFileDTO.class, environment.getRequiredProperty(PROPERTY_CSV_SOURCE_FILE_PATH).concat(filename), COLUMN_NAMES, ",", 0);        
     }
     
     public BookDateCsvFileReader(String filPath) {
