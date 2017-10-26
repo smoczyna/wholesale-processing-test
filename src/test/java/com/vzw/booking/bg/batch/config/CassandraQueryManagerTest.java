@@ -38,8 +38,8 @@ import java.util.concurrent.ExecutionException;
  *
  * @author torelfa
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = {CassandraQueryManager.class})
+//@RunWith(SpringRunner.class)
+//@SpringBootTest(classes = {CassandraQueryManager.class})
 public class CassandraQueryManagerTest {
 
     @Autowired
@@ -47,14 +47,14 @@ public class CassandraQueryManagerTest {
 
     private static final String CASSANDRA_KEYSPACE = "j6_dev";
 
-    private Session getCassandraSession() {
-        AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
-        Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
-        Session session = cluster.connect(CASSANDRA_KEYSPACE);
-        return session;
-    }
+//    private Session getCassandraSession() {
+//        AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
+//        Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
+//        Session session = cluster.connect(CASSANDRA_KEYSPACE);
+//        return session;
+//    }
 
-    @Test //(expected = NoResultsReturnedException.class)
+    //@Test //(expected = NoResultsReturnedException.class)
     public void testGetFinancialMarketRecord() throws Throwable {
         String financialmarketid = "HUB";
         List<FinancialMarket> recordsActual = queryManager.getFinancialMarketRecord(financialmarketid);
@@ -85,7 +85,7 @@ public class CassandraQueryManagerTest {
 //        }
 //    }
 
-    @Test //(expected = NoResultsReturnedException.class)
+    //@Test //(expected = NoResultsReturnedException.class)
     public void testGetFinancialEventCategoryRecord() throws Throwable {
         int TmpProdId = 18958;
         //String financialmarketid = "K34";
@@ -100,7 +100,7 @@ public class CassandraQueryManagerTest {
         //Assert.assertEquals(recordsExpected, recordsActual);
     }
 
-    @Test(expected = NoResultsReturnedException.class)
+    //@Test(expected = NoResultsReturnedException.class)
     public void testGetDataEventRecords() throws Throwable {
         Integer productid = 1;
         List<DataEvent> dbResult = queryManager.getDataEventRecords(productid);
@@ -108,7 +108,7 @@ public class CassandraQueryManagerTest {
         // Assert.assertEquals(recordExpected, record);
     }
 
-    @Test //(expected = NoResultsReturnedException.class)
+    //@Test //(expected = NoResultsReturnedException.class)
     public void testgetProductRecords() throws Throwable {
         Integer productid = 19182;
         String homesidbid = "30332";

@@ -44,13 +44,10 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.Resource;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -60,8 +57,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Configuration
 public class BookigFilesJobConfig {
-
-    
     
     /* listeners and helpers */
     @Bean
@@ -80,28 +75,21 @@ public class BookigFilesJobConfig {
     }
 
     @Bean
-    @StepScope
-    RangePartitioner billedFilePartitioner(Environment environment) throws IOException {
-        //String PROPERTY_CSV_SOURCE_FILE_PATH = "csv.to.database.job.source.file.path";
-        //Resource[] resources = resourceResolver.loadResources(environment.getRequiredProperty(PROPERTY_CSV_SOURCE_FILE_PATH).concat("unbilled_split/*.csv"));
-        
-        return new RangePartitioner(resources);        
+    //@StepScope
+    RangePartitioner billedFilePartitioner(Environment environment) {           
+        return new RangePartitioner(environment, "billed_split/");
     }
     
     @Bean
-    @StepScope
+    //@StepScope
     RangePartitioner unbilledFilePartitioner(Environment environment) throws IOException {
-        String PROPERTY_CSV_SOURCE_FILE_PATH = "csv.to.database.job.source.file.path";
-        Resource[] resources = applicationContext.getResources(environment.getRequiredProperty(PROPERTY_CSV_SOURCE_FILE_PATH).concat("unbilled_split/*.csv"));
-        return new RangePartitioner(resources);
+        return new RangePartitioner(environment, "unbilled_split/");
     }
 
     @Bean
-    @StepScope
+    //@StepScope
     RangePartitioner adminFeesFilePartitioner(Environment environment) throws IOException {
-        String PROPERTY_CSV_SOURCE_FILE_PATH = "csv.to.database.job.source.file.path";
-        Resource[] resources = applicationContext.getResources(environment.getRequiredProperty(PROPERTY_CSV_SOURCE_FILE_PATH).concat("adminfees_split/*.csv"));
-        return new RangePartitioner(resources);
+        return new RangePartitioner(environment, "adminfees_split/");
     }
     
     @Bean
