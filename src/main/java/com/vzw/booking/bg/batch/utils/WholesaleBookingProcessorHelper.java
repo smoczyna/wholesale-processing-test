@@ -12,7 +12,6 @@ import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
 import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,7 +34,7 @@ public class WholesaleBookingProcessorHelper {
     private long wholesaleReportCounter;
     private long maxSkippedRecords;
     private long numberOfChunks;
-    private ExecutionContext stepExecutionContext;
+    //private ExecutionContext stepExecutionContext;
 
     public WholesaleBookingProcessorHelper() {
         this.financialEventOffset = new HashMap();
@@ -48,13 +47,13 @@ public class WholesaleBookingProcessorHelper {
         this.maxSkippedRecords = 0;
     }
 
-    public ExecutionContext getStepExecutionContext() {
-        return stepExecutionContext;
-    }
-
-    public void setStepExecutionContext(ExecutionContext stepExecutionContext) {
-        this.stepExecutionContext = stepExecutionContext;
-    }
+//    public ExecutionContext getStepExecutionContext() {
+//        return stepExecutionContext;
+//    }
+//
+//    public void setStepExecutionContext(ExecutionContext stepExecutionContext) {
+//        this.stepExecutionContext = stepExecutionContext;
+//    }
 
     public BookDateCsvFileDTO getDates() {
         return this.dates;

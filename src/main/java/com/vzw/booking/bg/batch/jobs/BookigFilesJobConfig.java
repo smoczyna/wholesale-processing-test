@@ -25,7 +25,6 @@ import com.vzw.booking.bg.batch.readers.BilledBookingFileReader;
 import com.vzw.booking.bg.batch.readers.BookDateCsvFileReader;
 import com.vzw.booking.bg.batch.readers.FinancialEventOffsetReader;
 import com.vzw.booking.bg.batch.readers.UnbilledBookingFileReader;
-import com.vzw.booking.bg.batch.utils.WholesaleBookingProcessorHelper;
 import com.vzw.booking.bg.batch.validation.CsvFileVerificationSkipper;
 import com.vzw.booking.bg.batch.writers.SubledgerCsvFileWriter;
 import com.vzw.booking.bg.batch.writers.WholesaleOutputWriter;
@@ -41,12 +40,11 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -62,8 +60,8 @@ public class BookigFilesJobConfig {
     
     /* listeners and helpers */
     
-    @Autowired
-    WholesaleBookingProcessorHelper processingHelper;
+//    @Autowired
+//    WholesaleBookingProcessorHelper processingHelper;
     
     @Bean
     JobExecutionListener bookingFileJobListener() {
@@ -101,9 +99,9 @@ public class BookigFilesJobConfig {
     @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setMaxPoolSize(1000);
-        taskExecutor.setCorePoolSize(1000);
-        taskExecutor.setQueueCapacity(1000);
+        taskExecutor.setMaxPoolSize(1200);
+        taskExecutor.setCorePoolSize(1200);
+        taskExecutor.setQueueCapacity(1200);
         taskExecutor.afterPropertiesSet();
         return taskExecutor;
     }
@@ -122,30 +120,48 @@ public class BookigFilesJobConfig {
 
     @Bean
     @StepScope
-    ItemReader<BilledCsvFileDTO> billedFileItemReader() {
-        ExecutionContext context = this.processingHelper.getStepExecutionContext();
-        BilledBookingFileReader reader = new BilledBookingFileReader(context.getString("fileName"));
-        reader.open(context);
-        return reader;
+    ItemReader<BilledCsvFileDTO> billedFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
+        return new BilledBookingFileReader(filename);
     }
     
     @Bean
     @StepScope
-    ItemReader<UnbilledCsvFileDTO> unbilledFileItemReader() {
-        ExecutionContext context = this.processingHelper.getStepExecutionContext();
-        UnbilledBookingFileReader reader = new UnbilledBookingFileReader(context.getString("fileName"));
-        reader.open(context);
-        return reader;
+    ItemReader<UnbilledCsvFileDTO> unbilledFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
+        return new UnbilledBookingFileReader(filename);
     }
     
     @Bean
     @StepScope
-    ItemReader<AdminFeeCsvFileDTO> adminFeesFileItemReader() {
-        ExecutionContext context = this.processingHelper.getStepExecutionContext();
-        AdminFeesBookingFileReader reader = new AdminFeesBookingFileReader(context.getString("fileName"));
-        reader.open(context);
-        return reader;
+    ItemReader<AdminFeeCsvFileDTO> adminFeesFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
+        return new AdminFeesBookingFileReader(filename);
     }
+    
+//    @Bean
+//    @StepScope
+//    ItemReader<BilledCsvFileDTO> billedFileItemReader() {
+//        ExecutionContext context = this.processingHelper.getStepExecutionContext();
+//        BilledBookingFileReader reader = new BilledBookingFileReader(context.getString("fileName"));
+//        reader.open(context);
+//        return reader;
+//    }
+//    
+//    @Bean
+//    @StepScope
+//    ItemReader<UnbilledCsvFileDTO> unbilledFileItemReader() {
+//        ExecutionContext context = this.processingHelper.getStepExecutionContext();
+//        UnbilledBookingFileReader reader = new UnbilledBookingFileReader(context.getString("fileName"));
+//        reader.open(context);
+//        return reader;
+//    }
+//    
+//    @Bean
+//    @StepScope
+//    ItemReader<AdminFeeCsvFileDTO> adminFeesFileItemReader() {
+//        ExecutionContext context = this.processingHelper.getStepExecutionContext();
+//        AdminFeesBookingFileReader reader = new AdminFeesBookingFileReader(context.getString("fileName"));
+//        reader.open(context);
+//        return reader;
+//    }
     
     @Bean
     public SkipPolicy fileVerificationSkipper() {
@@ -165,16 +181,19 @@ public class BookigFilesJobConfig {
     }
 
     @Bean
+    @StepScope
     ItemProcessor<BilledCsvFileDTO, WholesaleProcessingOutput> billedBookingProcessor() {
         return new WholesaleBookingProcessor();
     }
 
     @Bean
+    @StepScope
     ItemProcessor<UnbilledCsvFileDTO, WholesaleProcessingOutput> unbilledBookingProcessor() {
         return new WholesaleBookingProcessor();
     }
 
     @Bean
+    @StepScope
     ItemProcessor<AdminFeeCsvFileDTO, WholesaleProcessingOutput> adminFeesBookingProcessor() {
         return new WholesaleBookingProcessor();
     }
@@ -182,16 +201,19 @@ public class BookigFilesJobConfig {
     /* writers */
     
     @Bean
+    @StepScope
     ItemWriter<AggregateWholesaleReportDTO> wholesaleReportWriter(Environment environment) {
         return new WholesaleReportCsvWriter(environment);
     }
 
     @Bean
+    @StepScope
     ItemWriter<SummarySubLedgerDTO> subledgerItemWriter(Environment environment) {
         return new SubledgerCsvFileWriter(environment);
     }
 
     @Bean
+    @StepScope
     ItemWriter<WholesaleProcessingOutput> wholesaleOutputWriter(Environment environment) {
         return new WholesaleOutputWriter();
     }
