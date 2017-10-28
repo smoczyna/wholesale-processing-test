@@ -8,11 +8,9 @@ package com.vzw.booking.bg.batch.jobs;
 import com.vzw.booking.bg.batch.utils.RangePartitioner;
 import com.vzw.booking.bg.batch.constants.Constants;
 import com.vzw.booking.bg.batch.domain.AdminFeeCsvFileDTO;
-import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import com.vzw.booking.bg.batch.domain.BilledCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.BookDateCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.FinancialEventOffsetDTO;
-import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
 import com.vzw.booking.bg.batch.domain.UnbilledCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.WholesaleProcessingOutput;
 import com.vzw.booking.bg.batch.listeners.BookingAggregateJobListener;
@@ -40,9 +38,6 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -59,10 +54,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class BookigFilesJobConfig {
     
     /* listeners and helpers */
-    
-//    @Autowired
-//    WholesaleBookingProcessorHelper processingHelper;
-    
+
     @Bean
     JobExecutionListener bookingFileJobListener() {
         return new BookingAggregateJobListener();
@@ -99,9 +91,9 @@ public class BookigFilesJobConfig {
     @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setMaxPoolSize(1200);
-        taskExecutor.setCorePoolSize(1200);
-        taskExecutor.setQueueCapacity(1200);
+        taskExecutor.setMaxPoolSize(30);
+        taskExecutor.setCorePoolSize(30);
+        taskExecutor.setQueueCapacity(5000);
         taskExecutor.afterPropertiesSet();
         return taskExecutor;
     }
@@ -109,59 +101,32 @@ public class BookigFilesJobConfig {
     /* readers */
     
     @Bean
-    ItemReader<BookDateCsvFileDTO> bookDateItemReader(Environment environment) {
+    BookDateCsvFileReader bookDateItemReader(Environment environment) {
         return new BookDateCsvFileReader(environment, Constants.BOOK_DATE_FILENAME);
     }
 
     @Bean
-    ItemReader<FinancialEventOffsetDTO> financialEventOffsetReader(Environment environment) {
+    FinancialEventOffsetReader financialEventOffsetReader(Environment environment) {
         return new FinancialEventOffsetReader(environment, Constants.FINANCIAL_EVENT_OFFSET_FILENAME);
     }
 
     @Bean
     @StepScope
-    ItemReader<BilledCsvFileDTO> billedFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
+    BilledBookingFileReader billedFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
         return new BilledBookingFileReader(filename);
     }
     
     @Bean
     @StepScope
-    ItemReader<UnbilledCsvFileDTO> unbilledFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
+    UnbilledBookingFileReader unbilledFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
         return new UnbilledBookingFileReader(filename);
     }
     
     @Bean
     @StepScope
-    ItemReader<AdminFeeCsvFileDTO> adminFeesFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
+    AdminFeesBookingFileReader adminFeesFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
         return new AdminFeesBookingFileReader(filename);
     }
-    
-//    @Bean
-//    @StepScope
-//    ItemReader<BilledCsvFileDTO> billedFileItemReader() {
-//        ExecutionContext context = this.processingHelper.getStepExecutionContext();
-//        BilledBookingFileReader reader = new BilledBookingFileReader(context.getString("fileName"));
-//        reader.open(context);
-//        return reader;
-//    }
-//    
-//    @Bean
-//    @StepScope
-//    ItemReader<UnbilledCsvFileDTO> unbilledFileItemReader() {
-//        ExecutionContext context = this.processingHelper.getStepExecutionContext();
-//        UnbilledBookingFileReader reader = new UnbilledBookingFileReader(context.getString("fileName"));
-//        reader.open(context);
-//        return reader;
-//    }
-//    
-//    @Bean
-//    @StepScope
-//    ItemReader<AdminFeeCsvFileDTO> adminFeesFileItemReader() {
-//        ExecutionContext context = this.processingHelper.getStepExecutionContext();
-//        AdminFeesBookingFileReader reader = new AdminFeesBookingFileReader(context.getString("fileName"));
-//        reader.open(context);
-//        return reader;
-//    }
     
     @Bean
     public SkipPolicy fileVerificationSkipper() {
@@ -171,51 +136,39 @@ public class BookigFilesJobConfig {
     /* processors */
     
     @Bean
-    ItemProcessor<BookDateCsvFileDTO, Boolean> bookDateProcessor() {
+    BookDateProcessor bookDateProcessor() {
         return new BookDateProcessor();
     }
 
     @Bean
-    ItemProcessor<FinancialEventOffsetDTO, Boolean> financialEventOffsetProcessor() {
+    FinancialEventOffsetProcessor financialEventOffsetProcessor() {
         return new FinancialEventOffsetProcessor();
     }
 
     @Bean
     @StepScope
-    ItemProcessor<BilledCsvFileDTO, WholesaleProcessingOutput> billedBookingProcessor() {
+    WholesaleBookingProcessor billedBookingProcessor() {
         return new WholesaleBookingProcessor();
     }
 
     @Bean
     @StepScope
-    ItemProcessor<UnbilledCsvFileDTO, WholesaleProcessingOutput> unbilledBookingProcessor() {
+    WholesaleBookingProcessor unbilledBookingProcessor() {
         return new WholesaleBookingProcessor();
     }
 
     @Bean
     @StepScope
-    ItemProcessor<AdminFeeCsvFileDTO, WholesaleProcessingOutput> adminFeesBookingProcessor() {
+    WholesaleBookingProcessor adminFeesBookingProcessor() {
         return new WholesaleBookingProcessor();
     }
 
     /* writers */
-    
-    @Bean
-    @StepScope
-    ItemWriter<AggregateWholesaleReportDTO> wholesaleReportWriter(Environment environment) {
-        return new WholesaleReportCsvWriter(environment);
-    }
 
     @Bean
     @StepScope
-    ItemWriter<SummarySubLedgerDTO> subledgerItemWriter(Environment environment) {
-        return new SubledgerCsvFileWriter(environment);
-    }
-
-    @Bean
-    @StepScope
-    ItemWriter<WholesaleProcessingOutput> wholesaleOutputWriter(Environment environment) {
-        return new WholesaleOutputWriter();
+    WholesaleOutputWriter wholesaleOutputWriter(Environment environment) {
+        return new WholesaleOutputWriter(environment);
     }
 
     /* job steps */
@@ -229,8 +182,8 @@ public class BookigFilesJobConfig {
     }
 
     @Bean
-    Step updateBookingDatesStep(ItemReader<BookDateCsvFileDTO> bookDateItemReader,
-                                ItemProcessor<BookDateCsvFileDTO, Boolean> bookDateProcessor,
+    Step updateBookingDatesStep(BookDateCsvFileReader bookDateItemReader,
+                                BookDateProcessor bookDateProcessor,
                                 StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("updateBookingDatesStep")
                 .<BookDateCsvFileDTO, Boolean>chunk(1)
@@ -240,8 +193,8 @@ public class BookigFilesJobConfig {
     }
 
     @Bean
-    Step readOffsetDataStep(ItemReader<FinancialEventOffsetDTO> financialEventOffsetReader,
-                            ItemProcessor<FinancialEventOffsetDTO, Boolean> financialEventOffsetProcessor,
+    Step readOffsetDataStep(FinancialEventOffsetReader financialEventOffsetReader,
+                            FinancialEventOffsetProcessor financialEventOffsetProcessor,
                             StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("readOffsetDataStep")
                 .<FinancialEventOffsetDTO, Boolean>chunk(1)
@@ -251,7 +204,8 @@ public class BookigFilesJobConfig {
     }
 
     @Bean
-    Step billedFilePartitionStep(RangePartitioner billedFilePartitioner,
+    Step billedFilePartitionStep(StepExecutionListener billedFileStepListener,
+                                 RangePartitioner billedFilePartitioner,
                                  Step billedBookingFileSlaveStep,
                                  TaskExecutor taskExecutor,
                                  StepBuilderFactory stepBuilderFactory) { // throws UnexpectedInputException, MalformedURLException, ParseException {
@@ -259,15 +213,15 @@ public class BookigFilesJobConfig {
                 .partitioner("billedSlaveStep", billedFilePartitioner)
                 .step(billedBookingFileSlaveStep)
                 .taskExecutor(taskExecutor)
+                .listener(billedFileStepListener)
                 .build();
     }
     
     @Bean
-    Step billedBookingFileSlaveStep(StepExecutionListener billedFileStepListener,
-                                    ItemReader<BilledCsvFileDTO> billedFileItemReader,
+    Step billedBookingFileSlaveStep(BilledBookingFileReader billedFileItemReader,
                                     SkipPolicy fileVerificationSkipper,
-                                    ItemProcessor<BilledCsvFileDTO, WholesaleProcessingOutput> billedBookingProcessor,
-                                    ItemWriter<WholesaleProcessingOutput> wholesaleOutputWriter,
+                                    WholesaleBookingProcessor billedBookingProcessor,
+                                    WholesaleOutputWriter wholesaleOutputWriter,
                                     StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("billedBookingFileSlaveStep")
                 .<BilledCsvFileDTO, WholesaleProcessingOutput>chunk(1)
@@ -275,13 +229,13 @@ public class BookigFilesJobConfig {
                 .faultTolerant()
                 .skipPolicy(fileVerificationSkipper)
                 .processor(billedBookingProcessor)
-                .writer(wholesaleOutputWriter)
-                .listener(billedFileStepListener)
+                .writer(wholesaleOutputWriter)                
                 .build();
     }
 
     @Bean
-    Step unbilledFilePartitionStep(RangePartitioner unbilledFilePartitioner,
+    Step unbilledFilePartitionStep(StepExecutionListener unbilledFileStepListener,
+                                   RangePartitioner unbilledFilePartitioner,
                                    Step unbilledBookingFileSlaveStep,
                                    TaskExecutor taskExecutor,
                                    StepBuilderFactory stepBuilderFactory) {
@@ -289,15 +243,15 @@ public class BookigFilesJobConfig {
                 .partitioner("unbilledSlaveStep", unbilledFilePartitioner)
                 .step(unbilledBookingFileSlaveStep)
                 .taskExecutor(taskExecutor)
+                .listener(unbilledFileStepListener)
                 .build();
     }
     
     @Bean
-    Step unbilledBookingFileSlaveStep(StepExecutionListener unbilledFileStepListener,
-                                      ItemReader<UnbilledCsvFileDTO> unbilledFileItemReader,
+    Step unbilledBookingFileSlaveStep(UnbilledBookingFileReader unbilledFileItemReader,
                                       SkipPolicy fileVerificationSkipper,
-                                      ItemProcessor<UnbilledCsvFileDTO, WholesaleProcessingOutput> unbilledBookingProcessor,
-                                      ItemWriter<WholesaleProcessingOutput> wholesaleOutputWriter,
+                                      WholesaleBookingProcessor unbilledBookingProcessor,
+                                      WholesaleOutputWriter wholesaleOutputWriter,
                                       StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("unbilledBookingFileSlaveStep")
                 .<UnbilledCsvFileDTO, WholesaleProcessingOutput>chunk(1)
@@ -306,12 +260,12 @@ public class BookigFilesJobConfig {
                 .skipPolicy(fileVerificationSkipper)
                 .processor(unbilledBookingProcessor)
                 .writer(wholesaleOutputWriter)
-                .listener(unbilledFileStepListener)
                 .build();
     }
 
     @Bean
-    Step adminFeesFilePartitionStep(RangePartitioner adminFeesFilePartitioner,
+    Step adminFeesFilePartitionStep(StepExecutionListener adminFeesFileStepListener,
+                                    RangePartitioner adminFeesFilePartitioner,
                                     Step adminFeesBookingFileSlaveStep,
                                     TaskExecutor taskExecutor,
                                     StepBuilderFactory stepBuilderFactory) {
@@ -319,15 +273,15 @@ public class BookigFilesJobConfig {
                 .partitioner("adminFeesSlaveStep", adminFeesFilePartitioner)
                 .step(adminFeesBookingFileSlaveStep)
                 .taskExecutor(taskExecutor)
+                .listener(adminFeesFileStepListener)
                 .build();
     }
     
     @Bean
-    Step adminFeesBookingFileSlaveStep(StepExecutionListener adminFeesFileStepListener,
-                                       ItemReader<AdminFeeCsvFileDTO> adminFeesFileItemReader,
+    Step adminFeesBookingFileSlaveStep(AdminFeesBookingFileReader adminFeesFileItemReader,
                                        SkipPolicy fileVerificationSkipper,
-                                       ItemProcessor<AdminFeeCsvFileDTO, WholesaleProcessingOutput> adminFeesBookingProcessor,
-                                       ItemWriter<WholesaleProcessingOutput> wholesaleOutputWriter,
+                                       WholesaleBookingProcessor adminFeesBookingProcessor,
+                                       WholesaleOutputWriter wholesaleOutputWriter,
                                        StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("adminFeesBookingFileSlaveStep")
                 .<AdminFeeCsvFileDTO, WholesaleProcessingOutput>chunk(1)
@@ -336,7 +290,6 @@ public class BookigFilesJobConfig {
                 .skipPolicy(fileVerificationSkipper)
                 .processor(adminFeesBookingProcessor)
                 .writer(wholesaleOutputWriter)
-                .listener(adminFeesFileStepListener)
                 .build();
     }
 

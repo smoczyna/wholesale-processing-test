@@ -64,9 +64,12 @@ public class BookingAggregateJobListener implements JobExecutionListener {
                 this.moveFileToArchive(Constants.UNBILLED_BOOKING_FILENAME);
                 this.moveFileToArchive(Constants.ADMIN_FEES_FILENAME);
                 
-                FileUtils.cleanDirectory(new File(INPUT_CSV_SOURCE_FILE_PATH.concat("billed_split")));
-                FileUtils.cleanDirectory(new File(INPUT_CSV_SOURCE_FILE_PATH.concat("unbilled_split")));
-                FileUtils.cleanDirectory(new File(INPUT_CSV_SOURCE_FILE_PATH.concat("adminfees_split")));
+                File d1 = new File(INPUT_CSV_SOURCE_FILE_PATH.concat("billed_split"));
+                if (d1.exists()) FileUtils.cleanDirectory(d1);
+                File d2 = new File(INPUT_CSV_SOURCE_FILE_PATH.concat("unbilled_split"));
+                if (d1.exists()) FileUtils.cleanDirectory(d2);
+                File d3 = new File(INPUT_CSV_SOURCE_FILE_PATH.concat("adminfees_split"));
+                if (d3.exists()) FileUtils.cleanDirectory(d3);
                 
                 Date endTime = new Date();
                 LOGGER.info(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
@@ -94,14 +97,15 @@ public class BookingAggregateJobListener implements JobExecutionListener {
             String archiveFileName = filename.concat(".").concat(ProcessingUtils.dateToString(new Date(), ProcessingUtils.SHORT_DATETIME_FORMAT_NOSPACE)).concat(".bak");
             File destFile = new File(INPUT_CSV_SOURCE_FILE_PATH.concat("archive/").concat(archiveFileName));
 
-            InputStream inStream = new FileInputStream(srcFile);
-            OutputStream outStream = new FileOutputStream(destFile);
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inStream.read(buffer)) > 0) {
-                outStream.write(buffer, 0, length);
+            OutputStream outStream;
+            try (InputStream inStream = new FileInputStream(srcFile)) {
+                outStream = new FileOutputStream(destFile);
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inStream.read(buffer)) > 0) {
+                    outStream.write(buffer, 0, length);
+                }
             }
-            inStream.close();
             outStream.close();
             srcFile.delete();
             LOGGER.info(String.format(Constants.FILE_ARCHIVED_MESSAGE, filename));

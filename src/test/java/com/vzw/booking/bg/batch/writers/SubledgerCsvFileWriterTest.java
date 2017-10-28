@@ -45,7 +45,7 @@ public class SubledgerCsvFileWriterTest {
         ClassLoader classLoader = getClass().getClassLoader();
         workingFoler = classLoader.getResource("./data").getPath();
         Logger.getLogger(SubledgerCsvFileWriterTest.class.getName()).info("Write path: "+workingFoler);
-        writer = new SubledgerCsvFileWriter(workingFoler+"/subledger_summary.csv");
+        writer = null; //new SubledgerCsvFileWriter(workingFoler+"/subledger_summary.csv");
     }
     
     @Test

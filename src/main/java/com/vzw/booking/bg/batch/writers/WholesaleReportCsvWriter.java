@@ -7,7 +7,6 @@ package com.vzw.booking.bg.batch.writers;
 
 import com.vzw.booking.bg.batch.constants.Constants;
 import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class WholesaleReportCsvWriter extends CsvFileGenericWriter<AggregateWholesaleReportDTO> {
-    
+    private static final String PROPERTY_CSV_EXPORT_FILE_PATH = "database.to.csv.job.export.file.path";
     private static final String[] COLUMN_NAMES = new String[] {
         "cycleMonthYear",
         "startDate",
@@ -41,12 +40,7 @@ public class WholesaleReportCsvWriter extends CsvFileGenericWriter<AggregateWhol
         "dbCrInd",
         "billedInd"};
 
-    public WholesaleReportCsvWriter(String filePath) {
-        super (filePath, COLUMN_NAMES, Constants.DEFAULT_CSV_FIELDS_DELIMITER);
-    }
-        
-    @Autowired
     public WholesaleReportCsvWriter(Environment environment) {
-        super(environment, Constants.WHOLESALE_REPORT_FILENAME, COLUMN_NAMES, Constants.DEFAULT_CSV_FIELDS_DELIMITER);
+        super (environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(Constants.WHOLESALE_REPORT_FILENAME), COLUMN_NAMES, Constants.DEFAULT_CSV_FIELDS_DELIMITER);
     }
 }

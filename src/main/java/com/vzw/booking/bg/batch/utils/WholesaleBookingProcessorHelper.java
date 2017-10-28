@@ -34,7 +34,6 @@ public class WholesaleBookingProcessorHelper {
     private long wholesaleReportCounter;
     private long maxSkippedRecords;
     private long numberOfChunks;
-    //private ExecutionContext stepExecutionContext;
 
     public WholesaleBookingProcessorHelper() {
         this.financialEventOffset = new HashMap();
@@ -46,14 +45,6 @@ public class WholesaleBookingProcessorHelper {
         this.wholesaleReportCounter = 0;
         this.maxSkippedRecords = 0;
     }
-
-//    public ExecutionContext getStepExecutionContext() {
-//        return stepExecutionContext;
-//    }
-//
-//    public void setStepExecutionContext(ExecutionContext stepExecutionContext) {
-//        this.stepExecutionContext = stepExecutionContext;
-//    }
 
     public BookDateCsvFileDTO getDates() {
         return this.dates;

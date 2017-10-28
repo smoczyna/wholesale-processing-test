@@ -10,7 +10,7 @@ import java.util.List;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamWriter;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,36 +19,38 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class WholesaleOutputWriter implements ItemStreamWriter<WholesaleProcessingOutput> {
-
-    @Autowired
-    private WholesaleReportCsvWriter wholesaleReportWriter;
     
-    @Autowired
-    private SubledgerCsvFileWriter subledgerWriter;
+    private final WholesaleReportCsvWriter wholesaleReportWriter;    
+    private final SubledgerCsvFileWriter subledgerWriter;
+    
+    public WholesaleOutputWriter(Environment environment) {
+        this.wholesaleReportWriter = new WholesaleReportCsvWriter(environment);
+        this.subledgerWriter = new SubledgerCsvFileWriter(environment);
+    }
     
     @Override
     public void open(ExecutionContext ec) throws ItemStreamException {
-        this.wholesaleReportWriter.open(ec);
-        this.subledgerWriter.open(ec);
+        wholesaleReportWriter.open(ec);
+        subledgerWriter.open(ec);
     }
 
     @Override
     public void update(ExecutionContext ec) throws ItemStreamException {
-        this.wholesaleReportWriter.update(ec);
-        this.subledgerWriter.update(ec);
+        wholesaleReportWriter.update(ec);
+        subledgerWriter.update(ec);
     }
 
     @Override
     public void close() throws ItemStreamException {
-        this.wholesaleReportWriter.close();
-        this.subledgerWriter.close();
+        wholesaleReportWriter.close();
+        subledgerWriter.close();
     }
 
     @Override
     public void write(List<? extends WholesaleProcessingOutput> list) throws Exception {
         for (WholesaleProcessingOutput item : list) {
-            this.wholesaleReportWriter.write(item.getWholesaleReportRecords());
-            this.subledgerWriter.write(item.getSubledgerRecords());
+            wholesaleReportWriter.write(item.getWholesaleReportRecords());
+            subledgerWriter.write(item.getSubledgerRecords());
         }        
     }    
 }

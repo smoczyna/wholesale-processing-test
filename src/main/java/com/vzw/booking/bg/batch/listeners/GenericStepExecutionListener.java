@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class GenericStepExecutionListener implements StepExecutionListener, SkipListener, ItemProcessListener {
 
     @Autowired
-    WholesaleBookingProcessorHelper processingHelper;
+    private WholesaleBookingProcessorHelper processingHelper;
     
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericStepExecutionListener.class);
     private Long recordCount;
@@ -31,12 +31,10 @@ public class GenericStepExecutionListener implements StepExecutionListener, Skip
     @Override
     public void beforeStep(StepExecution se) { 
         this.recordCount = 0L;
-        //this.processingHelper.setStepExecutionContext(se.getExecutionContext());
     }
 
     @Override
     public ExitStatus afterStep(StepExecution se) {
-        //this.processingHelper.setStepExecutionContext(null);
         LOGGER.info(String.format(Constants.JOB_EXECUTION_FINISHED, se.getReadCount(), se.getWriteCount()));        
         LOGGER.info(String.format(Constants.WHOLESALE_REPORT_NO, this.processingHelper.getCounter(Constants.WHOLESALES_REPORT)));
         LOGGER.info(String.format(Constants.SUBLEDGER_REPORD_NO, this.processingHelper.getCounter(Constants.SUBLEDGER)));

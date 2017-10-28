@@ -1,5 +1,6 @@
 package com.vzw.booking.bg.batch;
 
+import com.vzw.booking.bg.batch.utils.WholesaleBookingProcessorHelper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
@@ -31,5 +32,10 @@ public class BookingWholesaleApplicationInit {
     @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource metaDataSource() {
         return DataSourceBuilder.create().build();
+    }
+    
+    @Bean
+    public WholesaleBookingProcessorHelper wholesaleBookingProcessorHelper() {
+        return new WholesaleBookingProcessorHelper();
     }
 }

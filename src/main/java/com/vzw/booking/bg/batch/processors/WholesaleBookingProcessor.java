@@ -45,10 +45,10 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     private static final Logger LOGGER = LoggerFactory.getLogger(WholesaleBookingProcessor.class);
 
     @Autowired
-    WholesaleBookingProcessorHelper processingHelper;
+    private WholesaleBookingProcessorHelper processingHelper;
 
     @Autowired
-    CassandraQueryManager queryManager;
+    private static CassandraQueryManager queryManager;
 
     String searchServingSbid;
     String searchHomeSbid;
