@@ -84,14 +84,14 @@ public class CassandraQueryManager {
     
     @PostConstruct
     public void init() {
-//        AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
-//        Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
+        AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
+        Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
 
-        AuthProvider authProvider = new PlainTextAuthProvider("j6_prod_user", "Ireland");
-        Cluster cluster = Cluster.builder().addContactPoints("170.127.59.152", "170.127.59.153", "170.127.59.154")
-                .withAuthProvider(authProvider).withLoadBalancingPolicy(DCAwareRoundRobinPolicy.builder().withLocalDc("IDC1").build()).build();
-        
-        cassandraSession = cluster.connect(CASSANDRA_KEYSPACE_PROD);
+//        AuthProvider authProvider = new PlainTextAuthProvider("j6_prod_user", "Ireland");
+//        Cluster cluster = Cluster.builder().addContactPoints("170.127.59.152", "170.127.59.153", "170.127.59.154")
+//                .withAuthProvider(authProvider).withLoadBalancingPolicy(DCAwareRoundRobinPolicy.builder().withLocalDc("IDC1").build()).build();
+//        
+        cassandraSession = cluster.connect(CASSANDRA_KEYSPACE_DEV);
         
         this.finMarketStatement = cassandraSession.prepare(finMarketQuery);
         this.finEventCatStatement = cassandraSession.prepare(finEventCatQuery);
