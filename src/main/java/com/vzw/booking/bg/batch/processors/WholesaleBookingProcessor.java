@@ -48,7 +48,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     private WholesaleBookingProcessorHelper processingHelper;
 
     @Autowired
-    private static CassandraQueryManager queryManager;
+    private CassandraQueryManager queryManager;
 
     String searchServingSbid;
     String searchHomeSbid;
@@ -175,54 +175,9 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     }
 
     private boolean isAlternateBookingApplicable(BaseBookingInputInterface inRec) {
-        boolean altBookingInd = false;
-        String homeGlMarketId = " ";
-        String servingGlMarketId;
-
-        searchHomeSbid = inRec.getHomeSbid();
-        if (inRec.getServingSbid().trim().isEmpty()) {
-            searchServingSbid = searchHomeSbid;
-        } else {
-            searchServingSbid = inRec.getServingSbid();
-        }
-        if (searchHomeSbid.equals(searchServingSbid)) {
-            homeEqualsServingSbid = true;
-        }
-
-        FinancialMarket finMarket = this.getFinancialMarketFromDb(this.financialMarket);
-
-        String homeLegalEntityId = " ";
-        String servingLegalEntityId;
-
-        if (finMarket.getSidbid().equals(searchHomeSbid) && finMarket.getAlternatebookingtype().equals("P")) {
-            homeLegalEntityId = finMarket.getGllegalentityid();
-            if (homeEqualsServingSbid) {
-                altBookingInd = true;
-            }
-        }
-
-        if (!homeEqualsServingSbid && (finMarket.getSidbid().equals(searchServingSbid) && finMarket.getAlternatebookingtype().equals("P"))) {
-            servingLegalEntityId = finMarket.getGllegalentityid();
-            if (homeLegalEntityId.equals(servingLegalEntityId)) {
-                altBookingInd = true;
-            }
-        }
-
-        if (finMarket.getSidbid().equals(searchHomeSbid) && finMarket.getAlternatebookingtype().equals("M")) {
-            homeGlMarketId = finMarket.getGlmarketid();
-            if (homeEqualsServingSbid) {
-                altBookingInd = true;
-            }
-        }
-
-        if (!homeEqualsServingSbid && (finMarket.getSidbid().equals(searchServingSbid) && finMarket.getAlternatebookingtype().equals("M"))) {
-            servingGlMarketId = finMarket.getGlmarketid();
-            if (homeGlMarketId.equals(servingGlMarketId)) {
-                altBookingInd = true;
-            }
-        }
-        altBookingInd = false; // temporary fix, will be reviewed later
-        return altBookingInd;
+        
+        //altBookingInd = false; // temporary fix, will be reviewed later
+        return false;
     }
 
     private boolean bypassBooking(FinancialEventCategory financialEventCategory, boolean altBookingInd) {
@@ -321,13 +276,12 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             } else {
                 this.tmpProdId = billedRec.getAirProdId();
             }
-            report.setPeakDollarAmt(0d);            
             this.makeBookings(billedRec, outRec, tmpInterExchangeCarrierCode);
         } else {
             zeroAirCharge = true;
         }
 
-        if (billedRec.getTollProductId() > 0 && billedRec.getTollCharge() > 0) {
+        if (billedRec.getTollProductId() > 0 && billedRec.getTollCharge() > 0 && billedRec.getIncompleteInd().equals("D")) {
             if ((billedRec.getInterExchangeCarrierCode().equals(5050) && billedRec.getDebitcreditindicator().equals("CR"))
                     || billedRec.getIncompleteInd().equals("D")
                     || (!billedRec.getHomeSbid().equals(billedRec.getServingSbid()) && billedRec.getDebitcreditindicator().equals("CR"))

@@ -18,6 +18,7 @@ import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
 import com.datastax.driver.core.exceptions.QueryValidationException;
 import com.datastax.driver.core.exceptions.UnsupportedFeatureException;
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
 import com.vzw.booking.bg.batch.domain.casandra.DataEvent;
@@ -54,7 +55,8 @@ public class CassandraQueryManager {
     //private final String alternatebookingtype = "D";
 
     private static Session cassandraSession;    
-    private static final String CASSANDRA_KEYSPACE = "j6_dev";
+    private static final String CASSANDRA_KEYSPACE_DEV = "j6_dev";
+    private static final String CASSANDRA_KEYSPACE_PROD = "j6_prod";
     
     private final String finMarketQuery = "SELECT * FROM financialmarket"
             + " WHERE financialmarketid=? AND financialmarketmapenddate=? AND glmarketlegalentityenddate=? "
@@ -82,10 +84,14 @@ public class CassandraQueryManager {
     
     @PostConstruct
     public void init() {
-        AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
-        Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
+//        AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
+//        Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
 
-        cassandraSession = cluster.connect(CASSANDRA_KEYSPACE);
+        AuthProvider authProvider = new PlainTextAuthProvider("j6_prod_user", "Ireland");
+        Cluster cluster = Cluster.builder().addContactPoints("170.127.59.152", "170.127.59.153", "170.127.59.154")
+                .withAuthProvider(authProvider).withLoadBalancingPolicy(DCAwareRoundRobinPolicy.builder().withLocalDc("IDC1").build()).build();
+        
+        cassandraSession = cluster.connect(CASSANDRA_KEYSPACE_PROD);
         
         this.finMarketStatement = cassandraSession.prepare(finMarketQuery);
         this.finEventCatStatement = cassandraSession.prepare(finEventCatQuery);

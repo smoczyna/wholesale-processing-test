@@ -20,17 +20,15 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author smorcja
  */
-public class GenericStepExecutionListener implements StepExecutionListener, SkipListener, ItemProcessListener {
+public class GenericStepExecutionListener implements StepExecutionListener, SkipListener {
 
     @Autowired
     private WholesaleBookingProcessorHelper processingHelper;
     
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericStepExecutionListener.class);
-    private Long recordCount;
     
     @Override
-    public void beforeStep(StepExecution se) { 
-        this.recordCount = 0L;
+    public void beforeStep(StepExecution se) {
     }
 
     @Override
@@ -59,18 +57,5 @@ public class GenericStepExecutionListener implements StepExecutionListener, Skip
     @Override
     public void onSkipInProcess(Object inputRecord, Throwable exception) {
         LOGGER.error(inputRecord.toString());
-    }
-
-    @Override
-    public void beforeProcess(Object t) {
-        LOGGER.info(String.format(Constants.PROCESSING_RECORD, ++recordCount));
-    }
-
-    @Override
-    public void afterProcess(Object t, Object s) {
-    }
-
-    @Override
-    public void onProcessError(Object t, Exception excptn) {
     }
 }

@@ -23,9 +23,9 @@ public class WholesaleOutputWriter implements ItemStreamWriter<WholesaleProcessi
     private final WholesaleReportCsvWriter wholesaleReportWriter;    
     private final SubledgerCsvFileWriter subledgerWriter;
     
-    public WholesaleOutputWriter(Environment environment) {
-        this.wholesaleReportWriter = new WholesaleReportCsvWriter(environment);
-        this.subledgerWriter = new SubledgerCsvFileWriter(environment);
+    public WholesaleOutputWriter(Environment environment, String fileNo) {
+        this.wholesaleReportWriter = new WholesaleReportCsvWriter(environment, fileNo);
+        this.subledgerWriter = new SubledgerCsvFileWriter(environment, fileNo);
     }
     
     @Override

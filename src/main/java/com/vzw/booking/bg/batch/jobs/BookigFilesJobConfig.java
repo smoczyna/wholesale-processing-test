@@ -112,19 +112,19 @@ public class BookigFilesJobConfig {
 
     @Bean
     @StepScope
-    BilledBookingFileReader billedFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
+    BilledBookingFileReader billedFileItemReader(@Value("#{stepExecutionContext[sourceFileName]}") String filename) {
         return new BilledBookingFileReader(filename);
     }
     
     @Bean
     @StepScope
-    UnbilledBookingFileReader unbilledFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
+    UnbilledBookingFileReader unbilledFileItemReader(@Value("#{stepExecutionContext[sourceFileName]}") String filename) {
         return new UnbilledBookingFileReader(filename);
     }
     
     @Bean
     @StepScope
-    AdminFeesBookingFileReader adminFeesFileItemReader(@Value("#{stepExecutionContext[fileName]}") String filename) {
+    AdminFeesBookingFileReader adminFeesFileItemReader(@Value("#{stepExecutionContext[sourceFileName]}") String filename) {
         return new AdminFeesBookingFileReader(filename);
     }
     
@@ -167,8 +167,8 @@ public class BookigFilesJobConfig {
 
     @Bean
     @StepScope
-    WholesaleOutputWriter wholesaleOutputWriter(Environment environment) {
-        return new WholesaleOutputWriter(environment);
+    WholesaleOutputWriter wholesaleOutputWriter(Environment environment, @Value("#{stepExecutionContext[destFileNo]}") String fileNo) {
+        return new WholesaleOutputWriter(environment, fileNo);
     }
 
     /* job steps */
