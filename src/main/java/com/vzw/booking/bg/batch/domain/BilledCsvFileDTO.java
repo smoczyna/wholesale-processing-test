@@ -6,7 +6,7 @@
 package com.vzw.booking.bg.batch.domain;
 
 /**
- * Billed Bookings source payload class. This class represents the input file for billed bookings file: bmdunld.csv
+ * Billed Bookings source payload class. This class represents the input file for billed bookings file
  * @author smorcja
  */
 public class BilledCsvFileDTO implements BaseBookingInputInterface {

@@ -15,6 +15,7 @@ import com.vzw.booking.bg.batch.domain.UnbilledCsvFileDTO;
 import com.vzw.booking.bg.batch.domain.WholesaleProcessingOutput;
 import com.vzw.booking.bg.batch.listeners.BookingAggregateJobListener;
 import com.vzw.booking.bg.batch.listeners.GenericStepExecutionListener;
+import com.vzw.booking.bg.batch.listeners.WholesaleProcessingListener;
 import com.vzw.booking.bg.batch.processors.BookDateProcessor;
 import com.vzw.booking.bg.batch.processors.FinancialEventOffsetProcessor;
 import com.vzw.booking.bg.batch.processors.WholesaleBookingProcessor;
@@ -24,9 +25,7 @@ import com.vzw.booking.bg.batch.readers.BookDateCsvFileReader;
 import com.vzw.booking.bg.batch.readers.FinancialEventOffsetReader;
 import com.vzw.booking.bg.batch.readers.UnbilledBookingFileReader;
 import com.vzw.booking.bg.batch.validation.CsvFileVerificationSkipper;
-import com.vzw.booking.bg.batch.writers.SubledgerCsvFileWriter;
 import com.vzw.booking.bg.batch.writers.WholesaleOutputWriter;
-import com.vzw.booking.bg.batch.writers.WholesaleReportCsvWriter;
 import java.io.IOException;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionListener;
@@ -55,6 +54,11 @@ public class BookigFilesJobConfig {
     
     /* listeners and helpers */
 
+    @Bean
+    WholesaleProcessingListener processingListener() {
+        return new WholesaleProcessingListener();
+    }
+    
     @Bean
     JobExecutionListener bookingFileJobListener() {
         return new BookingAggregateJobListener();
@@ -218,7 +222,8 @@ public class BookigFilesJobConfig {
     }
     
     @Bean
-    Step billedBookingFileSlaveStep(BilledBookingFileReader billedFileItemReader,
+    Step billedBookingFileSlaveStep(WholesaleProcessingListener processingListener,
+                                    BilledBookingFileReader billedFileItemReader,
                                     SkipPolicy fileVerificationSkipper,
                                     WholesaleBookingProcessor billedBookingProcessor,
                                     WholesaleOutputWriter wholesaleOutputWriter,
@@ -229,7 +234,8 @@ public class BookigFilesJobConfig {
                 .faultTolerant()
                 .skipPolicy(fileVerificationSkipper)
                 .processor(billedBookingProcessor)
-                .writer(wholesaleOutputWriter)                
+                .writer(wholesaleOutputWriter)
+                .listener(processingListener)
                 .build();
     }
 
@@ -248,7 +254,8 @@ public class BookigFilesJobConfig {
     }
     
     @Bean
-    Step unbilledBookingFileSlaveStep(UnbilledBookingFileReader unbilledFileItemReader,
+    Step unbilledBookingFileSlaveStep(WholesaleProcessingListener processingListener,
+                                      UnbilledBookingFileReader unbilledFileItemReader,
                                       SkipPolicy fileVerificationSkipper,
                                       WholesaleBookingProcessor unbilledBookingProcessor,
                                       WholesaleOutputWriter wholesaleOutputWriter,
@@ -260,6 +267,7 @@ public class BookigFilesJobConfig {
                 .skipPolicy(fileVerificationSkipper)
                 .processor(unbilledBookingProcessor)
                 .writer(wholesaleOutputWriter)
+                .listener(processingListener)
                 .build();
     }
 
@@ -278,7 +286,8 @@ public class BookigFilesJobConfig {
     }
     
     @Bean
-    Step adminFeesBookingFileSlaveStep(AdminFeesBookingFileReader adminFeesFileItemReader,
+    Step adminFeesBookingFileSlaveStep(WholesaleProcessingListener processingListener,
+                                       AdminFeesBookingFileReader adminFeesFileItemReader,
                                        SkipPolicy fileVerificationSkipper,
                                        WholesaleBookingProcessor adminFeesBookingProcessor,
                                        WholesaleOutputWriter wholesaleOutputWriter,
@@ -290,6 +299,7 @@ public class BookigFilesJobConfig {
                 .skipPolicy(fileVerificationSkipper)
                 .processor(adminFeesBookingProcessor)
                 .writer(wholesaleOutputWriter)
+                .listener(processingListener)
                 .build();
     }
 

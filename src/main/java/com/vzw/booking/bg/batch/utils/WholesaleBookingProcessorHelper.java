@@ -34,6 +34,7 @@ public class WholesaleBookingProcessorHelper {
     private long wholesaleReportCounter;
     private long maxSkippedRecords;
     private long numberOfChunks;
+    private long recordCount;
 
     public WholesaleBookingProcessorHelper() {
         this.financialEventOffset = new HashMap();
@@ -44,6 +45,7 @@ public class WholesaleBookingProcessorHelper {
         this.subledgerWriteCounter = 0;
         this.wholesaleReportCounter = 0;
         this.maxSkippedRecords = 0;
+        this.recordCount = 0;
     }
 
     public BookDateCsvFileDTO getDates() {
@@ -97,6 +99,9 @@ public class WholesaleBookingProcessorHelper {
     
     public void incrementCounter(String name) {
         switch (name) {
+            case Constants.RECORD_COUNT:
+                this.recordCount++;
+                break;
             case Constants.ZERO_CHARGES:
                 this.zeroChargesCounter++;
                 break;
@@ -122,6 +127,8 @@ public class WholesaleBookingProcessorHelper {
 
     public long getCounter(String name) {
         switch (name) {
+            case Constants.RECORD_COUNT:
+                return this.recordCount;
             case Constants.ZERO_CHARGES:
                 return this.zeroChargesCounter;
             case Constants.GAPS:
@@ -140,6 +147,7 @@ public class WholesaleBookingProcessorHelper {
     }
 
     public void clearCounters() {
+        this.recordCount = 0;
         this.zeroChargesCounter = 0;
         this.gapsCounter = 0;
         this.dataErrorsCounter = 0;

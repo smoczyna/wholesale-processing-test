@@ -10,7 +10,6 @@ import com.vzw.booking.bg.batch.utils.WholesaleBookingProcessorHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -20,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author smorcja
  */
-public class GenericStepExecutionListener implements StepExecutionListener, SkipListener {
+public class GenericStepExecutionListener implements StepExecutionListener {
 
     @Autowired
     private WholesaleBookingProcessorHelper processingHelper;
@@ -44,18 +43,5 @@ public class GenericStepExecutionListener implements StepExecutionListener, Skip
         return se.getExitStatus();
     }
 
-    @Override
-    public void onSkipInRead(Throwable exception) {
-        LOGGER.error(String.format(Constants.READER_EXCEPTION, exception.getMessage()));
-    }
-
-    @Override
-    public void onSkipInWrite(Object s, Throwable exception) {
-        LOGGER.error(String.format(Constants.WRITER_EXCEPTION, exception.getMessage()));
-    }
-
-    @Override
-    public void onSkipInProcess(Object inputRecord, Throwable exception) {
-        LOGGER.error(inputRecord.toString());
-    }
+    
 }

@@ -175,9 +175,54 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     }
 
     private boolean isAlternateBookingApplicable(BaseBookingInputInterface inRec) {
-        
-        //altBookingInd = false; // temporary fix, will be reviewed later
-        return false;
+        boolean altBookingInd = false;
+        String homeGlMarketId = " ";
+        String servingGlMarketId;
+
+        searchHomeSbid = inRec.getHomeSbid();
+        if (inRec.getServingSbid().trim().isEmpty()) {
+            searchServingSbid = searchHomeSbid;
+        } else {
+            searchServingSbid = inRec.getServingSbid();
+        }
+        if (searchHomeSbid.equals(searchServingSbid)) {
+            homeEqualsServingSbid = true;
+        }
+
+        FinancialMarket finMarket = this.getFinancialMarketFromDb(this.financialMarket);
+
+        String homeLegalEntityId = " ";
+        String servingLegalEntityId;
+
+        if (finMarket.getSidbid().equals(searchHomeSbid) && finMarket.getAlternatebookingtype().equals("P")) {
+            homeLegalEntityId = finMarket.getGllegalentityid();
+            if (homeEqualsServingSbid) {
+                altBookingInd = true;
+            }
+        }
+
+        if (!homeEqualsServingSbid && (finMarket.getSidbid().equals(searchServingSbid) && finMarket.getAlternatebookingtype().equals("P"))) {
+            servingLegalEntityId = finMarket.getGllegalentityid();
+            if (homeLegalEntityId.equals(servingLegalEntityId)) {
+                altBookingInd = true;
+            }
+        }
+
+        if (finMarket.getSidbid().equals(searchHomeSbid) && finMarket.getAlternatebookingtype().equals("M")) {
+            homeGlMarketId = finMarket.getGlmarketid();
+            if (homeEqualsServingSbid) {
+                altBookingInd = true;
+            }
+        }
+
+        if (!homeEqualsServingSbid && (finMarket.getSidbid().equals(searchServingSbid) && finMarket.getAlternatebookingtype().equals("M"))) {
+            servingGlMarketId = finMarket.getGlmarketid();
+            if (homeGlMarketId.equals(servingGlMarketId)) {
+                altBookingInd = true;
+            }
+        }
+        altBookingInd = false; // temporary fix, will be reviewed later
+        return altBookingInd;
     }
 
     private boolean bypassBooking(FinancialEventCategory financialEventCategory, boolean altBookingInd) {
@@ -243,7 +288,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     }
     
     private WholesaleProcessingOutput processBilledRecord(BilledCsvFileDTO billedRec) {
-        WholesaleProcessingOutput outRec = new WholesaleProcessingOutput();
+         WholesaleProcessingOutput outRec = new WholesaleProcessingOutput();
         AggregateWholesaleReportDTO report = this.processingHelper.addWholesaleReport();
         
         boolean zeroAirCharge = false;
