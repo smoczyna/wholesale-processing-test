@@ -117,45 +117,5 @@ public class BookingAggregateJobListener implements JobExecutionListener {
             LOGGER.error(e.getMessage());
         }
     }
-    
-//    @Value("${database.to.csv.job.export.file.path}")
-//    private String OUTPUT_CSV_SOURCE_FILE_PATH;
-    
-//    private void consolidateOutputFiles() {
-//        
-//        OutputStream out = null;
-//        try {
-//            File master = new File("subledger_summary.csv");
-//            out = new FileOutputStream(master);
-//            byte[] buf = new byte[n];
-//            for (String file : files) {
-//                InputStream in = new FileInputStream(file);
-//                int b = 0;
-//                while ((b = in.read(buf)) >= 0) {
-//                    out.write(buf, 0, b);
-//                    out.flush();
-//                }
-//            }   out.close();
-//        } catch (FileNotFoundException ex) {
-//            LOGGER.error(ex.getMessage());
-//        } finally {
-//            try {
-//                out.close();
-//            } catch (IOException ex) {
-//                LOGGER.error(ex.getMessage());
-//            }
-//        }
-//    }
-//    
-//    private File[] findOutputFiles(String parentLocation) {
-//        File outputDir = new File(parentLocation);
-//        File[] files = outputDir.listFiles(new FileFilter() {
-//            
-//            @Override
-//            public boolean accept(File pathname) {
-//                return pathname.isDirectory();
-//            }
-//        });
-//        return files;
-//    }
+
 }
