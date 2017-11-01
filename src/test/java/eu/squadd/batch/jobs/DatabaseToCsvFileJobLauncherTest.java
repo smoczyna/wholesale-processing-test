@@ -6,7 +6,6 @@
 package eu.squadd.batch.jobs;
 
 import eu.squadd.batch.BookingProcessorApplication;
-import eu.squadd.batch.config.DatabasesConfig;
 import org.springframework.batch.core.JobExecution;
 
 import org.junit.Assert;
