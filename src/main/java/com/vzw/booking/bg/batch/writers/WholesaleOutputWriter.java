@@ -19,13 +19,15 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class WholesaleOutputWriter implements ItemStreamWriter<WholesaleProcessingOutput> {
-    
+    private static final String PROPERTY_CSV_EXPORT_FILE_PATH = "database.to.csv.job.export.file.path";
     private final WholesaleReportCsvWriter wholesaleReportWriter;    
     private final SubledgerCsvFileWriter subledgerWriter;
     
     public WholesaleOutputWriter(Environment environment, String fileNo) {
-        this.wholesaleReportWriter = new WholesaleReportCsvWriter(environment, fileNo);
-        this.subledgerWriter = new SubledgerCsvFileWriter(environment, fileNo);
+        String filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat("wholesale_report_").concat(fileNo).concat(".csv");        
+        this.wholesaleReportWriter = new WholesaleReportCsvWriter(filename);
+        filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat("subledger_summary_").concat(fileNo).concat(".csv");        
+        this.subledgerWriter = new SubledgerCsvFileWriter(filename);
     }
     
     @Override

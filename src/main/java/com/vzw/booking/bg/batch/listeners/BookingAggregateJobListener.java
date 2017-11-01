@@ -8,9 +8,13 @@ package com.vzw.booking.bg.batch.listeners;
 import com.vzw.booking.bg.batch.constants.Constants;
 import com.vzw.booking.bg.batch.utils.ProcessingUtils;
 import com.vzw.booking.bg.batch.utils.WholesaleBookingProcessorHelper;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -75,7 +79,7 @@ public class BookingAggregateJobListener implements JobExecutionListener {
                 LOGGER.info(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
                 LOGGER.info(String.format(Constants.JOB_PROCESSIG_TIME_MESSAGE, ((endTime.getTime() - this.startTIme.getTime()) / 1000)));
             } catch (IOException ex) {
-                java.util.logging.Logger.getLogger(BookingAggregateJobListener.class.getName()).log(Level.SEVERE, null, ex);
+                LOGGER.error(ex.getMessage());
             }
         } else {
             LOGGER.info(Constants.JOB_EXCEPTIONS_ENCOUNTERED);
@@ -113,4 +117,45 @@ public class BookingAggregateJobListener implements JobExecutionListener {
             LOGGER.error(e.getMessage());
         }
     }
+    
+//    @Value("${database.to.csv.job.export.file.path}")
+//    private String OUTPUT_CSV_SOURCE_FILE_PATH;
+    
+//    private void consolidateOutputFiles() {
+//        
+//        OutputStream out = null;
+//        try {
+//            File master = new File("subledger_summary.csv");
+//            out = new FileOutputStream(master);
+//            byte[] buf = new byte[n];
+//            for (String file : files) {
+//                InputStream in = new FileInputStream(file);
+//                int b = 0;
+//                while ((b = in.read(buf)) >= 0) {
+//                    out.write(buf, 0, b);
+//                    out.flush();
+//                }
+//            }   out.close();
+//        } catch (FileNotFoundException ex) {
+//            LOGGER.error(ex.getMessage());
+//        } finally {
+//            try {
+//                out.close();
+//            } catch (IOException ex) {
+//                LOGGER.error(ex.getMessage());
+//            }
+//        }
+//    }
+//    
+//    private File[] findOutputFiles(String parentLocation) {
+//        File outputDir = new File(parentLocation);
+//        File[] files = outputDir.listFiles(new FileFilter() {
+//            
+//            @Override
+//            public boolean accept(File pathname) {
+//                return pathname.isDirectory();
+//            }
+//        });
+//        return files;
+//    }
 }

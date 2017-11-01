@@ -45,7 +45,7 @@ public class WholesaleReportCsvWriterTest {
         ClassLoader classLoader = getClass().getClassLoader();
         workingFoler = classLoader.getResource("./data").getPath();
         Logger.getLogger(WholesaleReportCsvWriterTest.class.getName()).info("Write path: "+workingFoler);
-        writer = null; //new WholesaleReportCsvWriter(workingFoler+"/wholesale_report.csv");
+        writer = new WholesaleReportCsvWriter(workingFoler+"/wholesale_report.csv");
     }
 
     @Test
