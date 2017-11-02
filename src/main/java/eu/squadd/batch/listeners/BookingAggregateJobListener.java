@@ -78,10 +78,12 @@ public class BookingAggregateJobListener implements JobExecutionListener {
                 File d3 = new File(INPUT_CSV_SOURCE_FILE_PATH.concat("adminfees_split"));
                 if (d3.exists()) FileUtils.cleanDirectory(d3);
                 
-                File[] files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, "wholesale_report");
-                consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, "wholesale_report.csv");
-                files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, "subledger_summary");
-                consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, "subledger_summary.csv");
+                if (je.getJobParameters().getString("consolidateFiles").equals("Yes")) {
+                    File[] files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, "wholesale_report");
+                    consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, "wholesale_report.csv");
+                    files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, "subledger_summary");
+                    consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, "subledger_summary.csv");
+                }
                 
                 Date endTime = new Date();
                 LOGGER.info(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
