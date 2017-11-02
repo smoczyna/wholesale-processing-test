@@ -20,7 +20,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
  */
 @Component
 public class BookingWholesaleApplicationInit {
-
+    
     /**
      * This is meta data source this source is used by Spring Batch internally
      * to control processing connection and credentials details are configured

@@ -8,12 +8,14 @@ package com.vzw.booking.bg.batch.listeners;
 import com.vzw.booking.bg.batch.constants.Constants;
 import com.vzw.booking.bg.batch.utils.ProcessingUtils;
 import com.vzw.booking.bg.batch.utils.WholesaleBookingProcessorHelper;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +47,9 @@ public class BookingAggregateJobListener implements JobExecutionListener {
     @Value("${csv.to.database.job.source.file.path}")
     private String INPUT_CSV_SOURCE_FILE_PATH;
 
+    @Value("${database.to.csv.job.export.file.path}")
+    private String OUTPUT_CSV_SOURCE_FILE_PATH;
+    
     @Override
     public void beforeJob(JobExecution je) {
         this.startTIme = new Date();
@@ -74,6 +79,12 @@ public class BookingAggregateJobListener implements JobExecutionListener {
                 if (d1.exists()) FileUtils.cleanDirectory(d2);
                 File d3 = new File(INPUT_CSV_SOURCE_FILE_PATH.concat("adminfees_split"));
                 if (d3.exists()) FileUtils.cleanDirectory(d3);
+                 
+                File[] files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, Constants.WHOLESALE_REPORT_FILENAME_PATTERN);
+                consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, Constants.WHOLESALE_REPORT_FILENAME);
+
+                files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, Constants.SUBLEDGER_SUMMARY_FILENAME_PATTERN);
+                consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, Constants.SUBLEDGER_SUMMARY_FILENAME);
                 
                 Date endTime = new Date();
                 LOGGER.info(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
@@ -118,4 +129,40 @@ public class BookingAggregateJobListener implements JobExecutionListener {
         }
     }
 
+    private static File[] findOutputFiles(String parentDir, String namePattern) {
+        File outputDir = new File(parentDir);
+        File[] files = outputDir.listFiles(new FileFilter() {
+            
+            @Override
+            public boolean accept(File file) {
+                if (file.getName().matches(namePattern + "_.*[0-9]\\.csv$")) {
+                    System.out.println("File found: "+file.getName());
+                    return true;
+                } else
+                    return false;
+            }
+        });
+        return files;
+    }
+    
+    private static void appendFile(File file, BufferedWriter output) throws IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String text = null;
+            while ((text = br.readLine()) != null) {
+                output.write(text);
+                output.newLine();
+            }
+        } finally {
+        }
+
+    }
+    
+    private static void consolidateOutputFiles(File[] files, String destinationDir, String filename) throws IOException {
+        File master = new File(destinationDir.concat(filename));
+        BufferedWriter output = new BufferedWriter(new FileWriter(master));        
+        for (File file : files) {
+            appendFile(file, output);
+            file.delete();
+        }
+    }
 }

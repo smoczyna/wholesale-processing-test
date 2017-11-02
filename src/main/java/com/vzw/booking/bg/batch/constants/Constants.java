@@ -17,7 +17,9 @@ public class Constants {
     public static final String UNBILLED_BOOKING_FILENAME = "unbilled.csv";
     public static final String ADMIN_FEES_FILENAME = "adminfees.csv";
     
+    public static final String SUBLEDGER_SUMMARY_FILENAME_PATTERN = "subledger_summary";
     public static final String SUBLEDGER_SUMMARY_FILENAME = "subledger_summary.csv";
+    public static final String WHOLESALE_REPORT_FILENAME_PATTERN = "wholesale_report";
     public static final String WHOLESALE_REPORT_FILENAME = "wholesale_report.csv";
     
     public static final String FILE_SPLIT_MESSAGE = "File %s has been splitted into %d chunks";
