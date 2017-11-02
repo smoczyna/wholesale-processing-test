@@ -22,6 +22,14 @@ public class BookingProcessorApplication {
 
     //static Logger LOGGER = Logger.getLogger(BookingProcessorApplication.class.getName());
     
+//    @Bean
+//    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+//        PropertySourcesPlaceholderConfigurer placeholder = new PropertySourcesPlaceholderConfigurer();
+//        placeholder.setPropertySources(propertySources);
+//        
+//        return placeholder;
+//    }
+    
     /**
      * This the main method for the application. It executes the application
      *
