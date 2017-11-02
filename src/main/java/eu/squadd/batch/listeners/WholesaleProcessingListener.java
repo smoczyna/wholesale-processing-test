@@ -35,7 +35,7 @@ public class WholesaleProcessingListener implements ItemProcessListener, SkipLis
     
     @Override
     public void beforeProcess(Object t) {
-        System.out.println(String.format(Constants.PROCESSING_RECORD, t.toString()));
+        LOGGER.info(String.format(Constants.PROCESSING_RECORD, t.toString()));
     }
 
     @Override

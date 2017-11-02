@@ -62,7 +62,7 @@ public class Constants {
     public static final String ZERO_SUBLEDGER_AMOUNT = "Zero amounts in sub ledger record found !!!";
     public static final String FAILED_TO_CREATE_OFFSET = "Failed to create offset booking !!!";
     
-    public static final String PROCESSING_RECORD = "Processing records: %d";
+    public static final String PROCESSING_RECORD = "Processing records: %s";
     public static final String READER_EXCEPTION = "Reader exception encountered: %s";
     public static final String WRITER_EXCEPTION = "Writer exception encountered: %s";
     public static final String JOB_EXECUTION_FINISHED = "Step completed, read count: %d, write count: %d";
