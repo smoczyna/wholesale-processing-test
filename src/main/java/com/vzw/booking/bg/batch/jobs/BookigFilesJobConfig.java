@@ -27,6 +27,9 @@ import com.vzw.booking.bg.batch.readers.UnbilledBookingFileReader;
 import com.vzw.booking.bg.batch.validation.CsvFileVerificationSkipper;
 import com.vzw.booking.bg.batch.writers.WholesaleOutputWriter;
 import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
@@ -51,7 +54,19 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Configuration
 public class BookigFilesJobConfig {
-    
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(BookigFilesJobConfig.class);
+
+	private @Value("${com.springbatch.output.executor.maxPoolSize}") int maxPoolSize=30;
+
+	private @Value("${com.springbatch.output.executor.corePoolSize}") int corePoolSize=30;
+
+	private @Value("${com.springbatch.output.executor.queueCapacity}") int queueCapacity=5000;
+	
+	private @Value("${com.springbatch.output.chuncks.numberOfReadChunks}") int numberOfChucks=1;
+
+	private @Value("${com.springbatch.output.chuncks.numberOfWriteChunks}") int numberOfWriteChucks=1;
+	
     /* listeners and helpers */
 
     @Bean
@@ -95,9 +110,12 @@ public class BookigFilesJobConfig {
     @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setMaxPoolSize(30);
-        taskExecutor.setCorePoolSize(30);
-        taskExecutor.setQueueCapacity(5000);
+    	LOGGER.info("**** MAX POOL SIZE="+maxPoolSize);
+    	LOGGER.info("**** CORE POOL SIZE="+corePoolSize);
+    	LOGGER.info("**** QUEUE CAPACITY="+queueCapacity);
+        taskExecutor.setMaxPoolSize(maxPoolSize);
+        taskExecutor.setCorePoolSize(corePoolSize);
+        taskExecutor.setQueueCapacity(queueCapacity);
         taskExecutor.afterPropertiesSet();
         return taskExecutor;
     }
@@ -189,8 +207,9 @@ public class BookigFilesJobConfig {
     Step updateBookingDatesStep(BookDateCsvFileReader bookDateItemReader,
                                 BookDateProcessor bookDateProcessor,
                                 StepBuilderFactory stepBuilderFactory) {
+    	LOGGER.info("**** updateBookingDatesStep - NUMBER OF CHUNCKS="+numberOfWriteChucks);
         return stepBuilderFactory.get("updateBookingDatesStep")
-                .<BookDateCsvFileDTO, Boolean>chunk(1)
+                .<BookDateCsvFileDTO, Boolean>chunk(numberOfWriteChucks)
                 .reader(bookDateItemReader)
                 .processor(bookDateProcessor)
                 .build();
@@ -200,8 +219,9 @@ public class BookigFilesJobConfig {
     Step readOffsetDataStep(FinancialEventOffsetReader financialEventOffsetReader,
                             FinancialEventOffsetProcessor financialEventOffsetProcessor,
                             StepBuilderFactory stepBuilderFactory) {
+    	LOGGER.info("**** readOffsetDataStep - NUMBER OF CHUNCKS="+numberOfChucks);
         return stepBuilderFactory.get("readOffsetDataStep")
-                .<FinancialEventOffsetDTO, Boolean>chunk(1)
+                .<FinancialEventOffsetDTO, Boolean>chunk(numberOfChucks)
                 .reader(financialEventOffsetReader)
                 .processor(financialEventOffsetProcessor)
                 .build();

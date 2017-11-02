@@ -1,14 +1,18 @@
 package com.vzw.booking.bg.batch.config;
 
-import com.datastax.driver.core.AuthProvider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Configuration;
 
+import com.datastax.driver.core.AuthProvider;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PlainTextAuthProvider;
@@ -26,17 +30,15 @@ import com.vzw.booking.bg.batch.domain.casandra.FinancialEventCategory;
 import com.vzw.booking.bg.batch.domain.casandra.FinancialMarket;
 import com.vzw.booking.bg.batch.domain.casandra.Product;
 import com.vzw.booking.bg.batch.domain.casandra.WholesalePrice;
-import com.vzw.booking.bg.batch.domain.exceptions.CassandraQueryException;
-import com.vzw.booking.bg.batch.domain.exceptions.ErrorEnum;
-import com.vzw.booking.bg.batch.domain.exceptions.MultipleRowsReturnedException;
-import com.vzw.booking.bg.batch.domain.exceptions.NoResultsReturnedException;
 import com.vzw.booking.bg.batch.domain.casandra.mappers.DataEventCassandraMapper;
 import com.vzw.booking.bg.batch.domain.casandra.mappers.FinancialEventCategoryCassandraMapper;
 import com.vzw.booking.bg.batch.domain.casandra.mappers.FinancialMarketCassandraMapper;
 import com.vzw.booking.bg.batch.domain.casandra.mappers.ProductCassandraMapper;
 import com.vzw.booking.bg.batch.domain.casandra.mappers.WholesalePriceCassandraMapper;
-import javax.annotation.PostConstruct;
-import org.springframework.cache.annotation.Cacheable;
+import com.vzw.booking.bg.batch.domain.exceptions.CassandraQueryException;
+import com.vzw.booking.bg.batch.domain.exceptions.ErrorEnum;
+import com.vzw.booking.bg.batch.domain.exceptions.MultipleRowsReturnedException;
+import com.vzw.booking.bg.batch.domain.exceptions.NoResultsReturnedException;
 
 /**
  *
@@ -46,23 +48,38 @@ import org.springframework.cache.annotation.Cacheable;
 public class CassandraQueryManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraQueryManager.class);
-   
+
+    private @Value("${com.springbatch.db.cassandra.contactpoints}") String contactpoints="";
+	
+	private @Value("${com.springbatch.db.cassandra.keyspace}") String keyspace="";
+	
+	private @Value("${com.springbatch.db.cassandra.username}") String username="";
+	
+	private @Value("${com.springbatch.db.cassandra.password}") String password="";
+	
+	private @Value("${com.springbatch.db.cassandra.dcname}") String dcname="";
+    
+//    @Autowired
+//    private CassandraConfiguration cassandraConfiguration;
+
+    
     //private final String fcccgsamapenddate = "12/31/9999";
-    private final String financialmarketmapenddate = "12/31/9999";
-    private final String glmarketlegalentityenddate = "12/31/9999";
-    private final String glmarketmaptype = "D";
-    private final String glmarketenddate = "12/31/9999";
+    
+	private @Value("${com.springbatch.db.query.constraints.financialmarketmapenddate}") String financialmarketmapenddate;
+
+    private @Value("${com.springbatch.db.query.constraints.glmarketlegalentityenddate}") String glmarketlegalentityenddate;
+    
+    private @Value("${com.springbatch.db.query.constraints.glmarketmaptype}") String glmarketmaptype;
+    
+    private @Value("${com.springbatch.db.query.constraints.glmarketenddate}") String glmarketenddate;
+
     //private final String alternatebookingtype = "D";
 
     private static Session cassandraSession;    
-    private static final String CASSANDRA_KEYSPACE_DEV = "j6_dev";
-    private static final String CASSANDRA_KEYSPACE_PROD = "j6_prod";
     
     private final String finMarketQuery = "SELECT * FROM financialmarket"
             + " WHERE financialmarketid=? AND financialmarketmapenddate=? AND glmarketlegalentityenddate=? "
             + " AND glmarketmaptype=? AND glmarketenddate=? ALLOW FILTERING";
-    
-    //private final String productQuery = "SELECT * FROM product WHERE productid=?" + " ALLOW FILTERING";
     
     private final String finEventCatQuery = "SELECT * FROM financialeventcategory "
             + "WHERE productid=? AND homesidequalsservingsidindicator=? AND alternatebookingindicator=? AND interexchangecarriercode=? ALLOW FILTERING";
@@ -84,22 +101,33 @@ public class CassandraQueryManager {
     
     @PostConstruct
     public void init() {
-        AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
-        Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
-
-//        AuthProvider authProvider = new PlainTextAuthProvider("j6_prod_user", "Ireland");
-//        Cluster cluster = Cluster.builder().addContactPoints("170.127.59.152", "170.127.59.153", "170.127.59.154")
-//                .withAuthProvider(authProvider).withLoadBalancingPolicy(DCAwareRoundRobinPolicy.builder().withLocalDc("IDC1").build()).build();
-//        
-        cassandraSession = cluster.connect(CASSANDRA_KEYSPACE_DEV);
-        
-        this.finMarketStatement = cassandraSession.prepare(finMarketQuery);
-        this.finEventCatStatement = cassandraSession.prepare(finEventCatQuery);
-        this.finEventCatStatementBilled = cassandraSession.prepare(finEventCatQueryBilled);
-        this.dataEventStatement = cassandraSession.prepare(dataEventQuery);
-        this.wholesalePriceStatement = cassandraSession.prepare(wholesalePriceQuery);
-        
-        LOGGER.info("After construction of Cassandra connection");
+		LOGGER.info("Cassandra Query Contraints ...");
+		LOGGER.info("Constraint : Financial Market Map End Date : " + financialmarketmapenddate);
+		LOGGER.info("Constraint : GL Market Legal Entity End Date : " + glmarketlegalentityenddate);
+		LOGGER.info("Constraint : GL Market Map Type : " + glmarketmaptype);
+		LOGGER.info("Constraint : GL Market End Date : " + glmarketenddate);
+		LOGGER.info("Cassandra Connection parameters ...");
+		LOGGER.info("Cassandra Contact Points: " + contactpoints);
+		LOGGER.info("Cassandra User: " + username);
+		LOGGER.info("Cassandra Password: " + password);
+		LOGGER.info("Cassandra DataCenter: " + dcname);
+		LOGGER.info("Cassandra Keyspace: " + keyspace);
+		AuthProvider authProvider = new PlainTextAuthProvider(username, password);
+		Cluster.Builder builder = Cluster.builder()
+									.addContactPoints(contactpoints.split(","))
+		        					.withAuthProvider(authProvider);
+		if (dcname!=null && !dcname.trim().isEmpty())
+		      builder = builder.withLoadBalancingPolicy(DCAwareRoundRobinPolicy.builder().withLocalDc(dcname).build());
+		Cluster cluster = builder.build();
+		cassandraSession = cluster.connect(keyspace);
+		
+		this.finMarketStatement = cassandraSession.prepare(finMarketQuery);
+		this.finEventCatStatement = cassandraSession.prepare(finEventCatQuery);
+		this.finEventCatStatementBilled = cassandraSession.prepare(finEventCatQueryBilled);
+		this.dataEventStatement = cassandraSession.prepare(dataEventQuery);
+		this.wholesalePriceStatement = cassandraSession.prepare(wholesalePriceQuery);
+		
+		LOGGER.info("After construction of Cassandra connection");
     }
     
     /**
@@ -131,7 +159,7 @@ public class CassandraQueryManager {
         statement.bind(financialmarketid, financialmarketmapenddate, glmarketlegalentityenddate, glmarketmaptype, glmarketenddate);
         statement.enableTracing();        
         try {
-            Result<FinancialMarket> result = new FinancialMarketCassandraMapper().executeAndMapResults(this.cassandraSession, statement, new MappingManager(this.cassandraSession), false);
+            Result<FinancialMarket> result = new FinancialMarketCassandraMapper().executeAndMapResults(this.getCassandraSession(), statement, new MappingManager(this.cassandraSession), false);
             fms = result.all();
         } catch (NoHostAvailableException | QueryExecutionException | QueryValidationException | UnsupportedFeatureException e) {
             LOGGER.error(e.getLocalizedMessage());
@@ -175,7 +203,7 @@ public class CassandraQueryManager {
         BoundStatement statement = new BoundStatement(this.productStatement);
         statement.bind(TmpProdId);
         try {
-            Result<Product> result = new ProductCassandraMapper().executeAndMapResults(this.cassandraSession, statement, new MappingManager(this.cassandraSession), false);
+            Result<Product> result = new ProductCassandraMapper().executeAndMapResults(this.getCassandraSession(), statement, new MappingManager(this.cassandraSession), false);
             listoffep = result.all();
         } catch (NoHostAvailableException | QueryExecutionException | QueryValidationException | UnsupportedFeatureException e) {
             LOGGER.error(e.getLocalizedMessage());
@@ -223,7 +251,7 @@ public class CassandraQueryManager {
             statement.bind(TmpProdId, homesidequalsservingsidindicator, financialeventnormalsign, alternatebookingindicator, interExchangeCarrierCode);
         }
         try {
-            Result<FinancialEventCategory> result = new FinancialEventCategoryCassandraMapper().executeAndMapResults(this.cassandraSession, statement, new MappingManager(this.cassandraSession), false);
+            Result<FinancialEventCategory> result = new FinancialEventCategoryCassandraMapper().executeAndMapResults(this.getCassandraSession(), statement, new MappingManager(this.getCassandraSession()), false);
             listoffec = result.all();
         } catch (NoHostAvailableException | QueryExecutionException | QueryValidationException | UnsupportedFeatureException e) {
             LOGGER.error(e.getLocalizedMessage());
@@ -265,7 +293,7 @@ public class CassandraQueryManager {
         BoundStatement statement = new BoundStatement(this.dataEventStatement);
         statement.bind(productid);
         try {
-            Result<DataEvent> result = new DataEventCassandraMapper().executeAndMapResults(this.cassandraSession, statement, new MappingManager(this.cassandraSession), false);
+            Result<DataEvent> result = new DataEventCassandraMapper().executeAndMapResults(this.getCassandraSession(), statement, new MappingManager(this.getCassandraSession()), false);
             listofde = result.all();
         } catch (NoHostAvailableException | QueryExecutionException | QueryValidationException | UnsupportedFeatureException e) {
             LOGGER.error(e.getLocalizedMessage());
@@ -301,7 +329,7 @@ public class CassandraQueryManager {
         BoundStatement statement = new BoundStatement(this.wholesalePriceStatement);
         statement.bind(productid, homesidbid, "00000");
         try {
-            Result<WholesalePrice> result = new WholesalePriceCassandraMapper().executeAndMapResults(this.cassandraSession, statement, new MappingManager(this.cassandraSession), false);
+            Result<WholesalePrice> result = new WholesalePriceCassandraMapper().executeAndMapResults(this.getCassandraSession(), statement, new MappingManager(this.getCassandraSession()), false);
             listofwp = result.all();
         } catch (NoHostAvailableException | QueryExecutionException | QueryValidationException | UnsupportedFeatureException e) {
             LOGGER.error(e.getLocalizedMessage());
