@@ -80,7 +80,9 @@ public class BookingAggregateJobListener implements JobExecutionListener {
                 
                 File[] files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, "wholesale_report");
                 consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, "wholesale_report.csv");
-
+                files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, "subledger_summary");
+                consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, "subledger_summary.csv");
+                
                 Date endTime = new Date();
                 LOGGER.info(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
                 LOGGER.info(String.format(Constants.JOB_PROCESSIG_TIME_MESSAGE, ((endTime.getTime() - this.startTIme.getTime()) / 1000)));
