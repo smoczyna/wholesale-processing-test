@@ -52,10 +52,10 @@ public class FixedLengthLineAggregator<T> implements LineAggregator<T> {
                         if (value.getClass() == java.lang.Integer.class) strValue = Integer.toString((Integer) value);
                         else if (value.getClass() == Long.class) strValue = Long.toString((Long) value);
                         else if (value.getClass() == java.lang.Short.class) strValue = Short.toString((Short) value);
-                        else if (value.getClass() == java.lang.Double.class) strValue = Double.toString((Double) value);
-                        else throw new IllegalAccessException("Unrecognized field type"); //that should never happen actually                        
+                        else if (value.getClass() == java.lang.Double.class) strValue = String.format("%.2f", (Double) value);
+                        else throw new IllegalAccessException("Unrecognized field type"); //that should never happen actually 
                     }
-                }    
+                }
                 if (fieldsDefinition.containsKey(field.getName())) {
                     StringBuilder sb = new StringBuilder();
                     int fieldLength = fieldsDefinition.get(field.getName());

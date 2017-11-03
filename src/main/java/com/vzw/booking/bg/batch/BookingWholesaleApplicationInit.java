@@ -35,6 +35,7 @@ public class BookingWholesaleApplicationInit {
         EmbeddedDatabase db = builder
                 .setType(EmbeddedDatabaseType.H2) // .HSQL or .DERBY
                 .addScript("classpath:db/meta/schema-h2.sql")
+                //.addScript("classpath:db/meta/wholesale-h2-db.sql")
                 .build();
         return db;
     }

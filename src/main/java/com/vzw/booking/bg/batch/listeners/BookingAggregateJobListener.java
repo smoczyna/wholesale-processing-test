@@ -87,8 +87,8 @@ public class BookingAggregateJobListener implements JobExecutionListener {
                 consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, Constants.SUBLEDGER_SUMMARY_FILENAME);
                 
                 Date endTime = new Date();
-                LOGGER.info(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
-                LOGGER.info(String.format(Constants.JOB_PROCESSIG_TIME_MESSAGE, ((endTime.getTime() - this.startTIme.getTime()) / 1000)));
+                System.out.println(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
+                System.out.println(String.format(Constants.JOB_PROCESSIG_TIME_MESSAGE, ((endTime.getTime() - this.startTIme.getTime()) / 1000)));
             } catch (IOException ex) {
                 LOGGER.error(ex.getMessage());
             }
@@ -136,7 +136,7 @@ public class BookingAggregateJobListener implements JobExecutionListener {
             @Override
             public boolean accept(File file) {
                 if (file.getName().matches(namePattern + "_.*[0-9]\\.csv$")) {
-                    System.out.println("File found: "+file.getName());
+                    LOGGER.info("File found: "+file.getName());
                     return true;
                 } else
                     return false;

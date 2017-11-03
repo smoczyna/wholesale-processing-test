@@ -466,7 +466,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getLocalizedMessage());
+            LOGGER.debug("Cassandra error: "+ex.getMessage());
         }
         return result;
     }
@@ -485,7 +485,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
 //                dbResult.get(0).setFinancialcategory(677);
             
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getMessage());
+            LOGGER.debug("Cassandra error: "+ex.getMessage());
             dbResult = null;
         }
         if (dbResult == null && financialeventnormalsign.equals("DR")) {
@@ -503,7 +503,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
 
                 LOGGER.info(Constants.DEFAULT_FEC_OBTAINED);
             } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-                LOGGER.error(ex.getMessage());
+                LOGGER.debug("Cassandra error: "+ex.getMessage());
                 LOGGER.error(Constants.DEFAULT_FEC_NOT_FOUND);
             }
         }
@@ -521,7 +521,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getLocalizedMessage());
+            LOGGER.debug("Cassandra error: "+ex.getMessage());
         }
         return result;
     }
@@ -534,7 +534,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getLocalizedMessage());
+            LOGGER.debug("Cassandra error: "+ex.getLocalizedMessage());
         }
         return result;
     }
