@@ -30,22 +30,17 @@ public class WzwCache {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WzwCache.class);
 
-	private static WzwCache instance=null;
+	private static volatile WzwCache instance=null;
 
-	private @Value("${com.springbatch.cache.file.location}") String fileLocation = "";
+	private volatile @Value("${com.springbatch.cache.folder.location}") String folderLocation = "";
 
-	protected Map<String, CacheItem<?>> cacheItems = new HashMap<>(0);
+	protected Map<String, CacheEntry<?>> cacheItems = new HashMap<>(0);
 
 	/**
 	 * Default Constructor
 	 */
 	protected WzwCache() {
 		super();
-		try {
-			checkLoad();
-		} catch (CacheException e) {
-			LOGGER.error("Unable to initialize cache", e);
-		}
 	}
 
 	/**
@@ -60,7 +55,7 @@ public class WzwCache {
 	 * @param type
 	 */
 	public <T> void createCacheItem(String itemName, Class<T> type) {
-		CacheItem<T> item = new CacheItem<T>();
+		CacheEntry<T> item = new CacheEntry<T>();
 		cacheItems.put(itemName, item);
 	}
 
@@ -71,7 +66,9 @@ public class WzwCache {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> void addToItem(String itemName, String key, T value) {
-		((CacheItem<T>) cacheItems.get(itemName)).addElement(key, value);
+		if (cacheItems.get(itemName)!=null) {
+			((CacheEntry<T>) cacheItems.get(itemName)).addElement(key, value);
+		}
 	}
 
 	/**
@@ -81,7 +78,9 @@ public class WzwCache {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> void addAllToItem(String itemName, Function<T, String> indexer, List<T> values) {
-		((CacheItem<T>) cacheItems.get(itemName)).addMany(indexer, values);
+		if (cacheItems.get(itemName)!=null) {
+			((CacheEntry<T>) cacheItems.get(itemName)).addMany(indexer, values);
+		}
 	}
 
 	/**
@@ -91,7 +90,7 @@ public class WzwCache {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> getValueFromItem(String itemName, String key) {
-		List<T>  l = ((CacheItem<T>) cacheItems.get(itemName)).getRegistry().get(key);
+		List<T>  l = ((CacheEntry<T>) cacheItems.get(itemName)).getRegistry().get(key);
 		if (l==null) {
 			return new ArrayList<>(0);
 		}
@@ -107,11 +106,15 @@ public class WzwCache {
 //		return ((CacheItem<T>) cacheItems.get(itemName)).getRegistry().values().stream().collect(Collectors.toList());
 //	}
 
-	private String getFileName() {
-		if (fileLocation == null || fileLocation.trim().isEmpty()) {
-			return "cache-stogage.dat";
+	private String getFolderPath() {
+		if (folderLocation == null || folderLocation.trim().isEmpty()) {
+			return ".";
 		}
-		return fileLocation;
+		return folderLocation;
+	}
+
+	private String getFilePath() {
+		return getFolderPath() + File.separator + "cache-stogage.dat";
 	}
 	
 	/**
@@ -119,26 +122,27 @@ public class WzwCache {
 	 * @throws CacheException
 	 */
 	public boolean checkLoad() throws CacheException {
-		if (existsCacheFile()) {
+/*		if (existsCacheFile()) {
 			load();
 		} else {
 			save();
 		}
-		return false;
+*/		return false;
 	}
 	
 	/**
 	 * @throws CacheException
 	 */
 	public void checkSave() throws CacheException {
-		save();
-	}
+/*		save();
+*/	}
 	
 	/**
 	 * @return
 	 */
 	protected final boolean existsCacheFile() {
-		String fileLocation = getFileName();
+		String fileLocation = getFilePath();
+		LOGGER.info("Checking existance of file : " + fileLocation);
 		File file = new File(fileLocation);
 		return file.exists();
 	}
@@ -147,7 +151,13 @@ public class WzwCache {
 	 * @throws CacheException
 	 */
 	protected final void load() throws CacheException {
-		String fileLocation = getFileName();
+		String folderLocation = getFolderPath();
+		File dir = new File(folderLocation);
+		if (!dir.exists())
+			dir.mkdirs();
+		String fileLocation = getFilePath();
+		LOGGER.info("Loading cache from file : " + fileLocation);
+		
 		File file = new File(fileLocation);
 		if (! file.exists()) {
 			LOGGER.error("Cache binary file "+fileLocation+" doesn't exist!!");
@@ -171,8 +181,13 @@ public class WzwCache {
 	 * @throws CacheException
 	 */
 	protected final void save() throws CacheException {
-		String fileLocation = getFileName();
+		String folderLocation = getFolderPath();
+		File dir = new File(folderLocation);
+		if (!dir.exists())
+			dir.mkdirs();
+		String fileLocation = getFilePath();
 		File file = new File(fileLocation);
+		LOGGER.info("Saving cache to file : " + fileLocation);
 		if (file.exists()) {
 			boolean deleted = file.delete();
 			LOGGER.info("Cache binary file "+fileLocation+" deleted : " + deleted);

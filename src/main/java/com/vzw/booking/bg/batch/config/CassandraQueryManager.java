@@ -61,7 +61,8 @@ public class CassandraQueryManager {
 	
 	private @Value("${com.springbatch.db.cassandra.username}") String username="";
 	
-	private @Value("${com.springbatch.db.cassandra.password}") String password="";
+	//private @Value("${com.springbatch.db.cassandra.password}") String password="";
+	private String password="Ireland";//System.getProperty("cassandra.password");
 	
 	private @Value("${com.springbatch.db.cassandra.dcname}") String dcname="";
     
@@ -123,6 +124,11 @@ public class CassandraQueryManager {
 		LOGGER.info("Constraint : GL Market End Date : " + glmarketenddate);
 		
 		localCache = WzwCache.getInstance();
+		try {
+			localCache.checkLoad();
+		} catch (CacheException e) {
+			LOGGER.error("Unable to initialize cache", e);
+		}
 		
 		boolean anyChange = false;
 		

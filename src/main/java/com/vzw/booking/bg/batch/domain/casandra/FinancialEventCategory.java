@@ -1,5 +1,7 @@
 package com.vzw.booking.bg.batch.domain.casandra;
 
+import java.io.Serializable;
+
 /*
  * PRIMARY KEY ((ProductId,HomeSidEqualsServingSidIndicator,AlternateBookingIndicator),FinancialMarketId,InterExchangeCarrierCode))
  */
@@ -14,9 +16,14 @@ import com.datastax.driver.mapping.annotations.Table;
  * @author smorcja
  */
 @Table(name = "financialeventcategory")
-public class FinancialEventCategory {
+public class FinancialEventCategory implements Serializable {
 
-    @PartitionKey(value = 0)
+    /**
+	 * Entity Serial Version ID
+	 */
+	private static final long serialVersionUID = -6270238000461251943L;
+
+	@PartitionKey(value = 0)
     @Column(name = "productid")
     private Integer productid;
 

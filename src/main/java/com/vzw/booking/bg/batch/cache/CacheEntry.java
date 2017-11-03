@@ -3,6 +3,7 @@
  */
 package com.vzw.booking.bg.batch.cache;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,14 +15,19 @@ import java.util.function.Function;
  * @author torelfa
  *
  */
-public class CacheItem<T> {
+public class CacheEntry<T> implements Serializable {
 
+	/**
+	 * Cache Item Class Serial Version ID
+	 */
+	private static final long serialVersionUID = -2823568454566812950L;
+	
 	private Map<String, List<T>> registry = new HashMap<>(0);
 
 	/**
 	 * Default Constructor
 	 */
-	public CacheItem() {
+	public CacheEntry() {
 		super();
 	}
 
@@ -39,12 +45,14 @@ public class CacheItem<T> {
 	 * @param value value
 	 */
 	public void addElement(String key, T value) {
-		if ( ! registry.containsKey(key) ) {
-			List<T> elements = new ArrayList<>(0);
-			elements.add(value);
-			registry.put(key, elements);
-		} else {
-			registry.get(key).add(value);
+		synchronized (registry) {
+			if ( ! registry.containsKey(key) ) {
+				List<T> elements = new ArrayList<>(0);
+				elements.add(value);
+				registry.put(key, elements);
+			} else {
+				registry.get(key).add(value);
+			}
 		}
 	}
 	
