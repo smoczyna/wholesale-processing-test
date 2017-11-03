@@ -34,7 +34,7 @@ public class RangePartitioner implements Partitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        Map<String, ExecutionContext> result = new HashMap();
+        Map<String, ExecutionContext> result = new HashMap<>();
         ClassLoader cl = this.getClass().getClassLoader();
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
         Resource[] resources;

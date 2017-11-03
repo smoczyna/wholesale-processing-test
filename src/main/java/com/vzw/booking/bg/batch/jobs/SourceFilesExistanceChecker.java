@@ -34,6 +34,9 @@ public class SourceFilesExistanceChecker implements Tasklet {
     
     @Value("${csv.to.database.job.source.file.path}")
     private String SOURCE_FILES_PATH;
+    
+    @Value("${csv.to.database.job.source.file.splitSize}")
+    private int SOURCE_FILES_SPLIT_SIZE;
 
     @Override
     public RepeatStatus execute(StepContribution sc, ChunkContext cc) throws Exception {
@@ -54,9 +57,9 @@ public class SourceFilesExistanceChecker implements Tasklet {
             LOGGER.error(Constants.FILES_NOT_FOUND_JOB_ABORTED);
             throw new JobInterruptedException(Constants.FILES_NOT_FOUND_MESSAGE);
         } else {
-            splitTextFile(f3, 10000);
-            splitTextFile(f4, 10000);
-            splitTextFile(f5, 10000);
+            splitTextFile(f3, SOURCE_FILES_SPLIT_SIZE);
+            splitTextFile(f4, SOURCE_FILES_SPLIT_SIZE);
+            splitTextFile(f5, SOURCE_FILES_SPLIT_SIZE);
             return RepeatStatus.FINISHED;
         }
     }

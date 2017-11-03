@@ -37,7 +37,7 @@ public class WholesaleBookingProcessorHelper {
     private long recordCount;
 
     public WholesaleBookingProcessorHelper() {
-        this.financialEventOffset = new HashMap();
+        this.financialEventOffset = new HashMap<>();
         this.zeroChargesCounter = 0;
         this.gapsCounter = 0;
         this.dataErrorsCounter = 0;
