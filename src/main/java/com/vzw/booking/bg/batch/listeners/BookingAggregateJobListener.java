@@ -76,8 +76,8 @@ public class BookingAggregateJobListener implements JobExecutionListener {
                 if (d3.exists()) FileUtils.cleanDirectory(d3);
                 
                 Date endTime = new Date();
-                LOGGER.info(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
-                LOGGER.info(String.format(Constants.JOB_PROCESSIG_TIME_MESSAGE, ((endTime.getTime() - this.startTIme.getTime()) / 1000)));
+                System.out.println(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
+                System.out.println(String.format(Constants.JOB_PROCESSIG_TIME_MESSAGE, ((endTime.getTime() - this.startTIme.getTime()) / 1000)));
             } catch (IOException ex) {
                 LOGGER.error(ex.getMessage());
             }

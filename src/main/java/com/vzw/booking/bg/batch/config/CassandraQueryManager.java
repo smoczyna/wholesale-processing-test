@@ -62,7 +62,7 @@ public class CassandraQueryManager {
 	private @Value("${com.springbatch.db.cassandra.username}") String username="";
 	
 	//private @Value("${com.springbatch.db.cassandra.password}") String password="";
-	private String password="Ireland";//System.getProperty("cassandra.password");
+	private String password=ArgumentsHelper.getCassandraPassword();
 	
 	private @Value("${com.springbatch.db.cassandra.dcname}") String dcname="";
     

@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
+import static com.vzw.booking.bg.batch.config.ArgumentsHelper.*;
 
 /**
  * <h1>WholesaleBookingProcessorApplication</h1>
@@ -24,6 +25,7 @@ public class BookingWholesaleApplication {
      * @param args - arguments passed to the spring boot application.
      */
     public static void main(String[] args) {
+    	parseArguments(args);
         ConfigurableApplicationContext context = SpringApplication.run(BookingWholesaleApplication.class, args);
         // could be nice to have few modes of running (for instance: continuous lister and single run)
         context.registerShutdownHook();

@@ -152,13 +152,13 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         SummarySubLedgerDTO clone = null;
         Integer offsetFinCat = this.processingHelper.findOffsetFinCat(subLedgerOutput.getFinancialEventNumber());
         if (offsetFinCat == null) {
-            LOGGER.error(Constants.OFFSET_NOT_FOUND);
+            LOGGER.warn(Constants.OFFSET_NOT_FOUND);
         } else {
             Double debitAmt = subLedgerOutput.getSubledgerTotalDebitAmount();
             Double creditAmt = subLedgerOutput.getSubledgerTotalCreditAmount();
 
             if (debitAmt == 0d && creditAmt == 0d) {
-                LOGGER.info(Constants.ZERO_SUBLEDGER_AMOUNT);
+                LOGGER.warn(Constants.ZERO_SUBLEDGER_AMOUNT);
             }
 
             try {
@@ -304,7 +304,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         }
 
         if (billedRec.getWholesalePeakAirCharge() == 0 && billedRec.getWholesaleOffpeakAirCharge() == 0 && billedRec.getTollCharge() == 0) {
-            LOGGER.info(Constants.ZERO_CHARGES_SKIP);
+            LOGGER.warn(Constants.ZERO_CHARGES_SKIP);
             this.processingHelper.incrementCounter(Constants.ZERO_CHARGES);
             return null;
         }
@@ -370,7 +370,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 report.setPeakDollarAmt(0d);
                 this.makeBookings(billedRec, outRec, tmpInterExchangeCarrierCode);
             } else {
-                LOGGER.info(Constants.GAP_DETECTED);
+                LOGGER.warn(Constants.GAP_DETECTED);
                 this.processingHelper.incrementCounter(Constants.GAPS);
             }
         } else {
@@ -378,7 +378,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         }
 
         if (zeroAirCharge && zeroTollCharge) {
-            LOGGER.info(Constants.INVALID_INPUT);
+            LOGGER.warn(Constants.INVALID_INPUT);
             this.processingHelper.incrementCounter(Constants.DATA_ERRORS);
             return null;
         }
@@ -466,7 +466,6 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getLocalizedMessage());
         }
         return result;
     }
@@ -485,7 +484,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
 //                dbResult.get(0).setFinancialcategory(677);
             
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getMessage());
+            LOGGER.debug("FinancialEventCategory Proceesing Error",ex);
             dbResult = null;
         }
         if (dbResult == null && financialeventnormalsign.equals("DR")) {
@@ -501,9 +500,9 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 dbResult = queryManager.getFinancialEventCategoryNoClusteringRecord(
                         tmpProdId, homeEqualsServingSbid, altBookingInd ? "Y" : "N", interExchangeCarrierCode, financialeventnormalsign);
 
-                LOGGER.info(Constants.DEFAULT_FEC_OBTAINED);
+                LOGGER.warn(Constants.DEFAULT_FEC_OBTAINED);
             } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-                LOGGER.error(ex.getMessage());
+                LOGGER.debug("FinancialEventCategory Process Failure", ex);
                 LOGGER.error(Constants.DEFAULT_FEC_NOT_FOUND);
             }
         }
@@ -521,7 +520,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getLocalizedMessage());
+            LOGGER.debug("DataEvent Process Failure", ex);
         }
         return result;
     }
@@ -534,7 +533,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getLocalizedMessage());
+            LOGGER.debug("WholeSale Process Failure", ex);
         }
         return result;
     }

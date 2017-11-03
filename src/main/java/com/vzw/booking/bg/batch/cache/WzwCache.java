@@ -35,6 +35,7 @@ public class WzwCache {
 	private volatile @Value("${com.springbatch.cache.folder.location}") String folderLocation = "";
 
 	protected Map<String, CacheEntry<?>> cacheItems = new HashMap<>(0);
+	protected Map<String, Class<?>> cacheItemClasses = new HashMap<>(0);
 
 	/**
 	 * Default Constructor
@@ -57,6 +58,7 @@ public class WzwCache {
 	public <T> void createCacheItem(String itemName, Class<T> type) {
 		CacheEntry<T> item = new CacheEntry<T>();
 		cacheItems.put(itemName, item);
+		cacheItemClasses.put(itemName, type);
 	}
 
 	/**
@@ -95,6 +97,23 @@ public class WzwCache {
 			return new ArrayList<>(0);
 		}
 		return l;
+	}
+	
+	/**
+	 * 
+	 */
+	public void clearCache() {
+		this.cacheItems.clear();
+		this.cacheItemClasses.clear();
+	}
+	
+	/**
+	 * @throws CacheException
+	 */
+	public void invalidateAndReload() throws CacheException {
+		this.clearCache();
+		this.save();
+		this.load();
 	}
 
 //	/**
@@ -166,7 +185,10 @@ public class WzwCache {
 		try (ObjectInputStream os = new ObjectInputStream(new FileInputStream(file))) {
 			Object o = os.readObject();
 			if (WzwCache.class.isAssignableFrom(o.getClass())) {
+				this.cacheItems.clear();
 				this.cacheItems.putAll(((WzwCache)o).cacheItems);
+				this.cacheItemClasses.clear();
+				this.cacheItemClasses.putAll(((WzwCache)o).cacheItemClasses);
 			} else {
 				LOGGER.error("Unable to load Cache in file " + fileLocation + " due to unexpected cache data type");
 				throw new CacheException("Unable to load Cache in file " + fileLocation + " due to unexpected cache data type");
