@@ -23,8 +23,6 @@ public class GenericStepExecutionListener implements StepExecutionListener {
     @Autowired
     private WholesaleBookingProcessorHelper processingHelper;
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(GenericStepExecutionListener.class);
-    
     @Override
     public void beforeStep(StepExecution se) {
     }

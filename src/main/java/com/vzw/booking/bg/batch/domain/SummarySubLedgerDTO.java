@@ -36,7 +36,7 @@ public class SummarySubLedgerDTO implements Cloneable {
     private String billAccrualIndicator = "N";
     private String paymentSourceCode;
     private Integer discountOfferId = 0;
-    private String updateUserId = "WholesaleBookingApp";
+    private String updateUserId = "WBApp";
     private String updateTimestamp;
 
     public String getJemsApplId() {

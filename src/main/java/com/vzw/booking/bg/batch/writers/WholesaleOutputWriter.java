@@ -5,6 +5,7 @@
  */
 package com.vzw.booking.bg.batch.writers;
 
+import com.vzw.booking.bg.batch.constants.Constants;
 import com.vzw.booking.bg.batch.domain.WholesaleProcessingOutput;
 import java.util.List;
 import org.springframework.batch.item.ExecutionContext;
@@ -20,14 +21,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class WholesaleOutputWriter implements ItemStreamWriter<WholesaleProcessingOutput> {
     private static final String PROPERTY_CSV_EXPORT_FILE_PATH = "database.to.csv.job.export.file.path";
-    private final WholesaleReportCsvWriter wholesaleReportWriter;    
-    private final SubledgerCsvFileWriter subledgerWriter;
+    private final WholesaleReportFixedLengthFileWriter wholesaleReportWriter;    
+    private final SubledgerFixedLengthFileWriter subledgerWriter;
     
     public WholesaleOutputWriter(Environment environment, String fileNo) {
-        String filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat("wholesale_report_").concat(fileNo).concat(".csv");        
-        this.wholesaleReportWriter = new WholesaleReportCsvWriter(filename);
-        filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat("subledger_summary_").concat(fileNo).concat(".csv");        
-        this.subledgerWriter = new SubledgerCsvFileWriter(filename);
+        String filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(Constants.WHOLESALE_REPORT_FILENAME_PATTERN).concat("_").concat(fileNo).concat(".csv");        
+        this.wholesaleReportWriter = new WholesaleReportFixedLengthFileWriter(filename);
+        filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(Constants.SUBLEDGER_SUMMARY_FILENAME_PATTERN).concat("_").concat(fileNo).concat(".csv");        
+        this.subledgerWriter = new SubledgerFixedLengthFileWriter(filename);
     }
     
     @Override

@@ -20,7 +20,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
  */
 @Component
 public class BookingWholesaleApplicationInit {
-
+    
     /**
      * This is meta data source this source is used by Spring Batch internally
      * to control processing connection and credentials details are configured
@@ -35,6 +35,7 @@ public class BookingWholesaleApplicationInit {
         EmbeddedDatabase db = builder
                 .setType(EmbeddedDatabaseType.H2) // .HSQL or .DERBY
                 .addScript("classpath:db/meta/schema-h2.sql")
+                //.addScript("classpath:db/meta/wholesale-h2-db.sql")
                 .build();
         return db;
     }

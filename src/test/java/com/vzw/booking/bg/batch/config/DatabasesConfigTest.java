@@ -37,10 +37,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class DatabasesConfigTest {
 
-    @Test
+    //@Test
     public void testMeatDataSource() throws Exception {
         System.out.println("Check spring internal DB connection");
-        DataSource result = BookingWholesaleApplicationInit.dataSource();        
+        DataSource result = BookingWholesaleApplicationInit.dataSource();
         assertNotNull(result);
     }
 
@@ -51,7 +51,7 @@ public class DatabasesConfigTest {
         return cluster.connect(keyspace);
     }
 
-    @Test
+    //@Test
     public void testCasandraConnectivity() throws Exception {
         System.out.println("*** Checking Casandra native connectivity using Datastax driver ***");
         AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
@@ -70,8 +70,8 @@ public class DatabasesConfigTest {
     }
 
     @Test //(expected = NullPointerException.class)
-    public void testCassandraFinancialMarketTable() throws Throwable {
-        System.out.println("*** Checking Casandra Financial Market table ***");
+    public void testTransferCassandraFinancialMarketTable() throws Throwable {
+        System.out.println("*** Transfering Casandra Financial Market table to memory ***");
         AbstractMapper<FinancialMarket> financialMarketMapper = new AbstractMapper() {
             @Override
             protected Mapper<FinancialMarket> getMapper(MappingManager manager) {
@@ -90,10 +90,21 @@ public class DatabasesConfigTest {
 
         List<FinancialMarket> markets = builder.getResults();
         assertNotNull(markets);
+//        GenericSqlConverter converter = new GenericSqlConverter(FinancialMarket.class);
+//        DataSource h2ds = BookingWholesaleApplicationInit.dataSource();
+//        Connection con = h2ds.getConnection();
+//        Statement stmt = con.createStatement();
+//        //System.out.println("***");
+//        for (FinancialMarket market : markets) {
+//            String query = converter.createQueryFromModel(market);     
+//            System.out.println(query);
+//            stmt.executeUpdate(query);
+//            //System.out.println("***");
+//        }        
         System.out.println("Financial Market records found: "+ markets.size());
     }
 
-    @Test
+    //@Test
     public void testCassandraResultCaching() throws Throwable {
         System.out.println("*** Checking Casandra Result Caching ***");
         AbstractMapper<FinancialMarket> financialMarketMapper = new AbstractMapper() {
@@ -126,7 +137,7 @@ public class DatabasesConfigTest {
         //assertTrue(firstCallTime > secondCallTime);
     }
     
-    @Test
+    //@Test
     public void testSystemSchemaAccess() throws Exception {
         System.out.println("*** Checking Casandra System Schema ***");
         Session session = getCasandraSession("system_schema");
@@ -185,7 +196,7 @@ public class DatabasesConfigTest {
         System.out.println("*** End of Misctran check ***");
     }
 
-    @Test
+    //@Test
     public void testFinancialEventCategoryTable() throws Throwable {
         System.out.println("*** Cheking Financial Event Category table ***");
         AbstractMapper<FinancialEventCategory> misctranMapper = new AbstractMapper() {

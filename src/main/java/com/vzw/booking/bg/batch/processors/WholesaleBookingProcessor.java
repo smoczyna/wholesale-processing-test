@@ -466,6 +466,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
+            LOGGER.warn("Cassandra error: ", ex);
         }
         return result;
     }
@@ -484,7 +485,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
 //                dbResult.get(0).setFinancialcategory(677);
             
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.debug("FinancialEventCategory Proceesing Error",ex);
+            LOGGER.warn("FinancialEventCategory Proceesing Error",ex);
             dbResult = null;
         }
         if (dbResult == null && financialeventnormalsign.equals("DR")) {
@@ -502,7 +503,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
 
                 LOGGER.warn(Constants.DEFAULT_FEC_OBTAINED);
             } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-                LOGGER.debug("FinancialEventCategory Process Failure", ex);
+                LOGGER.warn("FinancialEventCategory Process Failure", ex);
                 LOGGER.error(Constants.DEFAULT_FEC_NOT_FOUND);
             }
         }
@@ -520,7 +521,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.debug("DataEvent Process Failure", ex);
+            LOGGER.warn("DataEvent Process Failure", ex);
         }
         return result;
     }
@@ -533,7 +534,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.debug("WholeSale Process Failure", ex);
+            LOGGER.warn("WholeSale Process Failure", ex);
         }
         return result;
     }
