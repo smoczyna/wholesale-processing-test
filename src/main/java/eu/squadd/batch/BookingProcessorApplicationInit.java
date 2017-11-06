@@ -3,11 +3,8 @@ package eu.squadd.batch;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import eu.squadd.batch.utils.CustomIdGenerator;
 import eu.squadd.batch.utils.WholesaleBookingProcessorHelper;
 import javax.sql.DataSource;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;

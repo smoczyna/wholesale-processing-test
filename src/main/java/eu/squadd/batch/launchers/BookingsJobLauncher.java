@@ -51,8 +51,6 @@ public class BookingsJobLauncher {
     private JobParameters newExecution() {
         Map<String, JobParameter> parameters = new HashMap<>();  
         parameters.put("currentTime", new JobParameter(new Date()));
-        parameters.put("maxSkippedRecords", new JobParameter(1000000L));
-        parameters.put("consolidateFiles", new JobParameter("Yes"));
         return new JobParameters(parameters);
     }
 }
