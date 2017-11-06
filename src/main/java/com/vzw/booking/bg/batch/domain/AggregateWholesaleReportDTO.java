@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * @author smorcja
  */
 @Component
-public class AggregateWholesaleReportDTO {
+public class AggregateWholesaleReportDTO implements Externalizable {
     
     private String cycleMonthYear;
     private String startDate;
@@ -204,4 +204,5 @@ public class AggregateWholesaleReportDTO {
     public void setBilledInd(String billedInd) {
         this.billedInd = billedInd;
     }
+    
 }

@@ -63,10 +63,6 @@ public class BookigFilesJobConfig {
 
 	private @Value("${com.springbatch.output.executor.queueCapacity}") int queueCapacity=5000;
 	
-	private @Value("${com.springbatch.output.chuncks.numberOfReadChunks}") int numberOfChucks=1;
-
-	private @Value("${com.springbatch.output.chuncks.numberOfWriteChunks}") int numberOfWriteChucks=1;
-	
     /* listeners and helpers */
 
     @Bean
@@ -207,9 +203,8 @@ public class BookigFilesJobConfig {
     Step updateBookingDatesStep(BookDateCsvFileReader bookDateItemReader,
                                 BookDateProcessor bookDateProcessor,
                                 StepBuilderFactory stepBuilderFactory) {
-    	LOGGER.info("**** updateBookingDatesStep - NUMBER OF CHUNCKS="+numberOfWriteChucks);
         return stepBuilderFactory.get("updateBookingDatesStep")
-                .<BookDateCsvFileDTO, Boolean>chunk(numberOfWriteChucks)
+                .<BookDateCsvFileDTO, Boolean>chunk(1)
                 .reader(bookDateItemReader)
                 .processor(bookDateProcessor)
                 .build();
@@ -219,9 +214,8 @@ public class BookigFilesJobConfig {
     Step readOffsetDataStep(FinancialEventOffsetReader financialEventOffsetReader,
                             FinancialEventOffsetProcessor financialEventOffsetProcessor,
                             StepBuilderFactory stepBuilderFactory) {
-    	LOGGER.info("**** readOffsetDataStep - NUMBER OF CHUNCKS="+numberOfChucks);
         return stepBuilderFactory.get("readOffsetDataStep")
-                .<FinancialEventOffsetDTO, Boolean>chunk(numberOfChucks)
+                .<FinancialEventOffsetDTO, Boolean>chunk(10)
                 .reader(financialEventOffsetReader)
                 .processor(financialEventOffsetProcessor)
                 .build();

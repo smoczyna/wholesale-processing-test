@@ -5,29 +5,32 @@
  */
 package com.vzw.booking.bg.batch.writers;
 
-import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
-import com.vzw.booking.bg.batch.utils.SubledgerFixedLengthFileReader;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.batch.test.StepScopeTestExecutionListener;
 import org.springframework.batch.test.StepScopeTestUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.vzw.booking.bg.batch.domain.ExternalizationMetadata;
+import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
+import com.vzw.booking.bg.batch.utils.ReflectionsUtility;
 
 /**
  *
@@ -38,15 +41,23 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration
 public class SubledgerFixedLengthFielWriterTest {
     
+	private @Value("${com.wzw.springbatch.processor.writer.format.subledger}") String subLedgerFormat;
     private SubledgerFixedLengthFileWriter writer;
     private String workingFoler;
     
     @Before
     public void setUp() {
+        ExternalizationMetadata subledgetMetaData = null;
+        try {
+			subledgetMetaData = ReflectionsUtility.getParametersMap(SummarySubLedgerDTO.class, subLedgerFormat);
+		} catch (Exception e) {
+			System.exit(1);
+		}
         ClassLoader classLoader = getClass().getClassLoader();
         workingFoler = classLoader.getResource("./data").getPath();
-        Logger.getLogger(SubledgerFixedLengthFielWriterTest.class.getName()).log(Level.INFO, "Write path: {0}", workingFoler);
+        LoggerFactory.getLogger(SubledgerFixedLengthFielWriterTest.class).info("Write path: {0}", workingFoler);
         writer = new SubledgerFixedLengthFileWriter(workingFoler+"/fixed_length_subledger_report.txt");
+        writer.setUpLineAggregator(subledgetMetaData);
     }
     
     @Test
@@ -69,7 +80,7 @@ public class SubledgerFixedLengthFielWriterTest {
                 writer.close();
                 verifyWrittenFile();
             } catch (Exception ex) {
-                Logger.getLogger(SubledgerFixedLengthFielWriterTest.class.getName()).log(Level.SEVERE, null, ex);
+            	LoggerFactory.getLogger(SubledgerFixedLengthFielWriterTest.class).error(ex.getMessage());
             }
             return 1;
         });

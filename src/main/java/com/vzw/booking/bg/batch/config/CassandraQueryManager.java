@@ -127,7 +127,7 @@ public class CassandraQueryManager {
 		try {
 			localCache.checkLoad();
 		} catch (CacheException e) {
-			LOGGER.error("Unable to initialize cache", e);
+			LOGGER.error("Unable to initialize cache: {}", e.getMessage());
 		}
 		
 		boolean anyChange = false;
@@ -150,7 +150,7 @@ public class CassandraQueryManager {
 				LOGGER.info("Chached records " + fmr.size() + " for table : financialmarket!!");
 				anyChange = true;
 			} catch (Exception e) {
-				LOGGER.error("Error Chaching records for table : financialmarket!!", e);
+				LOGGER.error("Error Chaching records for table : financialmarket => : {}", e.getMessage());
 			}
             
 		}
@@ -174,7 +174,7 @@ public class CassandraQueryManager {
 				LOGGER.info("Chached records " + fecr.size() + " for table : financialeventcategory!!");
 				anyChange = true;
 			} catch (Exception e) {
-				LOGGER.error("Error Chaching records for table : financialeventcategory!!", e);
+				LOGGER.error("Error Chaching records for table : financialeventcategory => {}", e.getMessage());
 			}
 		}
 		if (! localCache.existsCacheItem(CassandraTableReference.CACHE_ITEM_DATA_EVENT)) {
@@ -194,7 +194,7 @@ public class CassandraQueryManager {
 				LOGGER.info("Chached records " + fecr.size() + " for table : dataevent!!");
 				anyChange = true;
 			} catch (Exception e) {
-				LOGGER.error("Error Chaching records for table : dataevent!!", e);
+				LOGGER.error("Error Chaching records for table : dataevent => {}", e.getMessage());
 			}
 		}
 		if (! localCache.existsCacheItem(CassandraTableReference.CACHE_ITEM_WHOLESALE_PRICE)) {
@@ -214,7 +214,7 @@ public class CassandraQueryManager {
 				LOGGER.info("Chached records " + whsr.size() + " for table : wholesaleprice!!");
 				anyChange = true;
 			} catch (Exception e) {
-				LOGGER.error("Error Chaching records for table : wholesaleprice!!", e);
+				LOGGER.error("Error Chaching records for table : wholesaleprice => {}", e.getMessage());
 			}
 		}
 		
@@ -222,7 +222,7 @@ public class CassandraQueryManager {
 			if (anyChange)
 				localCache.checkSave();
 		} catch (CacheException e) {
-			LOGGER.error("Error Refreshing cache on disk!!", e);
+			LOGGER.error("Error Refreshing cache on disk => {}", e.getMessage());
 		}
 		
 		LOGGER.info("After construction/load of Verizon Wireless L2 Cache");

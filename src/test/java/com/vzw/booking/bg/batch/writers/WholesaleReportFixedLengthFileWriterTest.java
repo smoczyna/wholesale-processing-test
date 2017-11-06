@@ -5,28 +5,33 @@
  */
 package com.vzw.booking.bg.batch.writers;
 
-import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
-import com.vzw.booking.bg.batch.utils.ProcessingUtils;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.batch.test.StepScopeTestExecutionListener;
 import org.springframework.batch.test.StepScopeTestUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
+import com.vzw.booking.bg.batch.domain.ExternalizationMetadata;
+import com.vzw.booking.bg.batch.utils.ReflectionsUtility;
 
 /**
  *
@@ -37,15 +42,24 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration
 public class WholesaleReportFixedLengthFileWriterTest {
     
+    
+	private @Value("${com.wzw.springbatch.processor.writer.format.wholesale}") String wholeSaleFormat;
     private WholesaleReportFixedLengthFileWriter writer;
     private String workingFoler;
     
     @Before
     public void setUp() {
+        ExternalizationMetadata wholesaleMetaData = null;
+        try {
+			wholesaleMetaData = ReflectionsUtility.getParametersMap(AggregateWholesaleReportDTO.class, wholeSaleFormat);
+		} catch (Exception e) {
+			System.exit(1);
+		}
         ClassLoader classLoader = getClass().getClassLoader();
         workingFoler = classLoader.getResource("./data").getPath();
-        Logger.getLogger(WholesaleReportFixedLengthFileWriterTest.class.getName()).log(Level.INFO, "Write path: {0}", workingFoler);
+        LoggerFactory.getLogger(WholesaleReportFixedLengthFileWriterTest.class).info("Write path: {0}", workingFoler);
         writer = new WholesaleReportFixedLengthFileWriter(workingFoler+"/fixed_length_wholesale_report.txt");
+        writer.setUpLineAggregator(wholesaleMetaData);
     }
     
     @Test
@@ -69,7 +83,7 @@ public class WholesaleReportFixedLengthFileWriterTest {
                 writer.close();
                 verifyWrittenFile();
             } catch (Exception ex) {
-                Logger.getLogger(WholesaleReportCsvWriterTest.class.getName()).log(Level.SEVERE, null, ex);
+                LoggerFactory.getLogger(WholesaleReportFixedLengthFileWriterTest.class).error(ex.getMessage());
             }
             return 1;
         });

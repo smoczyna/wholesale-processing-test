@@ -5,14 +5,22 @@
  */
 package com.vzw.booking.bg.batch.writers;
 
-import com.vzw.booking.bg.batch.constants.Constants;
-import com.vzw.booking.bg.batch.domain.WholesaleProcessingOutput;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamWriter;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+
+import com.vzw.booking.bg.batch.constants.Constants;
+import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
+import com.vzw.booking.bg.batch.domain.ExternalizationMetadata;
+import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
+import com.vzw.booking.bg.batch.domain.WholesaleProcessingOutput;
+import com.vzw.booking.bg.batch.utils.ReflectionsUtility;
 
 /**
  *
@@ -20,15 +28,33 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class WholesaleOutputWriter implements ItemStreamWriter<WholesaleProcessingOutput> {
-    private static final String PROPERTY_CSV_EXPORT_FILE_PATH = "database.to.csv.job.export.file.path";
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(WholesaleOutputWriter.class);
+
+	private static final String PROPERTY_CSV_EXPORT_FILE_PATH = "database.to.csv.job.export.file.path";
+    private static final String PROPERTY_WHOLESALE_FORMAT = "com.wzw.springbatch.processor.writer.format.wholesale";
+    private static final String PROPERTY_SUBLEDGER_FORMAT = "com.wzw.springbatch.processor.writer.format.subledger";
     private final WholesaleReportFixedLengthFileWriter wholesaleReportWriter;    
     private final SubledgerFixedLengthFileWriter subledgerWriter;
     
     public WholesaleOutputWriter(Environment environment, String fileNo) {
-        String filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(Constants.WHOLESALE_REPORT_FILENAME_PATTERN).concat("_").concat(fileNo).concat(".csv");        
-        this.wholesaleReportWriter = new WholesaleReportFixedLengthFileWriter(filename);
-        filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(Constants.SUBLEDGER_SUMMARY_FILENAME_PATTERN).concat("_").concat(fileNo).concat(".csv");        
-        this.subledgerWriter = new SubledgerFixedLengthFileWriter(filename);
+        String wholesaleFormat = environment.getRequiredProperty(PROPERTY_WHOLESALE_FORMAT);
+        String subledgerFormat = environment.getRequiredProperty(PROPERTY_SUBLEDGER_FORMAT);
+        ExternalizationMetadata wholesaleMetaData = null;
+        ExternalizationMetadata subledgetMetaData = null;
+        try {
+			wholesaleMetaData = ReflectionsUtility.getParametersMap(AggregateWholesaleReportDTO.class, wholesaleFormat);
+			subledgetMetaData = ReflectionsUtility.getParametersMap(SummarySubLedgerDTO.class, subledgerFormat);
+		} catch (Exception e) {
+			LOGGER.error("FATAL: Failure loading WRITERS configuration {}", e.getMessage());
+			System.exit(1);
+		}
+		String filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(Constants.WHOLESALE_REPORT_FILENAME_PATTERN).concat("_").concat(fileNo).concat(".csv");        
+		this.wholesaleReportWriter = new WholesaleReportFixedLengthFileWriter(filename);
+		this.wholesaleReportWriter.setUpLineAggregator(wholesaleMetaData);
+		filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(Constants.SUBLEDGER_SUMMARY_FILENAME_PATTERN).concat("_").concat(fileNo).concat(".csv");        
+		this.subledgerWriter = new SubledgerFixedLengthFileWriter(filename);
+		this.subledgerWriter.setUpLineAggregator(subledgetMetaData);
     }
     
     @Override

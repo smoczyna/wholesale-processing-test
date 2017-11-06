@@ -466,7 +466,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.warn("Cassandra error: ", ex);
+            LOGGER.warn("FinancialMarket Process Failure: {}", ex.getMessage());
         }
         return result;
     }
@@ -485,7 +485,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
 //                dbResult.get(0).setFinancialcategory(677);
             
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.warn("FinancialEventCategory Proceesing Error",ex);
+            LOGGER.warn("FinancialEventCategory Proceesing Error: {}",ex.getMessage());
             dbResult = null;
         }
         if (dbResult == null && financialeventnormalsign.equals("DR")) {
@@ -503,7 +503,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
 
                 LOGGER.warn(Constants.DEFAULT_FEC_OBTAINED);
             } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-                LOGGER.warn("FinancialEventCategory Process Failure", ex);
+                LOGGER.warn("FinancialEventCategory Process Failure: {}", ex.getMessage());
                 LOGGER.error(Constants.DEFAULT_FEC_NOT_FOUND);
             }
         }
@@ -521,7 +521,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.warn("DataEvent Process Failure", ex);
+            LOGGER.warn("DataEvent Process Failure: {}", ex.getMessage());
         }
         return result;
     }
@@ -534,7 +534,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.warn("WholeSale Process Failure", ex);
+            LOGGER.warn("WholeSale Process Failure: {}", ex.getMessage());
         }
         return result;
     }

@@ -9,12 +9,15 @@ import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
+
 /**
  *
  * @author smorcja
  */
 public class WholesaleReportFixedLengthFileWriter extends FixedLengthGenericFileWriter<AggregateWholesaleReportDTO> {
-    private static final Map<String, Integer> FIELDS;
+
+	private static final Map<String, Integer> FIELDS;
     static {
         FIELDS = new LinkedHashMap();
         FIELDS.put("cycleMonthYear", 6);
