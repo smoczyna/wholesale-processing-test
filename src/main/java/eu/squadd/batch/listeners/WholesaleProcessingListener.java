@@ -30,12 +30,13 @@ public class WholesaleProcessingListener implements ItemProcessListener, SkipLis
 
     @Override
     public void onSkipInProcess(Object inputRecord, Throwable exception) {
-        LOGGER.error(Constants.RECORD_SKIP_DETECTED);
+        LOGGER.info(Constants.RECORD_SKIP_DETECTED);
+        LOGGER.info(exception.getMessage());
     }
     
     @Override
     public void beforeProcess(Object t) {
-        System.out.println(String.format(Constants.PROCESSING_RECORD, t.toString()));
+        LOGGER.info(String.format(Constants.PROCESSING_RECORD, t.toString()));
     }
 
     @Override

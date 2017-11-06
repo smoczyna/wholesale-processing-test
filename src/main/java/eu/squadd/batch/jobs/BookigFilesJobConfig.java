@@ -10,7 +10,6 @@ import eu.squadd.batch.domain.AdminFeeCsvFileDTO;
 import eu.squadd.batch.domain.BilledCsvFileDTO;
 import eu.squadd.batch.domain.BookDateCsvFileDTO;
 import eu.squadd.batch.domain.FinancialEventOffsetDTO;
-import eu.squadd.batch.domain.SummarySubLedgerDTO;
 import eu.squadd.batch.domain.UnbilledCsvFileDTO;
 import eu.squadd.batch.domain.WholesaleProcessingOutput;
 import eu.squadd.batch.listeners.BookingAggregateJobListener;
@@ -26,7 +25,6 @@ import eu.squadd.batch.readers.FinancialEventOffsetReader;
 import eu.squadd.batch.readers.UnbilledBookingFileReader;
 import eu.squadd.batch.utils.RangePartitioner;
 import eu.squadd.batch.validations.CsvFileVerificationSkipper;
-import eu.squadd.batch.writers.SubledgerCsvFileWriter;
 import eu.squadd.batch.writers.WholesaleOutputWriter;
 import java.io.IOException;
 import org.springframework.batch.core.Job;
@@ -39,7 +37,6 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -56,7 +53,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class BookigFilesJobConfig {
     
     /* listeners and helpers */
-    
+
     @Bean
     WholesaleProcessingListener processingListener() {
         return new WholesaleProcessingListener();
@@ -95,12 +92,18 @@ public class BookigFilesJobConfig {
         return new RangePartitioner(environment, "adminfees_split/");
     }
     
+    @Value("${spring.batch.number.of.threads}")
+    private Integer threadsNo;
+    
+    @Value("${spring.batch.number.of.queues}")
+    private Integer queueNo;
+        
     @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setMaxPoolSize(30);
-        taskExecutor.setCorePoolSize(30);
-        taskExecutor.setQueueCapacity(5000);
+        taskExecutor.setMaxPoolSize(threadsNo);
+        taskExecutor.setCorePoolSize(threadsNo);
+        taskExecutor.setQueueCapacity(queueNo);
         taskExecutor.afterPropertiesSet();
         return taskExecutor;
     }
@@ -134,34 +137,6 @@ public class BookigFilesJobConfig {
     AdminFeesBookingFileReader adminFeesFileItemReader(@Value("#{stepExecutionContext[sourceFileName]}") String filename) {
         return new AdminFeesBookingFileReader(filename);
     }
-    
-    
-//    @Bean
-//    @StepScope
-//    BilledBookingFileReader billedFileItemReader() {
-//        ExecutionContext context = this.processingHelper.getStepExecutionContext();
-//        BilledBookingFileReader reader = new BilledBookingFileReader(context.getString("fileName"));
-//        reader.open(context);
-//        return reader;
-//    }
-//    
-//    @Bean
-//    @StepScope
-//    UnbilledBookingFileReader unbilledFileItemReader() {
-//        ExecutionContext context = this.processingHelper.getStepExecutionContext();
-//        UnbilledBookingFileReader reader = new UnbilledBookingFileReader(context.getString("fileName"));
-//        reader.open(context);
-//        return reader;
-//    }
-//    
-//    @Bean
-//    @StepScope
-//    AdminFeesBookingFileReader adminFeesFileItemReader() {
-//        ExecutionContext context = this.processingHelper.getStepExecutionContext();
-//        AdminFeesBookingFileReader reader = new AdminFeesBookingFileReader(context.getString("fileName"));
-//        reader.open(context);
-//        return reader;
-//    }
     
     @Bean
     public SkipPolicy fileVerificationSkipper() {
@@ -199,7 +174,7 @@ public class BookigFilesJobConfig {
     }
 
     /* writers */
-    
+
     @Bean
     @StepScope
     WholesaleOutputWriter wholesaleOutputWriter(Environment environment, @Value("#{stepExecutionContext[destFileNo]}") String fileNo) {

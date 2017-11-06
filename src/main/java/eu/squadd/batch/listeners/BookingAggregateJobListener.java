@@ -52,8 +52,6 @@ public class BookingAggregateJobListener implements JobExecutionListener {
     public void beforeJob(JobExecution je) {
         this.startTIme = new Date();
         LOGGER.info(String.format(Constants.JOB_STARTED_MESSAGE, ProcessingUtils.dateToString(this.startTIme, ProcessingUtils.SHORT_DATETIME_FORMAT)));
-        this.helper.setMaxSkippedRecords(je.getJobParameters().getLong("maxSkippedRecords"));
-        this.helper.setNumberOfChunks(je.getJobParameters().getLong("numberOfChunks").intValue());
     }
 
     /**
@@ -77,17 +75,16 @@ public class BookingAggregateJobListener implements JobExecutionListener {
                 if (d1.exists()) FileUtils.cleanDirectory(d2);
                 File d3 = new File(INPUT_CSV_SOURCE_FILE_PATH.concat("adminfees_split"));
                 if (d3.exists()) FileUtils.cleanDirectory(d3);
-                
-                if (je.getJobParameters().getString("consolidateFiles").equals("Yes")) {
-                    File[] files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, "wholesale_report");
-                    consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, "wholesale_report.csv");
-                    files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, "subledger_summary");
-                    consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, "subledger_summary.csv");
-                }
+                 
+                File[] files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, Constants.WHOLESALE_REPORT_FILENAME_PATTERN);
+                consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, Constants.WHOLESALE_REPORT_FILENAME);
+
+                files = findOutputFiles(OUTPUT_CSV_SOURCE_FILE_PATH, Constants.SUBLEDGER_SUMMARY_FILENAME_PATTERN);
+                consolidateOutputFiles(files, OUTPUT_CSV_SOURCE_FILE_PATH, Constants.SUBLEDGER_SUMMARY_FILENAME);
                 
                 Date endTime = new Date();
-                LOGGER.info(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
-                LOGGER.info(String.format(Constants.JOB_PROCESSIG_TIME_MESSAGE, ((endTime.getTime() - this.startTIme.getTime()) / 1000)));
+                System.out.println(String.format(Constants.JOB_FINISHED_MESSAGE, ProcessingUtils.dateToString(endTime, ProcessingUtils.SHORT_DATETIME_FORMAT)));
+                System.out.println(String.format(Constants.JOB_PROCESSIG_TIME_MESSAGE, ((endTime.getTime() - this.startTIme.getTime()) / 1000)));
             } catch (IOException ex) {
                 LOGGER.error(ex.getMessage());
             }
@@ -127,7 +124,7 @@ public class BookingAggregateJobListener implements JobExecutionListener {
             LOGGER.error(e.getMessage());
         }
     }
-    
+
     private static File[] findOutputFiles(String parentDir, String namePattern) {
         File outputDir = new File(parentDir);
         File[] files = outputDir.listFiles(new FileFilter() {
@@ -135,7 +132,7 @@ public class BookingAggregateJobListener implements JobExecutionListener {
             @Override
             public boolean accept(File file) {
                 if (file.getName().matches(namePattern + "_.*[0-9]\\.csv$")) {
-                    System.out.println("File found: "+file.getName());
+                    LOGGER.info("File found: "+file.getName());
                     return true;
                 } else
                     return false;
@@ -146,14 +143,13 @@ public class BookingAggregateJobListener implements JobExecutionListener {
     
     private static void appendFile(File file, BufferedWriter output) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String text = null;
+            String text;
             while ((text = br.readLine()) != null) {
                 output.write(text);
                 output.newLine();
             }
         } finally {
         }
-
     }
     
     private static void consolidateOutputFiles(File[] files, String destinationDir, String filename) throws IOException {
