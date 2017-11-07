@@ -18,10 +18,10 @@ public interface Externalizable {
 	 */
 	default String dump(ExternalizationMetadata metadata) throws ExternalizationException {
 		String line = "";
-		String currentRecord="<none>"; 
+		String currentField="[none]"; 
 		try {
 			for (FieldMetaData meta: metadata.getMetaData()) {
-				currentRecord = meta.getFieldName();
+				currentField = meta.getFieldName();
 					if ( metadata.getFormat() == ExternalizationFormat.COMMA_SEPARATED_FORMAT ) {
 						line += (line.length()==0 ? "" : ",")  + ReflectionsUtility.objectToString(meta.getGetterMethod().invoke(this));
 					} else {
@@ -30,9 +30,9 @@ public interface Externalizable {
 			}
 		} catch (Exception e) {
 			try {
-				throw new ExternalizationException("Error merging line <record: "+currentRecord+"> : " + asStringDescriptor(metadata), e);
+				throw new ExternalizationException("Error merging line <field: "+currentField+"> : " + asStringDescriptor(metadata), e);
 			} catch (Exception e1) {
-				throw new ExternalizationException("Error merging line <record: "+currentRecord+"> : <NOT PARSABLE> => " + e.getMessage());
+				throw new ExternalizationException("Error merging line <field: "+currentField+"> : <NOT PARSABLE> => " + e.getMessage(), e1);
 			}
 		}
 		return line;

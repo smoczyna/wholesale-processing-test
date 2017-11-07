@@ -5,7 +5,9 @@
  */
 package com.vzw.booking.bg.batch.writers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,7 @@ import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
 import com.vzw.booking.bg.batch.domain.WholesaleProcessingOutput;
 import com.vzw.booking.bg.batch.utils.ReflectionsUtility;
 
+
 /**
  *
  * @author smorcja
@@ -30,6 +33,8 @@ import com.vzw.booking.bg.batch.utils.ReflectionsUtility;
 public class WholesaleOutputWriter implements ItemStreamWriter<WholesaleProcessingOutput> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WholesaleOutputWriter.class);
+	
+	private static final Map<Class<?>, ExternalizationMetadata> metaDataMap = new HashMap<>(0);
 
 	private static final String PROPERTY_CSV_EXPORT_FILE_PATH = "database.to.csv.job.export.file.path";
     private static final String PROPERTY_WHOLESALE_FORMAT = "com.wzw.springbatch.processor.writer.format.wholesale";
@@ -43,8 +48,20 @@ public class WholesaleOutputWriter implements ItemStreamWriter<WholesaleProcessi
         ExternalizationMetadata wholesaleMetaData = null;
         ExternalizationMetadata subledgetMetaData = null;
         try {
-			wholesaleMetaData = ReflectionsUtility.getParametersMap(AggregateWholesaleReportDTO.class, wholesaleFormat);
-			subledgetMetaData = ReflectionsUtility.getParametersMap(SummarySubLedgerDTO.class, subledgerFormat);
+        	synchronized (metaDataMap) {
+            	if (! metaDataMap.containsKey(AggregateWholesaleReportDTO.class)) {
+        			wholesaleMetaData = ReflectionsUtility.getParametersMap(AggregateWholesaleReportDTO.class, wholesaleFormat);
+        			metaDataMap.put(AggregateWholesaleReportDTO.class, wholesaleMetaData);
+            	} else {
+            		wholesaleMetaData = metaDataMap.get(AggregateWholesaleReportDTO.class);
+            	}
+            	if (! metaDataMap.containsKey(SummarySubLedgerDTO.class)) {
+            		subledgetMetaData = ReflectionsUtility.getParametersMap(SummarySubLedgerDTO.class, subledgerFormat);
+        			metaDataMap.put(AggregateWholesaleReportDTO.class, wholesaleMetaData);
+            	} else {
+            		subledgetMetaData = metaDataMap.get(SummarySubLedgerDTO.class);
+            	}
+			}
 		} catch (Exception e) {
 			LOGGER.error("FATAL: Failure loading WRITERS configuration {}", e.getMessage());
 			System.exit(1);
@@ -52,9 +69,11 @@ public class WholesaleOutputWriter implements ItemStreamWriter<WholesaleProcessi
 		String filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(Constants.WHOLESALE_REPORT_FILENAME_PATTERN).concat("_").concat(fileNo).concat(".csv");        
 		this.wholesaleReportWriter = new WholesaleReportFixedLengthFileWriter(filename);
 		this.wholesaleReportWriter.setUpLineAggregator(wholesaleMetaData);
+		this.wholesaleReportWriter.setTransactional(false);
 		filename = environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(Constants.SUBLEDGER_SUMMARY_FILENAME_PATTERN).concat("_").concat(fileNo).concat(".csv");        
 		this.subledgerWriter = new SubledgerFixedLengthFileWriter(filename);
 		this.subledgerWriter.setUpLineAggregator(subledgetMetaData);
+		this.subledgerWriter.setTransactional(false);
     }
     
     @Override

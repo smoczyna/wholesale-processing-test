@@ -33,13 +33,10 @@ public class FixedLengthLineAggregator<T extends Externalizable> implements Line
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FixedLengthLineAggregator.class);
 
-    private final Class<T> payloadClass;
-    private final Map<String, Integer> fieldsDefinition;
     private ExternalizationMetadata metaData;
         
-    public FixedLengthLineAggregator(Class<T> payloadClass, Map<String, Integer> fieldsDefinition) {
-        this.payloadClass = payloadClass;
-        this.fieldsDefinition = fieldsDefinition;
+    public FixedLengthLineAggregator() {
+    	super();
     }
     
     public void setFormat(ExternalizationMetadata metaData) {

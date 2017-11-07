@@ -5,6 +5,7 @@
  */
 package com.vzw.booking.bg.batch.utils;
 
+import com.vzw.booking.bg.batch.domain.ExternalizationMetadata;
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.test.StepScopeTestExecutionListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -25,36 +27,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @TestExecutionListeners({StepScopeTestExecutionListener.class})
 @ContextConfiguration
 public class SubledgerLineAggregatorTest {
-    private FixedLengthLineAggregator lineAggregator;
-    
+    private FixedLengthLineAggregator<SummarySubLedgerDTO> lineAggregator;
+	private @Value("${com.wzw.springbatch.processor.writer.format.subledger}") String subLedgerFormat;
+   
     @Before
     public void setUp() {
-        Map<String, Integer> fields = new LinkedHashMap();
-        fields.put("jemsApplId", 2);
-        fields.put("reportStartDate", 10);
-        fields.put("jemsApplTransactioDate", 10);
-        fields.put("financialEventNumber", 10);
-        fields.put("financialCategory", 10);
-        fields.put("financialmarketId", 3);
-        fields.put("subledgerSequenceNumber", 10);
-        fields.put("subledgerTotalDebitAmount", 14);
-        fields.put("subledgerTotalCreditAmount", 14);
-        fields.put("jurnalEventNumber", 10);
-        fields.put("jurnalEventExceptionCode", 4);
-        fields.put("jurnalEventReadInd", 1);
-        fields.put("generalLedgerTransactionNumber", 10);
-        fields.put("billCycleNumber", 2);
-        fields.put("billTypeCode", 2);
-        fields.put("billCycleMonthYear", 6);
-        fields.put("billPhaseType", 2);
-        fields.put("billMonthInd ", 1);
-        fields.put("billAccrualIndicator", 1);
-        fields.put("paymentSourceCode", 5);
-        fields.put("discountOfferId", 10);
-        fields.put("updateUserId", 8);
-        fields.put("updateTimestamp", 26);
-
-        this.lineAggregator = new FixedLengthLineAggregator(SummarySubLedgerDTO.class, fields);
+        ExternalizationMetadata metaData = null;
+        try {
+        	metaData = ReflectionsUtility.getParametersMap(SummarySubLedgerDTO.class, subLedgerFormat);
+		} catch (Exception e) {
+			System.exit(1);
+		}
+        this.lineAggregator = new FixedLengthLineAggregator<SummarySubLedgerDTO>();
+        this.lineAggregator.setFormat(metaData);
     }
 
     @Test

@@ -68,15 +68,15 @@ public class ReflectionsUtility {
 		} else if (value instanceof Double) {
 			return String.format("%.2f", (Double) value);
 		} else if (value instanceof Integer) {
-			return "" + ((Integer)value).intValue();
+			return value.toString();
 		} else if (value instanceof Long) {
-			return "" + ((Long)value).longValue();
+			return value.toString();
 		} else if (value instanceof Short) {
-			return "" + ((Short)value).shortValue();
+			return value.toString();
 		} else if (value instanceof Byte) {
-			return "" + ((Byte)value).byteValue();
+			return value.toString();
 		} else if (value instanceof Float) {
-			return "" + ((Float)value).floatValue();
+			return value.toString();
 		} else if (String.class.isAssignableFrom(value.getClass())) {
 			return value.toString();
 		}
