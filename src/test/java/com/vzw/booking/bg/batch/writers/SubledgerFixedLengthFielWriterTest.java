@@ -14,6 +14,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,8 +25,11 @@ import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.batch.test.StepScopeTestExecutionListener;
 import org.springframework.batch.test.StepScopeTestUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.vzw.booking.bg.batch.domain.ExternalizationMetadata;
@@ -39,18 +43,29 @@ import com.vzw.booking.bg.batch.utils.ReflectionsUtility;
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners({StepScopeTestExecutionListener.class})
 @ContextConfiguration
+@PropertySource(value= {"classpath:*.properties"})
 public class SubledgerFixedLengthFielWriterTest {
     
 	private @Value("${com.wzw.springbatch.processor.writer.format.subledger}") String subLedgerFormat;
     private SubledgerFixedLengthFileWriter writer;
     private String workingFoler;
-    
+
+    public Properties getPropertyFile() throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        Properties p = new Properties();
+        p.load(classLoader.getResourceAsStream("application.properties"));
+        return p;
+    }
+   
     @Before
     public void setUp() {
         ExternalizationMetadata subledgetMetaData = null;
         try {
+        	subLedgerFormat = (String)getPropertyFile().getProperty("com.wzw.springbatch.processor.writer.format.subledger");
 			subledgetMetaData = ReflectionsUtility.getParametersMap(SummarySubLedgerDTO.class, subLedgerFormat);
 		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Format="+subLedgerFormat);
 			System.exit(1);
 		}
         ClassLoader classLoader = getClass().getClassLoader();
@@ -91,7 +106,7 @@ public class SubledgerFixedLengthFielWriterTest {
         assertNotNull(file.exists());
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
-        assertTrue(line.length()==170);
+        assertTrue(line.length()==171); //It should be 171 and not 170
         // add above fields presence check 
     }
 }

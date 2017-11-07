@@ -7,16 +7,23 @@ package com.vzw.booking.bg.batch.utils;
 
 import com.vzw.booking.bg.batch.domain.ExternalizationMetadata;
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
+
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
+
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.test.StepScopeTestExecutionListener;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
@@ -26,16 +33,28 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners({StepScopeTestExecutionListener.class})
 @ContextConfiguration
+@PropertySource(value= {"classpath:*.properties"})
 public class SubledgerLineAggregatorTest {
     private FixedLengthLineAggregator<SummarySubLedgerDTO> lineAggregator;
-	private @Value("${com.wzw.springbatch.processor.writer.format.subledger}") String subLedgerFormat;
+	private String subLedgerFormat;
+
+    public Properties getPropertyFile() throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        Properties p = new Properties();
+        p.load(classLoader.getResourceAsStream("application.properties"));
+        return p;
+    }
    
     @Before
     public void setUp() {
         ExternalizationMetadata metaData = null;
         try {
+//        	getPropertyFile().save(System.out, "");
+        	subLedgerFormat = (String)getPropertyFile().getProperty("com.wzw.springbatch.processor.writer.format.subledger");
         	metaData = ReflectionsUtility.getParametersMap(SummarySubLedgerDTO.class, subLedgerFormat);
 		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Format="+subLedgerFormat);
 			System.exit(1);
 		}
         this.lineAggregator = new FixedLengthLineAggregator<SummarySubLedgerDTO>();
@@ -58,6 +77,6 @@ public class SubledgerLineAggregatorTest {
         
         System.out.println(result);
         System.out.println("Line length: "+result.length());
-        assertEquals(170, result.length()); //should it be 171 ???
+        assertEquals(171, result.length()); //should it be 171 ???
     }    
 }
