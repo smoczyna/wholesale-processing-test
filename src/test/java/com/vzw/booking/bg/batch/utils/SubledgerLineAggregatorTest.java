@@ -77,6 +77,6 @@ public class SubledgerLineAggregatorTest {
         
         System.out.println(result);
         System.out.println("Line length: "+result.length());
-        assertEquals(171, result.length()); //should it be 171 ???
+        assertEquals(171, result.length()); //should it be 171 ??? Not 170
     }    
 }

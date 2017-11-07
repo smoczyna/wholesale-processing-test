@@ -30,9 +30,9 @@ public interface Externalizable {
 			}
 		} catch (Exception e) {
 			try {
-				throw new ExternalizationException("Error merging line <field: "+currentField+"> : " + asStringDescriptor(metadata), e);
+				throw new ExternalizationException("Error merging line <field: "+currentField+"> : " + asStringDescriptor(metadata) + " => " + e.getMessage());
 			} catch (Exception e1) {
-				throw new ExternalizationException("Error merging line <field: "+currentField+"> : <NOT PARSABLE> => " + e.getMessage(), e1);
+				throw new ExternalizationException("Error merging line <field: "+currentField+"> : <NOT PARSABLE> => " + e.getMessage());
 			}
 		}
 		return line;
@@ -48,6 +48,7 @@ public interface Externalizable {
 					line += (line.length()==0 ? "" : "|")  + ReflectionsUtility.objectToString(meta.getGetterMethod().invoke(this)) + "#" + meta.getLength();
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new ExternalizationException("Error collating line => " + e.getMessage());
 		}
 		return line;
