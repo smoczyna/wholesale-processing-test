@@ -33,9 +33,11 @@ public class WholesaleBookingProcessorHelper {
     private long subledgerWriteCounter;
     private long wholesaleReportCounter;
     private long maxSkippedRecords;
+    private long numberOfChunks;
+    private long recordCount;
 
     public WholesaleBookingProcessorHelper() {
-        this.financialEventOffset = new HashMap();
+        this.financialEventOffset = new HashMap<>();
         this.zeroChargesCounter = 0;
         this.gapsCounter = 0;
         this.dataErrorsCounter = 0;
@@ -43,6 +45,7 @@ public class WholesaleBookingProcessorHelper {
         this.subledgerWriteCounter = 0;
         this.wholesaleReportCounter = 0;
         this.maxSkippedRecords = 0;
+        this.recordCount = 0;
     }
 
     public BookDateCsvFileDTO getDates() {
@@ -59,6 +62,14 @@ public class WholesaleBookingProcessorHelper {
 
     public void setMaxSkippedRecords(long maxSkippedRecords) {
         this.maxSkippedRecords = maxSkippedRecords>0 ? maxSkippedRecords : Constants.DEFAULT_MAX_SKIPPED_RECORDS;
+    }
+
+    public long getNumberOfChunks() {
+        return this.numberOfChunks==0 ? Constants.DEFAULT_NUMBER_OF_CHUNKS : this.numberOfChunks;
+    }
+
+    public void setNumberOfChunks(long numberOfChunks) {
+        this.numberOfChunks = numberOfChunks>0 ? numberOfChunks : Constants.DEFAULT_NUMBER_OF_CHUNKS;
     }
 
     public boolean addOffset(FinancialEventOffsetDTO offset) {
@@ -88,6 +99,9 @@ public class WholesaleBookingProcessorHelper {
     
     public void incrementCounter(String name) {
         switch (name) {
+            case Constants.RECORD_COUNT:
+                this.recordCount++;
+                break;
             case Constants.ZERO_CHARGES:
                 this.zeroChargesCounter++;
                 break;
@@ -113,6 +127,8 @@ public class WholesaleBookingProcessorHelper {
 
     public long getCounter(String name) {
         switch (name) {
+            case Constants.RECORD_COUNT:
+                return this.recordCount;
             case Constants.ZERO_CHARGES:
                 return this.zeroChargesCounter;
             case Constants.GAPS:
@@ -131,6 +147,7 @@ public class WholesaleBookingProcessorHelper {
     }
 
     public void clearCounters() {
+        this.recordCount = 0;
         this.zeroChargesCounter = 0;
         this.gapsCounter = 0;
         this.dataErrorsCounter = 0;

@@ -1,5 +1,7 @@
 package com.vzw.booking.bg.batch.domain.casandra;
 
+import java.io.Serializable;
+
 /*
  * PRIMARY KEY (ProductId),DataEventSubType))
  */
@@ -9,7 +11,12 @@ import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
 
 @Table(name = "dataevent")
-public class DataEvent {
+public class DataEvent implements Serializable {
+
+	/**
+	 * Entity Serial Version ID
+	 */
+	private static final long serialVersionUID = 5863188732889055228L;
 
 	@PartitionKey
 	@Column(name = "dataeventtype")

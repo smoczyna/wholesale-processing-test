@@ -18,11 +18,13 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
+import com.vzw.booking.bg.batch.BookingWholesaleApplicationInit;
 import com.vzw.booking.bg.batch.domain.casandra.FinancialEventCategory;
 import com.vzw.booking.bg.batch.domain.casandra.FinancialMarket;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import javax.sql.DataSource;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +37,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class DatabasesConfigTest {
 
+    //@Test
+    public void testMeatDataSource() throws Exception {
+        System.out.println("Check spring internal DB connection");
+        DataSource result = BookingWholesaleApplicationInit.dataSource();
+        assertNotNull(result);
+    }
+
+    
     public static Session getCasandraSession(String keyspace) {
         AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
         Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
@@ -44,7 +54,6 @@ public class DatabasesConfigTest {
     //@Test
     public void testCasandraConnectivity() throws Exception {
         System.out.println("*** Checking Casandra native connectivity using Datastax driver ***");
-        //Session session = DatabasesConfig.getCasandraSession();
         AuthProvider authProvider = new PlainTextAuthProvider("j6_dev_user", "Ireland");
         Cluster cluster = Cluster.builder().addContactPoint("170.127.114.154").withAuthProvider(authProvider).build();
         assertNotNull(cluster);
@@ -60,9 +69,9 @@ public class DatabasesConfigTest {
         System.out.println("*** End of connectivity test ***");
     }
 
-    //@Test //(expected = NullPointerException.class)
-    public void testCassandraFinancialMarketTable() throws Throwable {
-        System.out.println("*** Checking Casandra Financial Market table ***");
+    @Test //(expected = NullPointerException.class)
+    public void testTransferCassandraFinancialMarketTable() throws Throwable {
+        System.out.println("*** Transfering Casandra Financial Market table to memory ***");
         AbstractMapper<FinancialMarket> financialMarketMapper = new AbstractMapper() {
             @Override
             protected Mapper<FinancialMarket> getMapper(MappingManager manager) {
@@ -81,11 +90,21 @@ public class DatabasesConfigTest {
 
         List<FinancialMarket> markets = builder.getResults();
         assertNotNull(markets);
-        assertTrue(markets.size()==1265);
+//        GenericSqlConverter converter = new GenericSqlConverter(FinancialMarket.class);
+//        DataSource h2ds = BookingWholesaleApplicationInit.dataSource();
+//        Connection con = h2ds.getConnection();
+//        Statement stmt = con.createStatement();
+//        //System.out.println("***");
+//        for (FinancialMarket market : markets) {
+//            String query = converter.createQueryFromModel(market);     
+//            System.out.println(query);
+//            stmt.executeUpdate(query);
+//            //System.out.println("***");
+//        }        
         System.out.println("Financial Market records found: "+ markets.size());
     }
 
-    @Test
+    //@Test
     public void testCassandraResultCaching() throws Throwable {
         System.out.println("*** Checking Casandra Result Caching ***");
         AbstractMapper<FinancialMarket> financialMarketMapper = new AbstractMapper() {
@@ -106,12 +125,16 @@ public class DatabasesConfigTest {
         
         List<FinancialMarket> markets = builder.getResults();
         Date endDate = new Date();
-        System.out.println("First call time: " + (endDate.getTime() - startDate .getTime()) / 1000);
+        long firstCallTime =  (endDate.getTime() - startDate .getTime()) / 1000;
+        System.out.println("First call time: " + firstCallTime);
         
         startDate = new Date();
         markets = builder.getResults();
         endDate = new Date();
-        System.out.println("Second call time: " + (endDate.getTime() - startDate .getTime()) / 1000);
+        long secondCallTime = (endDate.getTime() - startDate .getTime()) / 1000;
+        System.out.println("Second call time: " + secondCallTime);
+        
+        //assertTrue(firstCallTime > secondCallTime);
     }
     
     //@Test
@@ -170,7 +193,6 @@ public class DatabasesConfigTest {
         }
         System.out.println("It seeme that the only issue I have here is that I cannot retrieve rows from result set without a mapper !!!");
         System.out.println("Query never fails, regardless there is an output or not");
-
         System.out.println("*** End of Misctran check ***");
     }
 

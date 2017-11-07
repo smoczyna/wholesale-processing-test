@@ -7,7 +7,6 @@ package com.vzw.booking.bg.batch.readers;
 
 import com.vzw.booking.bg.batch.domain.UnbilledCsvFileDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 
 /**
  *
@@ -28,8 +27,8 @@ public class UnbilledBookingFileReader extends CsvFileGenericReader<UnbilledCsvF
         "debitcreditindicator"};
     
     @Autowired
-    public UnbilledBookingFileReader(Environment environment, String filename) {
-        super(UnbilledCsvFileDTO.class, environment, filename, COLUMN_NAMES, ",");
+    public UnbilledBookingFileReader(String filePath) {
+        super(UnbilledCsvFileDTO.class, filePath, COLUMN_NAMES, ",", 0);
     }
     
     public UnbilledBookingFileReader(String filePath, String delimiter) {

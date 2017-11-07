@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * @author smorcja
  */
 @Component
-public class SummarySubLedgerDTO implements Cloneable {
+public class SummarySubLedgerDTO implements Cloneable, Externalizable {
     
     private String jemsApplId = "BL";
     private String reportStartDate;
@@ -36,7 +36,7 @@ public class SummarySubLedgerDTO implements Cloneable {
     private String billAccrualIndicator = "N";
     private String paymentSourceCode;
     private Integer discountOfferId = 0;
-    private String updateUserId = "WholesaleBookingApp";
+    private String updateUserId = "WBApp";
     private String updateTimestamp;
 
     public String getJemsApplId() {

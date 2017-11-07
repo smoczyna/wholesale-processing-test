@@ -13,7 +13,6 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -41,7 +40,6 @@ public class BookingsJobLauncher {
         this.jobLauncher = jobLauncher;
     }
 
-    @Scheduled(cron = "${csv.to.database.job.cron}")
     void launchCsvFileToDatabaseJob() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
         LOGGER.info(Constants.JOB_STARTED);
         jobLauncher.run(job, newExecution());
@@ -52,6 +50,7 @@ public class BookingsJobLauncher {
         Map<String, JobParameter> parameters = new HashMap<>();  
         parameters.put("currentTime", new JobParameter(new Date()));
         parameters.put("maxSkippedRecords", new JobParameter(1000000L));
+        //parameters.put("numberOfChunks", new JobParameter(50000L));
         return new JobParameters(parameters);
     }
 }

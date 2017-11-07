@@ -7,7 +7,6 @@ package com.vzw.booking.bg.batch.readers;
 
 import com.vzw.booking.bg.batch.domain.AdminFeeCsvFileDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 
 /**
  *
@@ -23,8 +22,8 @@ public class AdminFeesBookingFileReader extends CsvFileGenericReader<AdminFeeCsv
         "debitcreditindicator"};
     
     @Autowired
-    public AdminFeesBookingFileReader(Environment environment, String filename) {
-        super(AdminFeeCsvFileDTO.class, environment, filename, COLUMN_NAMES, ",");
+    public AdminFeesBookingFileReader(String filename) {
+        super(AdminFeeCsvFileDTO.class, filename, COLUMN_NAMES, ",", 0);
     }
     
     public AdminFeesBookingFileReader(String filePath, String delimiter) {

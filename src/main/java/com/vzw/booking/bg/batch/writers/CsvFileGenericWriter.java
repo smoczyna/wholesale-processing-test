@@ -10,7 +10,6 @@ import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.batch.item.file.transform.FieldExtractor;
 import org.springframework.batch.item.file.transform.LineAggregator;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 
 /**
@@ -19,18 +18,14 @@ import org.springframework.core.io.FileSystemResource;
  * @param <T>
  */
 public class CsvFileGenericWriter<T> extends FlatFileItemWriter<T> {
-    private static final String PROPERTY_CSV_EXPORT_FILE_PATH = "database.to.csv.job.export.file.path";
+//    private static final String PROPERTY_CSV_EXPORT_FILE_PATH = "database.to.csv.job.export.file.path";
     
     public CsvFileGenericWriter(String fileName, String[] fieldNames, String delimiter) {
         super.setAppendAllowed(true);
         this.setResource(new FileSystemResource(fileName));
         this.setLineAggregator(createLineAggregator(fieldNames, delimiter));
     }
-    
-    public CsvFileGenericWriter(Environment environment, String fileName, String[] fieldNames, String delimiter) {
-        this(environment.getRequiredProperty(PROPERTY_CSV_EXPORT_FILE_PATH).concat(fileName), fieldNames, delimiter);
-    }
-    
+
     private LineAggregator<T> createLineAggregator(String[] fieldNames, String delimiter) {
         DelimitedLineAggregator<T> lineAggregator = new DelimitedLineAggregator<>();
         lineAggregator.setDelimiter(delimiter);

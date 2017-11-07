@@ -5,16 +5,25 @@
  */
 package com.vzw.booking.bg.batch.utils;
 
+import com.vzw.booking.bg.batch.domain.ExternalizationMetadata;
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
+
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
+
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.test.StepScopeTestExecutionListener;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
@@ -24,37 +33,32 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners({StepScopeTestExecutionListener.class})
 @ContextConfiguration
+@PropertySource(value= {"classpath:*.properties"})
 public class SubledgerLineAggregatorTest {
-    private FixedLengthLineAggregator lineAggregator;
-    
+    private FixedLengthLineAggregator<SummarySubLedgerDTO> lineAggregator;
+	private String subLedgerFormat;
+
+    public Properties getPropertyFile() throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        Properties p = new Properties();
+        p.load(classLoader.getResourceAsStream("application.properties"));
+        return p;
+    }
+   
     @Before
     public void setUp() {
-        Map<String, Integer> fields = new LinkedHashMap();
-        fields.put("jemsApplId", 2);
-        fields.put("reportStartDate", 10);
-        fields.put("jemsApplTransactioDate", 10);
-        fields.put("financialEventNumber", 10);
-        fields.put("financialCategory", 10);
-        fields.put("financialmarketId", 3);
-        fields.put("subledgerSequenceNumber", 10);
-        fields.put("subledgerTotalDebitAmount", 14);
-        fields.put("subledgerTotalCreditAmount", 14);
-        fields.put("jurnalEventNumber", 10);
-        fields.put("jurnalEventExceptionCode", 4);
-        fields.put("jurnalEventReadInd", 1);
-        fields.put("generalLedgerTransactionNumber", 10);
-        fields.put("billCycleNumber", 2);
-        fields.put("billTypeCode", 2);
-        fields.put("billCycleMonthYear", 6);
-        fields.put("billPhaseType", 2);
-        fields.put("billMonthInd ", 1);
-        fields.put("billAccrualIndicator", 1);
-        fields.put("paymentSourceCode", 5);
-        fields.put("discountOfferId", 10);
-        fields.put("updateUserId", 8);
-        fields.put("updateTimestamp", 26);
-
-        this.lineAggregator = new FixedLengthLineAggregator(SummarySubLedgerDTO.class, fields);
+        ExternalizationMetadata metaData = null;
+        try {
+//        	getPropertyFile().save(System.out, "");
+        	subLedgerFormat = (String)getPropertyFile().getProperty("com.wzw.springbatch.processor.writer.format.subledger");
+        	metaData = ReflectionsUtility.getParametersMap(SummarySubLedgerDTO.class, subLedgerFormat);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Format="+subLedgerFormat);
+			System.exit(1);
+		}
+        this.lineAggregator = new FixedLengthLineAggregator<SummarySubLedgerDTO>();
+        this.lineAggregator.setFormat(metaData);
     }
 
     @Test
@@ -73,6 +77,6 @@ public class SubledgerLineAggregatorTest {
         
         System.out.println(result);
         System.out.println("Line length: "+result.length());
-        assertEquals(170, result.length()); //should it be 171 ???
+        assertEquals(171, result.length()); //should it be 171 ??? Not 170
     }    
 }

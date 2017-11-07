@@ -45,10 +45,10 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     private static final Logger LOGGER = LoggerFactory.getLogger(WholesaleBookingProcessor.class);
 
     @Autowired
-    WholesaleBookingProcessorHelper processingHelper;
+    private WholesaleBookingProcessorHelper processingHelper;
 
     @Autowired
-    CassandraQueryManager queryManager;
+    private CassandraQueryManager queryManager;
 
     String searchServingSbid;
     String searchHomeSbid;
@@ -137,7 +137,11 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             }
         }
         subLedgerOutput.setFinancialEventNumber(financialEventCategory.getFinancialeventnumber());
-        subLedgerOutput.setFinancialCategory(financialEventCategory.getFinancialcategory());
+        if (this.fileSource.equals("M") && this.financialMarket.equals("003") && dbcrIndicatorFromFile.equals("CR"))
+            subLedgerOutput.setFinancialCategory(677);
+        else
+            subLedgerOutput.setFinancialCategory(financialEventCategory.getFinancialcategory());
+        
         subLedgerOutput.setFinancialmarketId(financialMarket);
         subLedgerOutput.setBillCycleMonthYear(ProcessingUtils.getYearAndMonthFromStrDate(this.processingHelper.getDates().getRptPerEndDate()));
         subLedgerOutput.setBillAccrualIndicator(financialEventCategory.getBillingaccrualindicator());
@@ -148,13 +152,13 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         SummarySubLedgerDTO clone = null;
         Integer offsetFinCat = this.processingHelper.findOffsetFinCat(subLedgerOutput.getFinancialEventNumber());
         if (offsetFinCat == null) {
-            LOGGER.error(Constants.OFFSET_NOT_FOUND);
+            LOGGER.warn(Constants.OFFSET_NOT_FOUND);
         } else {
             Double debitAmt = subLedgerOutput.getSubledgerTotalDebitAmount();
             Double creditAmt = subLedgerOutput.getSubledgerTotalCreditAmount();
 
             if (debitAmt == 0d && creditAmt == 0d) {
-                LOGGER.info(Constants.ZERO_SUBLEDGER_AMOUNT);
+                LOGGER.warn(Constants.ZERO_SUBLEDGER_AMOUNT);
             }
 
             try {
@@ -267,6 +271,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         FinancialEventCategory financialEventCategory = null;        
         financialEventCategory = this.getEventCategoryFromDb(this.tmpProdId, tmpHomeEqualsServingSbid, altBookingInd, iecCode, inRec.getDebitcreditindicator());
         boolean bypassBooking = this.bypassBooking(financialEventCategory, altBookingInd);
+        
         if (bypassBooking) {
             LOGGER.warn(Constants.BOOKING_BYPASS_DETECTED);
             this.processingHelper.incrementCounter(Constants.BYPASS);
@@ -283,7 +288,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     }
     
     private WholesaleProcessingOutput processBilledRecord(BilledCsvFileDTO billedRec) {
-        WholesaleProcessingOutput outRec = new WholesaleProcessingOutput();
+         WholesaleProcessingOutput outRec = new WholesaleProcessingOutput();
         AggregateWholesaleReportDTO report = this.processingHelper.addWholesaleReport();
         
         boolean zeroAirCharge = false;
@@ -299,7 +304,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         }
 
         if (billedRec.getWholesalePeakAirCharge() == 0 && billedRec.getWholesaleOffpeakAirCharge() == 0 && billedRec.getTollCharge() == 0) {
-            LOGGER.info(Constants.ZERO_CHARGES_SKIP);
+            LOGGER.warn(Constants.ZERO_CHARGES_SKIP);
             this.processingHelper.incrementCounter(Constants.ZERO_CHARGES);
             return null;
         }
@@ -316,13 +321,12 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             } else {
                 this.tmpProdId = billedRec.getAirProdId();
             }
-            report.setPeakDollarAmt(0d);            
             this.makeBookings(billedRec, outRec, tmpInterExchangeCarrierCode);
         } else {
             zeroAirCharge = true;
         }
 
-        if (billedRec.getTollProductId() > 0 && billedRec.getTollCharge() > 0) {
+        if (billedRec.getTollProductId() > 0 && billedRec.getTollCharge() > 0 && billedRec.getIncompleteInd().equals("D")) {
             if ((billedRec.getInterExchangeCarrierCode().equals(5050) && billedRec.getDebitcreditindicator().equals("CR"))
                     || billedRec.getIncompleteInd().equals("D")
                     || (!billedRec.getHomeSbid().equals(billedRec.getServingSbid()) && billedRec.getDebitcreditindicator().equals("CR"))
@@ -364,10 +368,9 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 }
 
                 report.setPeakDollarAmt(0d);
-                outRec.addWholesaleReportRecord(report);
                 this.makeBookings(billedRec, outRec, tmpInterExchangeCarrierCode);
             } else {
-                LOGGER.info(Constants.GAP_DETECTED);
+                LOGGER.warn(Constants.GAP_DETECTED);
                 this.processingHelper.incrementCounter(Constants.GAPS);
             }
         } else {
@@ -375,10 +378,11 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         }
 
         if (zeroAirCharge && zeroTollCharge) {
-            LOGGER.info(Constants.INVALID_INPUT);
+            LOGGER.warn(Constants.INVALID_INPUT);
             this.processingHelper.incrementCounter(Constants.DATA_ERRORS);
             return null;
         }
+        outRec.addWholesaleReportRecord(report);
         return outRec;
     }
 
@@ -462,7 +466,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getLocalizedMessage());
+            LOGGER.warn("FinancialMarket Process Failure: {}", ex.getMessage());
         }
         return result;
     }
@@ -481,7 +485,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
 //                dbResult.get(0).setFinancialcategory(677);
             
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getMessage());
+            LOGGER.warn("FinancialEventCategory Proceesing Error: {}",ex.getMessage());
             dbResult = null;
         }
         if (dbResult == null && financialeventnormalsign.equals("DR")) {
@@ -497,9 +501,9 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 dbResult = queryManager.getFinancialEventCategoryNoClusteringRecord(
                         tmpProdId, homeEqualsServingSbid, altBookingInd ? "Y" : "N", interExchangeCarrierCode, financialeventnormalsign);
 
-                LOGGER.info(Constants.DEFAULT_FEC_OBTAINED);
+                LOGGER.warn(Constants.DEFAULT_FEC_OBTAINED);
             } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-                LOGGER.error(ex.getMessage());
+                LOGGER.warn("FinancialEventCategory Process Failure: {}", ex.getMessage());
                 LOGGER.error(Constants.DEFAULT_FEC_NOT_FOUND);
             }
         }
@@ -517,7 +521,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getLocalizedMessage());
+            LOGGER.warn("DataEvent Process Failure: {}", ex.getMessage());
         }
         return result;
     }
@@ -530,7 +534,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
                 result = dbResult.get(0);
             }
         } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.error(ex.getLocalizedMessage());
+            LOGGER.warn("WholeSale Process Failure: {}", ex.getMessage());
         }
         return result;
     }

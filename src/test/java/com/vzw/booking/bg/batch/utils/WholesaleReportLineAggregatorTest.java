@@ -6,19 +6,29 @@
 package com.vzw.booking.bg.batch.utils;
 
 import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
+import com.vzw.booking.bg.batch.domain.ExternalizationMetadata;
+import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
 import com.vzw.booking.bg.batch.domain.exceptions.ContentTooLongException;
+
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.test.StepScopeTestExecutionListener;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
@@ -28,36 +38,32 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners({StepScopeTestExecutionListener.class})
 @ContextConfiguration
+@PropertySource(value= {"classpath:*.properties"})
 public class WholesaleReportLineAggregatorTest {
-    private FixedLengthLineAggregator lineAggregator;
-    private final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-        
+    private FixedLengthLineAggregator<AggregateWholesaleReportDTO> lineAggregator=null;
+	private @Value("${com.wzw.springbatch.processor.writer.format.wholesale}") String wholeSaleFormat;
+	private final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+
+    public Properties getPropertyFile() throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        Properties p = new Properties();
+        p.load(classLoader.getResourceAsStream("application.properties"));
+        return p;
+    }
+       
     @Before
     public void setUp() {
-        Map<String, Integer> fields = new LinkedHashMap();
-        fields.put("cycleMonthYear", 6);
-        fields.put("startDate", 10);
-        fields.put("endDate", 10);
-        fields.put("homeLegalEntity", 5);
-        fields.put("servingLegalEntity", 5);
-        fields.put("homeFinancialMarketId", 3);
-        fields.put("servingFinancialMarketId", 3);
-        fields.put("productDiscountOfferId", 10);
-        fields.put("contractTermId", 10);
-        fields.put("peakDollarAmt", 12);
-        fields.put("offpeakDollarAmt", 12);
-        fields.put("voiceMinutes", 10);
-        fields.put("tollDollarsAmt", 12);
-        fields.put("tollMinutes", 10);
-        fields.put("dollarAmt3G", 12);
-        fields.put("usage3G", 12);
-        fields.put("dollarAmt4G", 12);
-        fields.put("usage4G", 12);
-        fields.put("dollarAmtOther", 12);
-        fields.put("dbCrInd", 2);
-        fields.put("billedInd", 1);
-        
-        this.lineAggregator = new FixedLengthLineAggregator(AggregateWholesaleReportDTO.class, fields);
+        ExternalizationMetadata metaData = null;
+        try {
+        	wholeSaleFormat = (String)getPropertyFile().getProperty("com.wzw.springbatch.processor.writer.format.wholesale");
+        	metaData = ReflectionsUtility.getParametersMap(AggregateWholesaleReportDTO.class, wholeSaleFormat);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Format="+wholeSaleFormat);
+			System.exit(1);
+		}
+        this.lineAggregator = new FixedLengthLineAggregator<>();
+        this.lineAggregator.setFormat(metaData);
     }
     
     @Test

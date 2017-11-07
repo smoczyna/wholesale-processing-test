@@ -5,28 +5,37 @@
  */
 package com.vzw.booking.bg.batch.writers;
 
-import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
-import com.vzw.booking.bg.batch.utils.ProcessingUtils;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import java.util.Properties;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.batch.test.StepScopeTestExecutionListener;
 import org.springframework.batch.test.StepScopeTestUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.vzw.booking.bg.batch.domain.AggregateWholesaleReportDTO;
+import com.vzw.booking.bg.batch.domain.ExternalizationMetadata;
+import com.vzw.booking.bg.batch.utils.ReflectionsUtility;
 
 /**
  *
@@ -35,17 +44,38 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners({StepScopeTestExecutionListener.class})
 @ContextConfiguration
+@PropertySource(value= {"classpath:*.properties"})
 public class WholesaleReportFixedLengthFileWriterTest {
     
+    
+	private String wholeSaleFormat;
     private WholesaleReportFixedLengthFileWriter writer;
     private String workingFoler;
+
+    public Properties getPropertyFile() throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        Properties p = new Properties();
+        p.load(classLoader.getResourceAsStream("application.properties"));
+        return p;
+    }
     
     @Before
     public void setUp() {
+        ExternalizationMetadata wholesaleMetaData = null;
+        try {
+//        	getPropertyFile().save(System.out, "");
+        	wholeSaleFormat = (String)getPropertyFile().getProperty("com.wzw.springbatch.processor.writer.format.wholesale");
+			wholesaleMetaData = ReflectionsUtility.getParametersMap(AggregateWholesaleReportDTO.class, wholeSaleFormat);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Format="+wholeSaleFormat);
+			System.exit(1);
+		}
         ClassLoader classLoader = getClass().getClassLoader();
         workingFoler = classLoader.getResource("./data").getPath();
-        Logger.getLogger(WholesaleReportFixedLengthFileWriterTest.class.getName()).log(Level.INFO, "Write path: {0}", workingFoler);
+        LoggerFactory.getLogger(WholesaleReportFixedLengthFileWriterTest.class).info("Write path: {0}", workingFoler);
         writer = new WholesaleReportFixedLengthFileWriter(workingFoler+"/fixed_length_wholesale_report.txt");
+        writer.setUpLineAggregator(wholesaleMetaData);
     }
     
     @Test
@@ -69,7 +99,7 @@ public class WholesaleReportFixedLengthFileWriterTest {
                 writer.close();
                 verifyWrittenFile();
             } catch (Exception ex) {
-                Logger.getLogger(WholesaleReportCsvWriterTest.class.getName()).log(Level.SEVERE, null, ex);
+                LoggerFactory.getLogger(WholesaleReportFixedLengthFileWriterTest.class).error(ex.getMessage());
             }
             return 1;
         });

@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class FinancialEventOffsetProcessor implements ItemProcessor<FinancialEventOffsetDTO, Boolean> {
     
     @Autowired
-    WholesaleBookingProcessorHelper tempSubLedgerOuput;
+    private WholesaleBookingProcessorHelper tempSubLedgerOuput;
     
     @Override
     public Boolean process(FinancialEventOffsetDTO offset) throws Exception {

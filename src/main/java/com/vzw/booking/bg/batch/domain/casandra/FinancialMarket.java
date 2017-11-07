@@ -12,6 +12,9 @@ package com.vzw.booking.bg.batch.domain.casandra;
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
+
+import java.io.Serializable;
+
 import com.datastax.driver.mapping.annotations.ClusteringColumn;
 
 /**
@@ -19,7 +22,12 @@ import com.datastax.driver.mapping.annotations.ClusteringColumn;
  * @author smorcja
  */
 @Table(name = "financialmarket")
-public class FinancialMarket {
+public class FinancialMarket implements Serializable {
+
+	/**
+	 * Entity Serial Version ID
+	 */
+	private static final long serialVersionUID = 2112479617262123110L;
 
 	@PartitionKey
 	@Column(name = "financialmarketid")

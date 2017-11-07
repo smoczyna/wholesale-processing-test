@@ -17,15 +17,20 @@ public class Constants {
     public static final String UNBILLED_BOOKING_FILENAME = "unbilled.csv";
     public static final String ADMIN_FEES_FILENAME = "adminfees.csv";
     
+    public static final String SUBLEDGER_SUMMARY_FILENAME_PATTERN = "subledger_summary";
     public static final String SUBLEDGER_SUMMARY_FILENAME = "subledger_summary.csv";
+    public static final String WHOLESALE_REPORT_FILENAME_PATTERN = "wholesale_report";
     public static final String WHOLESALE_REPORT_FILENAME = "wholesale_report.csv";
     
+    public static final String FILE_SPLIT_MESSAGE = "File %s has been splitted into %d chunks";
     public static final String DEFAULT_CSV_FIELDS_DELIMITER = ",";
     public static final Integer DEFAULT_MAX_SKIPPED_RECORDS = 100;
+    public static final Integer DEFAULT_NUMBER_OF_CHUNKS = 1;
     
     public static final String DEBIT_CODE = "DR";
     public static final String CREDIT_CODE = "CR";
     
+    public static final String RECORD_COUNT = "count";
     public static final String ZERO_CHARGES = "zero";
     public static final String GAPS ="gap";
     public static final String DATA_ERRORS = "error";
@@ -33,7 +38,7 @@ public class Constants {
     public static final String SUBLEDGER = "subledger";
     public static final String WHOLESALES_REPORT = "report";
     
-    public static final String JOB_STARTED = "Starting booking files processing job\"";
+    public static final String JOB_STARTED = "Starting booking files processing job";
     public static final String JOB_FINISHED = "Stopping booking files processing job";
     public static final String JOB_STARTED_MESSAGE = "Wholesale booking processing started at: %S";
     public static final String JOB_FINISHED_MESSAGE = "Wholesale booking processing ended at: %s";
@@ -60,7 +65,7 @@ public class Constants {
     public static final String ZERO_SUBLEDGER_AMOUNT = "Zero amounts in sub ledger record found !!!";
     public static final String FAILED_TO_CREATE_OFFSET = "Failed to create offset booking !!!";
     
-    public static final String PROCESSING_RECORD = "Processing records: %d";
+    public static final String PROCESSING_RECORD = "Processing record: %s";
     public static final String READER_EXCEPTION = "Reader exception encountered: %s";
     public static final String WRITER_EXCEPTION = "Writer exception encountered: %s";
     public static final String JOB_EXECUTION_FINISHED = "Step completed, read count: %d, write count: %d";

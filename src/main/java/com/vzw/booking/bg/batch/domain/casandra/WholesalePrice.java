@@ -7,12 +7,19 @@ import com.datastax.driver.mapping.annotations.ClusteringColumn;
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
+
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Table(name = "wholesaleprice")
-public class WholesalePrice {
+public class WholesalePrice implements Serializable {
 
-    @PartitionKey(value = 0)
+    /**
+	 * Entity Serial Version ID
+	 */
+	private static final long serialVersionUID = 2623593349729735227L;
+
+	@PartitionKey(value = 0)
     @Column(name = "productid")
     private Integer productid;
 

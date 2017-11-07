@@ -6,7 +6,15 @@
 package com.vzw.booking.bg.batch.jobs;
 
 import com.vzw.booking.bg.batch.constants.Constants;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobInterruptedException;
@@ -26,6 +34,9 @@ public class SourceFilesExistanceChecker implements Tasklet {
     
     @Value("${csv.to.database.job.source.file.path}")
     private String SOURCE_FILES_PATH;
+    
+    @Value("${csv.to.database.job.source.file.splitSize}")
+    private int SOURCE_FILES_SPLIT_SIZE;
 
     @Override
     public RepeatStatus execute(StepContribution sc, ChunkContext cc) throws Exception {
@@ -46,7 +57,41 @@ public class SourceFilesExistanceChecker implements Tasklet {
             LOGGER.error(Constants.FILES_NOT_FOUND_JOB_ABORTED);
             throw new JobInterruptedException(Constants.FILES_NOT_FOUND_MESSAGE);
         } else {
+            splitTextFile(f3, SOURCE_FILES_SPLIT_SIZE);
+            splitTextFile(f4, SOURCE_FILES_SPLIT_SIZE);
+            splitTextFile(f5, SOURCE_FILES_SPLIT_SIZE);
             return RepeatStatus.FINISHED;
         }
+    }
+    
+    public static void splitTextFile(File bigFile, int maxRows) throws IOException {
+        int i = 1;
+        String ext = FilenameUtils.getExtension(bigFile.getName());
+        String fileNoExt = bigFile.getName().replace("."+ext, "");        
+        File newDir = new File(bigFile.getParent() + "/" + fileNoExt + "_split");
+        if (!newDir.exists()) newDir.mkdirs();        
+        try (BufferedReader reader = Files.newBufferedReader(bigFile.toPath())) {
+            String line;
+            int lineNum = 1;
+            Path splitFile = Paths.get(newDir.getPath() + "/" + fileNoExt + "_" + String.format("%03d", i) + "." + ext);
+            BufferedWriter writer = Files.newBufferedWriter(splitFile, StandardOpenOption.CREATE);
+            while ((line = reader.readLine()) != null) {
+                if (lineNum == 1) {
+                    writer.newLine();
+                }
+                writer.append(line);
+                writer.newLine();
+                lineNum++;
+                if (lineNum > maxRows) {
+                    writer.close();
+                    lineNum = 1;
+                    i++;
+                    splitFile = Paths.get(newDir.getPath() + "/" + fileNoExt + "_" + String.format("%03d", i) + "." +  ext);
+                    writer = Files.newBufferedWriter(splitFile, StandardOpenOption.CREATE);
+                }
+            }            
+            writer.close();
+        }
+        LOGGER.info(String.format(Constants.FILE_SPLIT_MESSAGE, bigFile.getName(), i));
     }
 }

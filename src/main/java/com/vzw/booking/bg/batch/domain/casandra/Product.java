@@ -1,5 +1,7 @@
 package com.vzw.booking.bg.batch.domain.casandra;
 
+import java.io.Serializable;
+
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
@@ -9,7 +11,12 @@ import com.datastax.driver.mapping.annotations.Table;
  * @author smorcja
  */
 @Table(name = "product")
-public class Product {
+public class Product implements Serializable {
+
+	/**
+	 * Entity Serial Version ID
+	 */
+	private static final long serialVersionUID = -1362749733515266788L;
 
 	@PartitionKey(value = 0)
 	@Column(name = "productid")

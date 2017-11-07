@@ -7,15 +7,11 @@ package com.vzw.booking.bg.batch.writers;
 
 import com.vzw.booking.bg.batch.constants.Constants;
 import com.vzw.booking.bg.batch.domain.SummarySubLedgerDTO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author smorcja
  */
-@Component
 public class SubledgerCsvFileWriter extends CsvFileGenericWriter<SummarySubLedgerDTO> {
     private static final String[] COLUMN_NAMES = new String[] {
         "jemsApplId",
@@ -41,13 +37,8 @@ public class SubledgerCsvFileWriter extends CsvFileGenericWriter<SummarySubLedge
         "discountOfferId",
         "updateUserId",
         "updateTimestamp"};
-    
-    @Autowired
-    public SubledgerCsvFileWriter(Environment environment) {
-        super(environment, Constants.SUBLEDGER_SUMMARY_FILENAME, COLUMN_NAMES, Constants.DEFAULT_CSV_FIELDS_DELIMITER);
-    }
-    
-    public SubledgerCsvFileWriter(String filePath) {
-        super(filePath, COLUMN_NAMES, Constants.DEFAULT_CSV_FIELDS_DELIMITER);
-    }    
+
+    public SubledgerCsvFileWriter(String filename) {        
+        super(filename, COLUMN_NAMES, Constants.DEFAULT_CSV_FIELDS_DELIMITER);
+    }   
 }
