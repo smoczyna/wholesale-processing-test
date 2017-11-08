@@ -61,6 +61,8 @@ public class ReflectionsUtility {
     public static final String objectToString(Object value) throws ExternalizationException {
         if (value == null) {
             return "";
+        } else if (String.class.isAssignableFrom(value.getClass())) {
+            return value.toString();
         } else if (value instanceof BigInteger) {
             return String.valueOf((BigInteger) value);
         } else if (value instanceof BigDecimal) {
@@ -76,8 +78,6 @@ public class ReflectionsUtility {
         } else if (value instanceof Byte) {
             return value.toString();
         } else if (value instanceof Float) {
-            return value.toString();
-        } else if (String.class.isAssignableFrom(value.getClass())) {
             return value.toString();
         }
         throw new ExternalizationException("Unrecognized field type: " + value.getClass().getName());
