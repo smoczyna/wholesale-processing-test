@@ -207,7 +207,7 @@ public class BookigFilesJobConfig {
                             FinancialEventOffsetProcessor financialEventOffsetProcessor,
                             StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("readOffsetDataStep")
-                .<FinancialEventOffsetDTO, Boolean>chunk(1)
+                .<FinancialEventOffsetDTO, Boolean>chunk(10)
                 .reader(financialEventOffsetReader)
                 .processor(financialEventOffsetProcessor)
                 .build();
