@@ -58,7 +58,7 @@ public class WholesaleReportProcessorTest {
         
         //when(tempSubLedgerOuput.addSubledger()).thenReturn(new SummarySubLedgerDTO());
         when(tempSubLedgerOuput.getDates()).thenReturn(this.createBookDateRecord());
-       // when(tempSubLedgerOuput.getFinancialEventOffset()).thenReturn(this.createFinancialEventOffset());
+        //when(tempSubLedgerOuput.getFinancialEventOffset()).thenReturn(this.createFinancialEventOffset());
         
         when(wholesaleBookingProcessor.getFinancialMarketFromDb(anyString())).thenReturn(this.createFinancialMarket());
         when(wholesaleBookingProcessor.getEventCategoryFromDb(anyInt(), anyString(), anyBoolean(), anyInt(), anyString())).thenReturn(this.createEventCategory(true));
@@ -77,7 +77,7 @@ public class WholesaleReportProcessorTest {
     
     private BilledCsvFileDTO createBilledBookingsInputRecord() {
         BilledCsvFileDTO record = new BilledCsvFileDTO();
-        record.setAirBillSeconds(1235);
+        record.setAirBillSeconds(1235L);
         record.setAirProdId(1);
         record.setAirSurcharge(123.45d);
         record.setAirSurchargeProductId(1);
@@ -93,7 +93,7 @@ public class WholesaleReportProcessorTest {
         record.setServingSbid("dublin");
         record.setSpace("space");
         record.setStateAirTax(34.45d);
-        record.setTollBillSeconds(123);
+        record.setTollBillSeconds(123L);
         record.setTollProductId(1);
         record.setTollCharge(465.76d);
         record.setTollLocalTax(11.23d);
@@ -111,7 +111,7 @@ public class WholesaleReportProcessorTest {
         UnbilledCsvFileDTO record = new UnbilledCsvFileDTO();
         record.setHomeSbid("athlone");
         record.setServingSbid("dublin");
-        record.setAirBillSeconds(457687);
+        record.setAirBillSeconds(457687L);
         record.setAirProdId(100);
         record.setFinancialMarket("Ireland");
         record.setMessageSource("U");

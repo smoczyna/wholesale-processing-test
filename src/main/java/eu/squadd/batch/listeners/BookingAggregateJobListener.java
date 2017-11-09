@@ -148,7 +148,8 @@ public class BookingAggregateJobListener implements JobExecutionListener {
                 output.write(text);
                 output.newLine();
             }
-        } finally {
+            br.close();
+        } finally {            
         }
     }
     

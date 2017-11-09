@@ -7,11 +7,7 @@ package eu.squadd.batch.config;
 
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.datastax.driver.core.AuthProvider;
 import com.datastax.driver.core.Cluster;
@@ -21,7 +17,6 @@ import eu.squadd.batch.domain.casandra.DataEvent;
 import eu.squadd.batch.domain.casandra.FinancialEventCategory;
 import eu.squadd.batch.domain.casandra.FinancialMarket;
 import eu.squadd.batch.domain.casandra.WholesalePrice;
-import eu.squadd.batch.domain.exceptions.NoResultsReturnedException;
 import static org.junit.Assert.assertTrue;
 
 /**

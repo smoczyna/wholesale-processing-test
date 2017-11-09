@@ -18,7 +18,7 @@ public class UnbilledCsvFileDTO implements BaseBookingInputInterface {
     private Double wholesaleOffpeakAirCharge;
     private String source;
     private String financialMarket;
-    private Long airBillSeconds;
+    private Integer airBillSeconds;
     private Long totalWholesaleUsage;
     private String debitcreditindicator;
 
@@ -94,11 +94,11 @@ public class UnbilledCsvFileDTO implements BaseBookingInputInterface {
     }
 
     @Override
-    public Long getAirBillSeconds() {
+    public Integer getAirBillSeconds() {
         return airBillSeconds;
     }
 
-    public void setAirBillSeconds(Long airBillSeconds) {
+    public void setAirBillSeconds(Integer airBillSeconds) {
         this.airBillSeconds = airBillSeconds;
     }
 

@@ -4,15 +4,13 @@
  * and open the template in the editor.
  */
 package eu.squadd.batch.domain;
-import org.springframework.stereotype.Component;
 
 /**
  * Aggregate Wholesale Report DTO payload class. 
  * This class represents the output file of the application called aggregate wholesale report
  * @author smorcja
  */
-@Component
-public class AggregateWholesaleReportDTO implements Externalizable {
+public class AggregateWholesaleReportDTO {
     
     private String cycleMonthYear;
     private String startDate;
@@ -25,9 +23,9 @@ public class AggregateWholesaleReportDTO implements Externalizable {
     private Short contractTermId;
     private Double peakDollarAmt;
     private Double offpeakDollarAmt;
-    private Long voiceMinutes;
+    private Integer voiceMinutes;
     private Double tollDollarsAmt;
-    private Long tollMinutes;
+    private Integer tollMinutes;
     private Double dollarAmt3G;
     private Long usage3G;
     private Double dollarAmt4G;
@@ -124,11 +122,11 @@ public class AggregateWholesaleReportDTO implements Externalizable {
         this.offpeakDollarAmt = offpeakDollarAmt;
     }
 
-    public Long getVoiceMinutes() {
+    public Integer getVoiceMinutes() {
         return voiceMinutes;
     }
 
-    public void setVoiceMinutes(Long voiceMinutes) {
+    public void setVoiceMinutes(Integer voiceMinutes) {
         this.voiceMinutes = voiceMinutes;
     }
 
@@ -140,11 +138,11 @@ public class AggregateWholesaleReportDTO implements Externalizable {
         this.tollDollarsAmt = tollDollarsAmt;
     }
 
-    public Long getTollMinutes() {
+    public Integer getTollMinutes() {
         return tollMinutes;
     }
 
-    public void setTollMinutes(Long tollMinutes) {
+    public void setTollMinutes(Integer tollMinutes) {
         this.tollMinutes = tollMinutes;
     }
 
@@ -203,5 +201,4 @@ public class AggregateWholesaleReportDTO implements Externalizable {
     public void setBilledInd(String billedInd) {
         this.billedInd = billedInd;
     }
-    
 }

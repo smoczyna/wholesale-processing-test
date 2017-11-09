@@ -6,7 +6,7 @@
 package eu.squadd.batch.domain;
 
 /**
- * Billed Bookings source payload class. This class represents the input file for billed bookings file
+ * Billed Bookings source payload class. This class represents the input file for billed bookings file: bmdunld.csv
  * @author smorcja
  */
 public class BilledCsvFileDTO implements BaseBookingInputInterface {
@@ -35,8 +35,8 @@ public class BilledCsvFileDTO implements BaseBookingInputInterface {
     private String space;
     private String financialMarket;
     private String deviceType;
-    private Long airBillSeconds;
-    private Long tollBillSeconds;
+    private Integer airBillSeconds;
+    private Integer tollBillSeconds;
     private Long wholesaleUsageBytes;
     private String debitcreditindicator;
 
@@ -248,19 +248,19 @@ public class BilledCsvFileDTO implements BaseBookingInputInterface {
     }
 
     @Override
-    public Long getAirBillSeconds() {
+    public Integer getAirBillSeconds() {
         return airBillSeconds;
     }
 
-    public void setAirBillSeconds(Long airBillSeconds) {
+    public void setAirBillSeconds(Integer airBillSeconds) {
         this.airBillSeconds = airBillSeconds;
     }
 
-    public Long getTollBillSeconds() {
+    public Integer getTollBillSeconds() {
         return tollBillSeconds;
     }
 
-    public void setTollBillSeconds(Long tollBillSeconds) {
+    public void setTollBillSeconds(Integer tollBillSeconds) {
         this.tollBillSeconds = tollBillSeconds;
     }
 

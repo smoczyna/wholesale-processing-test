@@ -17,5 +17,5 @@ public interface BaseBookingInputInterface extends MinBookingInterface {
     Double getWholesalePeakAirCharge();
     Double getWholesaleOffpeakAirCharge();
     String getFinancialMarket();
-    Long getAirBillSeconds();    
+    Integer getAirBillSeconds();    
 }
