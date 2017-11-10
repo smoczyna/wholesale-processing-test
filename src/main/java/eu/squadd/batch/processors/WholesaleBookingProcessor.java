@@ -178,7 +178,9 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     private boolean isAlternateBookingApplicable(BaseBookingInputInterface inRec) {
         boolean altBookingInd = false;
         String homeGlMarketId = " ";
-        String servingGlMarketId;
+        String homeLegalEntityId = " ";
+        String servingGlMarketId = "";
+        String servingLegalEntityId = "";
 
         searchHomeSbid = inRec.getHomeSbid();
         if (inRec.getServingSbid().trim().isEmpty()) {
@@ -189,22 +191,33 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         if (searchHomeSbid.equals(searchServingSbid)) {
             homeEqualsServingSbid = true;
         }
-
-        AltBookingCsvFileDTO altBooking = this.processingHelper.getAltBooking(searchHomeSbid);        
-        if (homeEqualsServingSbid) {
-            if (altBooking.getAltBookType().equals("P"))
+        try {
+            AltBookingCsvFileDTO altBooking = this.processingHelper.getAltBooking(searchHomeSbid);
+            if (homeEqualsServingSbid) {
                 altBookingInd = true;
-        } 
-        else {
-            if (altBooking.getAltBookType().equals("M"))
-                homeGlMarketId = altBooking.getGlMarketId();
-            
-            altBooking = this.processingHelper.getAltBooking(searchServingSbid);
-            servingGlMarketId = altBooking.getGlMarketId();
-            
-            if (homeGlMarketId.equals(servingGlMarketId))
-                altBookingInd = true;
-        }
+            } 
+            else {
+                if (altBooking.getAltBookType().equals("P")) {
+                    homeLegalEntityId = altBooking.getLegalEntityId();
+                    altBooking = this.processingHelper.getAltBooking(searchServingSbid);
+                    if (altBooking.getAltBookType().equals("P"))
+                        servingLegalEntityId = altBooking.getLegalEntityId();
+                            
+                    if (homeLegalEntityId.equals(servingLegalEntityId))
+                        altBookingInd = true;
+                }
+                else if (altBooking.getAltBookType().equals("M")) {
+                    homeGlMarketId = altBooking.getGlMarketId();
+                    altBooking = this.processingHelper.getAltBooking(searchServingSbid);
+                    if (altBooking.getAltBookType().equals("M"))
+                        servingGlMarketId = altBooking.getGlMarketId();
+                    
+                    if (homeGlMarketId.equals(servingGlMarketId))
+                        altBookingInd = true;
+                }                
+            }
+        } catch (Exception ex) {            
+        }        
         return altBookingInd;
     }
 
@@ -249,9 +262,13 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         String tmpHomeEqualsServingSbid = " ";
         if (inRec instanceof BilledCsvFileDTO) {
             altBookingInd = this.isAlternateBookingApplicable((BilledCsvFileDTO) inRec);
-            tmpHomeEqualsServingSbid = this.homeEqualsServingSbid ? "Y" : "N";
+            if (altBookingInd)
+                tmpHomeEqualsServingSbid = "N"; 
+            else
+                tmpHomeEqualsServingSbid = this.homeEqualsServingSbid ? "Y" : "N";
         }
-        FinancialEventCategory financialEventCategory = null;        
+        FinancialEventCategory financialEventCategory = null;
+        
         financialEventCategory = this.getEventCategoryFromDb(this.tmpProdId, tmpHomeEqualsServingSbid, altBookingInd, iecCode, inRec.getDebitcreditindicator());
         boolean bypassBooking = this.bypassBooking(financialEventCategory, altBookingInd);
         
@@ -446,7 +463,6 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         }
     }
 
-
 //    protected FinancialMarket getFinancialMarketFromDb(String financialMarketId) {
 //        FinancialMarket result = null;
 //        try {
@@ -482,7 +498,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             if (this.fileSource.equals("M")) {  // for admin fees call 0 product and 1 as inter exchange code
                 tmpProdId = 0;
                 if (!this.financialMarket.equals("003"))
-                interExchangeCarrierCode = 1;
+                    interExchangeCarrierCode = 1;                
             } else {
                 tmpProdId = 36;                 // for the rest 2 files call 36 product
             }
