@@ -7,6 +7,7 @@ package eu.squadd.batch.jobs;
 
 import eu.squadd.batch.constants.Constants;
 import eu.squadd.batch.domain.AdminFeeCsvFileDTO;
+import eu.squadd.batch.domain.AltBookingCsvFileDTO;
 import eu.squadd.batch.domain.BilledCsvFileDTO;
 import eu.squadd.batch.domain.BookDateCsvFileDTO;
 import eu.squadd.batch.domain.FinancialEventOffsetDTO;
@@ -15,10 +16,12 @@ import eu.squadd.batch.domain.WholesaleProcessingOutput;
 import eu.squadd.batch.listeners.BookingAggregateJobListener;
 import eu.squadd.batch.listeners.GenericStepExecutionListener;
 import eu.squadd.batch.listeners.WholesaleProcessingListener;
+import eu.squadd.batch.processors.AltBookingProcessor;
 import eu.squadd.batch.processors.BookDateProcessor;
 import eu.squadd.batch.processors.FinancialEventOffsetProcessor;
 import eu.squadd.batch.processors.WholesaleBookingProcessor;
 import eu.squadd.batch.readers.AdminFeesBookingFileReader;
+import eu.squadd.batch.readers.AltBookingFileReader;
 import eu.squadd.batch.readers.BilledBookingFileReader;
 import eu.squadd.batch.readers.BookDateCsvFileReader;
 import eu.squadd.batch.readers.FinancialEventOffsetReader;
@@ -121,6 +124,11 @@ public class BookigFilesJobConfig {
     }
 
     @Bean
+    AltBookingFileReader altBookigReader(Environment environment) {
+        return new AltBookingFileReader(environment, Constants.ALT_BOOKING_FILENAME);
+    }
+    
+    @Bean
     @StepScope
     BilledBookingFileReader billedFileItemReader(@Value("#{stepExecutionContext[sourceFileName]}") String filename) {
         return new BilledBookingFileReader(filename);
@@ -155,6 +163,11 @@ public class BookigFilesJobConfig {
         return new FinancialEventOffsetProcessor();
     }
 
+    @Bean
+    AltBookingProcessor altBookingProcessor() {
+        return new AltBookingProcessor();
+    }
+    
     @Bean
     @StepScope
     WholesaleBookingProcessor billedBookingProcessor() {
@@ -213,6 +226,17 @@ public class BookigFilesJobConfig {
                 .build();
     }
 
+    @Bean
+    Step readAltBookingStep(AltBookingFileReader altBookingFileReader,
+                            AltBookingProcessor altBookingProcessor,
+                            StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("readAltBookingStep")
+                .<AltBookingCsvFileDTO, Boolean>chunk(40)
+                .reader(altBookingFileReader)
+                .processor(altBookingProcessor)
+                .build();        
+    }
+    
     @Bean
     Step billedFilePartitionStep(StepExecutionListener billedFileStepListener,
                                  RangePartitioner billedFilePartitioner,
@@ -317,6 +341,7 @@ public class BookigFilesJobConfig {
                             @Qualifier("checkIfSourceFilesExist") Step checkIfSourceFilesExist,
                             @Qualifier("updateBookingDatesStep") Step updateBookingDatesStep,
                             @Qualifier("readOffsetDataStep") Step readOffsetDataStep,
+                            @Qualifier("readAltBookingStep") Step readAltBookingStep,
                             @Qualifier("billedFilePartitionStep") Step billedFilePartitionStep,
                             @Qualifier("unbilledFilePartitionStep") Step unbilledFilePartitionStep,
                             @Qualifier("adminFeesFilePartitionStep") Step adminFeesFilePartitionStep) {
@@ -326,6 +351,7 @@ public class BookigFilesJobConfig {
                 .start(checkIfSourceFilesExist)
                 .on("COMPLETED").to(updateBookingDatesStep)
                 .on("COMPLETED").to(readOffsetDataStep)
+                .on("COMPLETED").to(readAltBookingStep)
                 .on("COMPLETED").to(billedFilePartitionStep)
                 .on("COMPLETED").to(unbilledFilePartitionStep)
                 .on("COMPLETED").to(adminFeesFilePartitionStep)

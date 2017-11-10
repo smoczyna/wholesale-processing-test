@@ -8,16 +8,13 @@ package eu.squadd.batch.processors;
 import eu.squadd.batch.utils.WholesaleBookingProcessorHelper;
 import eu.squadd.batch.config.CassandraQueryManager;
 import eu.squadd.batch.domain.AdminFeeCsvFileDTO;
-import eu.squadd.batch.domain.AggregateWholesaleReportDTO;
 import eu.squadd.batch.domain.BilledCsvFileDTO;
 import eu.squadd.batch.domain.BookDateCsvFileDTO;
 import eu.squadd.batch.domain.FinancialEventOffsetDTO;
-import eu.squadd.batch.domain.SummarySubLedgerDTO;
 import eu.squadd.batch.domain.UnbilledCsvFileDTO;
 import eu.squadd.batch.domain.WholesaleProcessingOutput;
 import eu.squadd.batch.domain.casandra.DataEvent;
 import eu.squadd.batch.domain.casandra.FinancialEventCategory;
-import eu.squadd.batch.domain.casandra.FinancialMarket;
 import eu.squadd.batch.domain.casandra.WholesalePrice;
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -60,7 +57,7 @@ public class WholesaleReportProcessorTest {
         when(tempSubLedgerOuput.getDates()).thenReturn(this.createBookDateRecord());
         //when(tempSubLedgerOuput.getFinancialEventOffset()).thenReturn(this.createFinancialEventOffset());
         
-        when(wholesaleBookingProcessor.getFinancialMarketFromDb(anyString())).thenReturn(this.createFinancialMarket());
+        //when(wholesaleBookingProcessor.getFinancialMarketFromDb(anyString())).thenReturn(this.createFinancialMarket());
         when(wholesaleBookingProcessor.getEventCategoryFromDb(anyInt(), anyString(), anyBoolean(), anyInt(), anyString())).thenReturn(this.createEventCategory(true));
         when(wholesaleBookingProcessor.getDataEventFromDb(anyInt())).thenReturn(this.createDataEvent(true));
         when(wholesaleBookingProcessor.getWholesalePriceFromDb(anyInt(), anyString())).thenReturn(this.createWholesalePrice());
@@ -141,14 +138,14 @@ public class WholesaleReportProcessorTest {
         return record;
     }
     
-    protected FinancialMarket createFinancialMarket() {
-        FinancialMarket record = new FinancialMarket();
-        record.setSidbid("dublin");
-        record.setAlternatebookingtype("A");
-        record.setGllegalentityid("Ireland");
-        record.setGlmarketid("Leinster");
-        return record;
-    }
+//    protected FinancialMarket createFinancialMarket() {
+//        FinancialMarket record = new FinancialMarket();
+//        record.setSidbid("dublin");
+//        record.setAlternatebookingtype("A");
+//        record.setGllegalentityid("Ireland");
+//        record.setGlmarketid("Leinster");
+//        return record;
+//    }
     
     protected FinancialEventCategory createEventCategory(boolean validForBooking) {
         FinancialEventCategory financialEventCategory = new FinancialEventCategory();

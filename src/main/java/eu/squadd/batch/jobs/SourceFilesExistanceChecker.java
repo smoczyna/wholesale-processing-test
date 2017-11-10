@@ -34,10 +34,10 @@ public class SourceFilesExistanceChecker implements Tasklet {
     
     @Value("${csv.to.database.job.source.file.path}")
     private String SOURCE_FILES_PATH;
-
-    @Value("${spring.batch.records.per.chunk}")
-    private Integer CHUNK_RECORD_NO;
     
+    @Value("${csv.to.database.job.source.file.splitSize}")
+    private int SOURCE_FILES_SPLIT_SIZE;
+
     @Override
     public RepeatStatus execute(StepContribution sc, ChunkContext cc) throws Exception {
         LOGGER.info(Constants.CHECK_IF_FILES_EXIST);
@@ -46,20 +46,22 @@ public class SourceFilesExistanceChecker implements Tasklet {
             
         File f1 = new File(SOURCE_FILES_PATH.concat(Constants.BOOK_DATE_FILENAME));
         File f2 = new File(SOURCE_FILES_PATH.concat(Constants.FINANCIAL_EVENT_OFFSET_FILENAME));
-        File f3 = new File(SOURCE_FILES_PATH.concat(Constants.BILLED_BOOKING_FILENAME));
-        File f4 = new File(SOURCE_FILES_PATH.concat(Constants.UNBILLED_BOOKING_FILENAME));
-        File f5 = new File(SOURCE_FILES_PATH.concat(Constants.ADMIN_FEES_FILENAME));        
+        File f3 = new File(SOURCE_FILES_PATH.concat(Constants.ALT_BOOKING_FILENAME));
+        File f4 = new File(SOURCE_FILES_PATH.concat(Constants.BILLED_BOOKING_FILENAME));
+        File f5 = new File(SOURCE_FILES_PATH.concat(Constants.UNBILLED_BOOKING_FILENAME));
+        File f6 = new File(SOURCE_FILES_PATH.concat(Constants.ADMIN_FEES_FILENAME));
         if ((!f1.exists() || f1.isDirectory()) ||
             (!f2.exists() || f2.isDirectory()) ||
             (!f3.exists() || f3.isDirectory()) ||
             (!f4.exists() || f4.isDirectory()) ||
-            (!f5.exists() || f4.isDirectory())) {
+            (!f5.exists() || f5.isDirectory()) ||
+            (!f6.exists() || f6.isDirectory())) {
             LOGGER.error(Constants.FILES_NOT_FOUND_JOB_ABORTED);
             throw new JobInterruptedException(Constants.FILES_NOT_FOUND_MESSAGE);
         } else {
-            splitTextFile(f3, CHUNK_RECORD_NO);
-            splitTextFile(f4, CHUNK_RECORD_NO);
-            splitTextFile(f5, CHUNK_RECORD_NO);
+            splitTextFile(f4, SOURCE_FILES_SPLIT_SIZE);
+            splitTextFile(f5, SOURCE_FILES_SPLIT_SIZE);
+            splitTextFile(f6, SOURCE_FILES_SPLIT_SIZE);
             return RepeatStatus.FINISHED;
         }
     }

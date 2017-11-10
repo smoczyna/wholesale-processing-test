@@ -5,9 +5,7 @@
  */
 package eu.squadd.batch.validations;
 
-import eu.squadd.batch.constants.Constants;
 import eu.squadd.batch.utils.WholesaleBookingProcessorHelper;
-import java.io.FileNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.step.skip.SkipLimitExceededException;
@@ -28,23 +26,33 @@ public class CsvFileVerificationSkipper implements SkipPolicy {
 
     @Override
     public boolean shouldSkip(Throwable exception, int skipCount) throws SkipLimitExceededException {
-        boolean result = false;        
-        if (skipCount > helper.getMaxSkippedRecords()) {
-            LOGGER.error(Constants.MAX_ALLOWED_EXCEPTION);
-        } else {
-            if (exception instanceof FileNotFoundException) {
-                LOGGER.error(Constants.FILE_MISSING_MESSAGE);
-            } else if (exception instanceof FlatFileParseException) {
-                FlatFileParseException ffpe = (FlatFileParseException) exception;
-                LOGGER.error(String.format(Constants.PARSING_ERROR, ffpe.getLineNumber()));
-                result = true;
-            } else if (exception instanceof NullPointerException) {
-                NullPointerException npe = (NullPointerException) exception;
-                result = true;
-            }
-            LOGGER.error(Constants.RECORD_SKIP_DETECTED);
-            this.helper.incrementCounter(Constants.DATA_ERRORS);
+        boolean result = false;
+        if (exception instanceof FlatFileParseException) {
+            FlatFileParseException ffpe = (FlatFileParseException) exception;
+            LOGGER.error( ffpe.getMessage());
+            result = true;
+        } else if (exception instanceof NullPointerException) {
+            result = true;
         }
-        return result;
+        return result;        
+        
+//        boolean result = false;        
+//        if (skipCount > helper.getMaxSkippedRecords()) {
+//            LOGGER.error(Constants.MAX_ALLOWED_EXCEPTION);
+//        } else {
+//            if (exception instanceof FileNotFoundException) {
+//                LOGGER.error(Constants.FILE_MISSING_MESSAGE);
+//            } else if (exception instanceof FlatFileParseException) {
+//                FlatFileParseException ffpe = (FlatFileParseException) exception;
+//                LOGGER.error(String.format(Constants.PARSING_ERROR, ffpe.getLineNumber()));
+//                result = true;
+//            } else if (exception instanceof NullPointerException) {
+//                NullPointerException npe = (NullPointerException) exception;
+//                result = true;
+//            }
+//            LOGGER.error(Constants.RECORD_SKIP_DETECTED);
+//            this.helper.incrementCounter(Constants.DATA_ERRORS);
+//        }
+//        return result;
     }
 }

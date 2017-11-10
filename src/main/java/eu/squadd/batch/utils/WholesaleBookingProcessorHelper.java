@@ -7,6 +7,7 @@ package eu.squadd.batch.utils;
 
 import eu.squadd.batch.constants.Constants;
 import eu.squadd.batch.domain.AggregateWholesaleReportDTO;
+import eu.squadd.batch.domain.AltBookingCsvFileDTO;
 import eu.squadd.batch.domain.BookDateCsvFileDTO;
 import eu.squadd.batch.domain.FinancialEventOffsetDTO;
 import eu.squadd.batch.domain.SummarySubLedgerDTO;
@@ -26,17 +27,18 @@ public class WholesaleBookingProcessorHelper {
 
     private BookDateCsvFileDTO dates;
     private final Map<Integer, Integer> financialEventOffset;
+    private final Map<String, AltBookingCsvFileDTO> altBooking;
     private long zeroChargesCounter;
     private long gapsCounter;
     private long dataErrorsCounter;
     private long bypassCounter;
     private long subledgerWriteCounter;
     private long wholesaleReportCounter;
-    private long maxSkippedRecords;
     private long recordCount;
 
     public WholesaleBookingProcessorHelper() {
-        this.financialEventOffset = new HashMap<>();
+        this.financialEventOffset = new HashMap();
+        this.altBooking = new HashMap();
         this.zeroChargesCounter = 0;
         this.gapsCounter = 0;
         this.dataErrorsCounter = 0;
@@ -54,23 +56,24 @@ public class WholesaleBookingProcessorHelper {
         this.dates = dates;
     }
 
-    public long getMaxSkippedRecords() {
-        return this.maxSkippedRecords==0 ? Constants.DEFAULT_MAX_SKIPPED_RECORDS : this.maxSkippedRecords;
-    }
-
-    public void setMaxSkippedRecords(long maxSkippedRecords) {
-        this.maxSkippedRecords = maxSkippedRecords>0 ? maxSkippedRecords : Constants.DEFAULT_MAX_SKIPPED_RECORDS;
-    }
-    
     public boolean addOffset(FinancialEventOffsetDTO offset) {
         this.financialEventOffset.put(offset.getFinancialEvent(), offset.getOffsetFinancialCategory());
         return true;
     }
-
+    
     public Integer findOffsetFinCat(Integer finCat) {
         return this.financialEventOffset.get(finCat);
     }
 
+    
+    public void addAltBooking(AltBookingCsvFileDTO altBooking) {
+        this.altBooking.put(altBooking.getSbid(), altBooking);
+    }
+    
+    public AltBookingCsvFileDTO getAltBooking(String sbid) {
+        return this.altBooking.get(sbid);
+    }
+    
     public SummarySubLedgerDTO addSubledger() {
         SummarySubLedgerDTO slRecord = new SummarySubLedgerDTO();
         if (this.dates != null) {

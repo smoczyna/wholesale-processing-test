@@ -16,6 +16,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import eu.squadd.batch.domain.AdminFeeCsvFileDTO;
 import eu.squadd.batch.domain.AggregateWholesaleReportDTO;
+import eu.squadd.batch.domain.AltBookingCsvFileDTO;
 import eu.squadd.batch.domain.BaseBookingInputInterface;
 import eu.squadd.batch.domain.BilledCsvFileDTO;
 import eu.squadd.batch.domain.MinBookingInterface;
@@ -24,7 +25,6 @@ import eu.squadd.batch.domain.UnbilledCsvFileDTO;
 import eu.squadd.batch.domain.WholesaleProcessingOutput;
 import eu.squadd.batch.domain.casandra.DataEvent;
 import eu.squadd.batch.domain.casandra.FinancialEventCategory;
-import eu.squadd.batch.domain.casandra.FinancialMarket;
 import eu.squadd.batch.domain.casandra.WholesalePrice;
 import eu.squadd.batch.domain.exceptions.CassandraQueryException;
 import eu.squadd.batch.domain.exceptions.MultipleRowsReturnedException;
@@ -141,7 +141,8 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         if (this.fileSource.equals("M") && this.financialMarket.equals("003") && dbcrIndicatorFromFile.equals("CR"))
             subLedgerOutput.setFinancialCategory(677);
         else
-        subLedgerOutput.setFinancialCategory(financialEventCategory.getFinancialcategory());
+            subLedgerOutput.setFinancialCategory(financialEventCategory.getFinancialcategory());
+        
         subLedgerOutput.setFinancialmarketId(financialMarket);
         subLedgerOutput.setBillCycleMonthYear(ProcessingUtils.getYearAndMonthFromStrDate(this.processingHelper.getDates().getRptPerEndDate()));
         subLedgerOutput.setBillAccrualIndicator(financialEventCategory.getBillingaccrualindicator());
@@ -189,39 +190,21 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             homeEqualsServingSbid = true;
         }
 
-        FinancialMarket finMarket = this.getFinancialMarketFromDb(this.financialMarket);
-
-        String homeLegalEntityId = " ";
-        String servingLegalEntityId;
-
-        if (finMarket.getSidbid().equals(searchHomeSbid) && finMarket.getAlternatebookingtype().equals("P")) {
-            homeLegalEntityId = finMarket.getGllegalentityid();
-            if (homeEqualsServingSbid) {
+        AltBookingCsvFileDTO altBooking = this.processingHelper.getAltBooking(searchHomeSbid);        
+        if (homeEqualsServingSbid) {
+            if (altBooking.getAltBookType().equals("P"))
                 altBookingInd = true;
-            }
-        }
-
-        if (!homeEqualsServingSbid && (finMarket.getSidbid().equals(searchServingSbid) && finMarket.getAlternatebookingtype().equals("P"))) {
-            servingLegalEntityId = finMarket.getGllegalentityid();
-            if (homeLegalEntityId.equals(servingLegalEntityId)) {
+        } 
+        else {
+            if (altBooking.getAltBookType().equals("M"))
+                homeGlMarketId = altBooking.getGlMarketId();
+            
+            altBooking = this.processingHelper.getAltBooking(searchServingSbid);
+            servingGlMarketId = altBooking.getGlMarketId();
+            
+            if (homeGlMarketId.equals(servingGlMarketId))
                 altBookingInd = true;
-            }
         }
-
-        if (finMarket.getSidbid().equals(searchHomeSbid) && finMarket.getAlternatebookingtype().equals("M")) {
-            homeGlMarketId = finMarket.getGlmarketid();
-            if (homeEqualsServingSbid) {
-                altBookingInd = true;
-            }
-        }
-
-        if (!homeEqualsServingSbid && (finMarket.getSidbid().equals(searchServingSbid) && finMarket.getAlternatebookingtype().equals("M"))) {
-            servingGlMarketId = finMarket.getGlmarketid();
-            if (homeGlMarketId.equals(servingGlMarketId)) {
-                altBookingInd = true;
-            }
-        }
-        altBookingInd = false; // temporary fix, will be reviewed later
         return altBookingInd;
     }
 
@@ -440,35 +423,42 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     }
 
     private WholesaleProcessingOutput processAdminFeesRecord(AdminFeeCsvFileDTO adminFeesRec) {
-        WholesaleProcessingOutput outRec = new WholesaleProcessingOutput();
-        AggregateWholesaleReportDTO report = this.processingHelper.addWholesaleReport();
-        report.setBilledInd("Y");
-        this.fileSource = "M";
-        this.searchHomeSbid = adminFeesRec.getSbid();
-        this.tmpProdId = adminFeesRec.getProductId();
-        this.financialMarket = adminFeesRec.getFinancialMarket().isEmpty() ? "003" : adminFeesRec.getFinancialMarket();
+        if (! adminFeesRec.getProductId().equals(19182)) {        
+            WholesaleProcessingOutput outRec = new WholesaleProcessingOutput();
+            AggregateWholesaleReportDTO report = this.processingHelper.addWholesaleReport();
+            report.setBilledInd("Y");
+            this.fileSource = "M";
+            this.searchHomeSbid = adminFeesRec.getSbid();
+            this.tmpProdId = adminFeesRec.getProductId();
+            this.financialMarket = adminFeesRec.getFinancialMarket().isEmpty() ? "003" : adminFeesRec.getFinancialMarket();
 
-        WholesalePrice wholesalePrice = this.getWholesalePriceFromDb(this.tmpProdId, this.searchHomeSbid);
+            WholesalePrice wholesalePrice = this.getWholesalePriceFromDb(this.tmpProdId, this.searchHomeSbid);
 
-        this.tmpChargeAmt = wholesalePrice.getProductwholesaleprice().multiply(BigDecimal.valueOf(adminFeesRec.getAdminCount())).floatValue();
-        report.setDollarAmtOther(this.tmpChargeAmt);
-        outRec.addWholesaleReportRecord(report);
-        this.makeBookings(adminFeesRec, outRec, tmpInterExchangeCarrierCode);
+            this.tmpChargeAmt = wholesalePrice.getProductwholesaleprice().multiply(BigDecimal.valueOf(adminFeesRec.getAdminCount())).floatValue();
+            report.setDollarAmtOther(this.tmpChargeAmt);
+            outRec.addWholesaleReportRecord(report);
+
+            this.makeBookings(adminFeesRec, outRec, tmpInterExchangeCarrierCode);
         return outRec;
+        } else {
+            this.processingHelper.incrementCounter(Constants.GAPS);
+            return null;
+        }
     }
 
-    protected FinancialMarket getFinancialMarketFromDb(String financialMarketId) {
-        FinancialMarket result = null;
-        try {
-            List<FinancialMarket> dbResult = queryManager.getFinancialMarketRecord(financialMarketId);
-            if (dbResult.size() == 1) {
-                result = dbResult.get(0);
-            }
-        } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
-            LOGGER.warn("Cassandra error: ", ex);
-        }
-        return result;
-    }
+
+//    protected FinancialMarket getFinancialMarketFromDb(String financialMarketId) {
+//        FinancialMarket result = null;
+//        try {
+//            List<FinancialMarket> dbResult = queryManager.getFinancialMarketRecord(financialMarketId);
+//            if (dbResult.size() == 1) {
+//                result = dbResult.get(0);
+//            }
+//        } catch (MultipleRowsReturnedException | NoResultsReturnedException | CassandraQueryException ex) {
+//            LOGGER.warn("Cassandra error: ", ex);
+//        }
+//        return result;
+//    }
 
     protected FinancialEventCategory getEventCategoryFromDb(Integer tmpProdId, String homeEqualsServingSbid,
             boolean altBookingInd, int interExchangeCarrierCode, String financialeventnormalsign) {

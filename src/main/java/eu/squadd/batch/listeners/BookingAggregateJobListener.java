@@ -65,6 +65,7 @@ public class BookingAggregateJobListener implements JobExecutionListener {
             try {
                 this.moveFileToArchive(Constants.BOOK_DATE_FILENAME);
                 this.moveFileToArchive(Constants.FINANCIAL_EVENT_OFFSET_FILENAME);
+                this.moveFileToArchive(Constants.ALT_BOOKING_FILENAME);
                 this.moveFileToArchive(Constants.BILLED_BOOKING_FILENAME);
                 this.moveFileToArchive(Constants.UNBILLED_BOOKING_FILENAME);
                 this.moveFileToArchive(Constants.ADMIN_FEES_FILENAME);
@@ -132,7 +133,7 @@ public class BookingAggregateJobListener implements JobExecutionListener {
             @Override
             public boolean accept(File file) {
                 if (file.getName().matches(namePattern + "_.*[0-9]\\.csv$")) {
-                    LOGGER.info("File found: "+file.getName());
+                    LOGGER.debug("File found: "+file.getName());
                     return true;
                 } else
                     return false;
@@ -143,22 +144,24 @@ public class BookingAggregateJobListener implements JobExecutionListener {
     
     private static void appendFile(File file, BufferedWriter output) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String text;
+            String text = null;
             while ((text = br.readLine()) != null) {
                 output.write(text);
                 output.newLine();
             }
             br.close();
-        } finally {            
+        } finally {
+            file.delete();
         }
+
     }
     
     private static void consolidateOutputFiles(File[] files, String destinationDir, String filename) throws IOException {
         File master = new File(destinationDir.concat(filename));
         BufferedWriter output = new BufferedWriter(new FileWriter(master));        
         for (File file : files) {
-            appendFile(file, output);
-            file.delete();
+            appendFile(file, output);            
         }
-    }
+        output.close();
+    }  
 }

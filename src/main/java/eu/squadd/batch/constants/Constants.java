@@ -10,9 +10,10 @@ package eu.squadd.batch.constants;
  * @author smorcja
  */
 public class Constants {
-    
+     
     public static final String BOOK_DATE_FILENAME = "bookdate.csv";
     public static final String FINANCIAL_EVENT_OFFSET_FILENAME = "offset.csv";
+    public static final String ALT_BOOKING_FILENAME = "altbook.csv";
     public static final String BILLED_BOOKING_FILENAME = "billed.csv";    
     public static final String UNBILLED_BOOKING_FILENAME = "unbilled.csv";
     public static final String ADMIN_FEES_FILENAME = "adminfees.csv";
@@ -81,7 +82,7 @@ public class Constants {
     
     public static final String MAX_ALLOWED_EXCEPTION = "Maximum allowed exceptions reached, terminating...";
     public static final String FILE_MISSING_MESSAGE = "File missing, terminating...";
-    public static final String PARSING_ERROR = "Parsing error when processing line: %d";
+    public static final String PARSING_ERROR = "Parsing error of input line: %s";
     public static final String NULL_ENCOUNTERED = "NULL encountered but the value was expected - skipping record ...";
     public static final String RECORD_SKIP_DETECTED = "Record skipped due to processing errors !!!";
     public static final String DB_CALL_FAILURE = "%s Cassandra table call error %s";
