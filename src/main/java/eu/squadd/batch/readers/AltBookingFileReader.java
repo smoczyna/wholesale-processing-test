@@ -22,7 +22,7 @@ public class AltBookingFileReader extends CsvFileGenericReader<AltBookingCsvFile
         super(AltBookingCsvFileDTO.class, environment.getRequiredProperty(PROPERTY_CSV_SOURCE_FILE_PATH).concat(filename), COLUMN_NAMES, ",", 0);
     }
     
-    public AltBookingFileReader(String filePath, String delimiter) {
-        super(AltBookingCsvFileDTO.class, filePath, COLUMN_NAMES, delimiter, 0);
+    public AltBookingFileReader(String filePath) {
+        super(AltBookingCsvFileDTO.class, filePath, COLUMN_NAMES, ",", 0);
     }
 }
