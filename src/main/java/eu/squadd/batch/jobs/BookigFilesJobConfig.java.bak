@@ -346,7 +346,6 @@ public class BookigFilesJobConfig {
                             @Qualifier("unbilledFilePartitionStep") Step unbilledFilePartitionStep,
                             @Qualifier("adminFeesFilePartitionStep") Step adminFeesFilePartitionStep) {
         return jobBuilderFactory.get("bookingAggregateJob")
-                .preventRestart()
                 .incrementer(new RunIdIncrementer())
                 .listener(bookingFileJobListener)
                 .start(checkIfSourceFilesExist)
