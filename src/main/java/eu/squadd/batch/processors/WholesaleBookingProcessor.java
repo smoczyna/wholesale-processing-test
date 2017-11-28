@@ -204,6 +204,8 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         String servingGlMarketId = "";
         String servingLegalEntityId = "";
 
+        // thisis missing part in BPEL, will be moved elsewhere as it is similar for unbilled too
+        
         searchHomeSbid = inRec.getHomeSbid();
         if (inRec.getServingSbid().trim().isEmpty()) {
             searchServingSbid = searchHomeSbid;
@@ -213,6 +215,9 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         if (searchHomeSbid.equals(searchServingSbid)) {
             homeEqualsServingSbid = true;
         }
+        
+        // end of missing part
+        
         try {
             AltBookingCsvFileDTO altBooking = this.processingHelper.getAltBooking(searchHomeSbid);
             if (!homeEqualsServingSbid) {
@@ -434,6 +439,8 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             this.fileSource = "U";
             financialMarket = unbilledRec.getFinancialMarket();
 
+            // this is missing part in BPEL so far 
+            
             this.searchHomeSbid = unbilledRec.getHomeSbid();
             if (unbilledRec.getServingSbid().trim().isEmpty()) {
                 this.searchServingSbid = unbilledRec.getHomeSbid();
@@ -448,6 +455,9 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             } else {
                 this.tmpProdId = unbilledRec.getAirProdId();
             }
+            
+            // end of missing part
+            
             this.tmpChargeAmt = ProcessingUtils.roundDecimalNumber(unbilledRec.getWholesalePeakAirCharge() + unbilledRec.getWholesaleOffpeakAirCharge());
             if (unbilledRec.getMessageSource().trim().isEmpty()) {
                 report.setPeakDollarAmt(unbilledRec.getWholesalePeakAirCharge());
@@ -501,7 +511,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             outRec.addWholesaleReportRecord(report);
 
             this.makeBookings(adminFeesRec, outRec, tmpInterExchangeCarrierCode);
-        return outRec;
+            return outRec;
         } else {
             this.processingHelper.incrementCounter(Constants.GAPS);
             return null;
