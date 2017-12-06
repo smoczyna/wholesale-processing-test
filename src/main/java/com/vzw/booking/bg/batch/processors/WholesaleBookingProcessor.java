@@ -497,8 +497,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             this.financialMarket = adminFeesRec.getFinancialMarket().isEmpty() ? "003" : adminFeesRec.getFinancialMarket();
 
             WholesalePrice wholesalePrice = this.getWholesalePriceFromDb(this.tmpProdId, this.searchHomeSbid);
-
-            this.tmpChargeAmt = wholesalePrice.getProductwholesaleprice().multiply(BigDecimal.valueOf(adminFeesRec.getAdminCount())).floatValue();
+            this.tmpChargeAmt = wholesalePrice.getProductwholesaleprice().multiply(BigDecimal.valueOf(adminFeesRec.getAdminCount())).doubleValue();
             report.setDollarAmtOther(this.tmpChargeAmt);
             outRec.addWholesaleReportRecord(report);
 
