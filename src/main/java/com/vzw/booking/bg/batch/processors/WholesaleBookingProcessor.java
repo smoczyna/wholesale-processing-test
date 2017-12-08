@@ -250,6 +250,9 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     private boolean bypassBooking(FinancialEventCategory financialEventCategory, boolean altBookingInd) {
         boolean bypassBooking = false;
 
+        if (this.tmpProdId==2957)
+            return true;
+        
         if (!financialEventCategory.getBamsaffiliateindicator().equals("N") || !financialEventCategory.getCompanycode().trim().isEmpty()) {
             bypassBooking = true;
         }
