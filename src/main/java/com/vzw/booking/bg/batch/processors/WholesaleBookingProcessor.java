@@ -250,7 +250,8 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     private boolean bypassBooking(FinancialEventCategory financialEventCategory, boolean altBookingInd) {
         boolean bypassBooking = false;
 
-        if (this.tmpProdId==2957)
+        // these products are bypassed because mainframe also skips them
+        if (this.tmpProdId==2957 || this.tmpProdId==10657)
             return true;
         
         if (!financialEventCategory.getBamsaffiliateindicator().equals("N") || !financialEventCategory.getCompanycode().trim().isEmpty()) {
@@ -300,10 +301,15 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             altBookingInd = this.isAlternateBookingApplicable((BilledCsvFileDTO) inRec);
             tmpHomeEqualsServingSbid = this.homeEqualsServingSbid ? "Y" : "N";
         }
-        FinancialEventCategory financialEventCategory = null;
         
+        FinancialEventCategory financialEventCategory = null;       
         financialEventCategory = this.getEventCategoryFromDb(this.tmpProdId, tmpHomeEqualsServingSbid, altBookingInd, iecCode, inRec.getDebitcreditindicator());
         boolean bypassBooking = this.bypassBooking(financialEventCategory, altBookingInd);
+        
+        // patch to overpass lack of right Cassandra record
+        if (inRec instanceof UnbilledCsvFileDTO && inRec.getDebitcreditindicator().equals("DR") && this.tmpProdId==3188) {
+            financialEventCategory.setFinancialeventnumber(46);                
+        }
         
         if (bypassBooking) {
             LOGGER.warn(Constants.BOOKING_BYPASS_DETECTED);
