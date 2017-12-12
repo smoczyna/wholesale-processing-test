@@ -63,6 +63,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
     int tmpInterExchangeCarrierCode;
     final Set<Integer> PROD_IDS_TOLL = new HashSet(Arrays.asList(new Integer[]{95, 12872, 12873, 36201}));
     final Set<Integer> PROD_IDS = new HashSet(Arrays.asList(new Integer[]{95, 12872, 12873, 13537, 13538, 36201}));
+    final Set<Integer> BYPASS_PROD_IDS = new HashSet(Arrays.asList(new Integer[]{2957, 10657, 12847, 10645, 10654, 10651}));
     final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ss.ssssss");
         
 
@@ -251,7 +252,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
         boolean bypassBooking = false;
 
         // these products are bypassed because mainframe also skips them
-        if (this.tmpProdId==2957 || this.tmpProdId==10657)
+        if (BYPASS_PROD_IDS.contains(this.tmpProdId))
             return true;
         
         if (!financialEventCategory.getBamsaffiliateindicator().equals("N") || !financialEventCategory.getCompanycode().trim().isEmpty()) {
