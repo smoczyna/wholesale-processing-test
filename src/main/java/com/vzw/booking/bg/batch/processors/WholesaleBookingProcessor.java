@@ -150,7 +150,7 @@ public class WholesaleBookingProcessor<T> implements ItemProcessor<T, WholesaleP
             }
         }
         subLedgerOutput.setFinancialEventNumber(financialEventCategory.getFinancialeventnumber());
-        if (this.fileSource.equals("M") && this.financialMarket.equals("003") && dbcrIndicatorFromFile.equals("CR"))
+        if (this.financialMarket.equals("003") && dbcrIndicatorFromFile.equals("CR"))
             subLedgerOutput.setFinancialCategory(677);
         else
             subLedgerOutput.setFinancialCategory(financialEventCategory.getFinancialcategory());
