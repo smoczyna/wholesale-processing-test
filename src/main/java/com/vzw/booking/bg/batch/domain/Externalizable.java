@@ -34,7 +34,7 @@ public interface Externalizable {
             try {
                 outLine = asStringDescriptor(metadata.clone(ExternalizationFormat.COMMA_SEPARATED_FORMAT));
             } catch (ExternalizationException e1) {
-                throw new ExternalizationException("Error merging line <field: " + currentField + "> : <NOT PARSABLE> => " + e.getMessage());
+                throw new ExternalizationException("Error merging line <field: " + currentField + "> : <NOT PARSABLE> => " + e1.getMessage());
             }
             throw new ExternalizationException("Error merging line <field: " + currentField + "> : " + outLine + " => " + e.getMessage());
         }
